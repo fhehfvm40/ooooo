@@ -316,89 +316,120 @@
         .title-y { top: -1.5rem; left: 50%; transform: translateX(-50%); }
         .title-x { right: -3.5rem; top: 50%; transform: translateY(-50%); }
 
-        /* Sticky Note Styles */
-        .sticky-note {
+        /* Task Star Styles */
+        .task-star {
             position: absolute;
-            width: 100px;
-            height: 100px;
-            padding: 0.75rem;
-            background: var(--amber-400);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            width: 30px;
+            height: 30px;
             cursor: grab;
             display: flex;
-            flex-direction: column;
-            border-radius: 2px;
-            transform: translate(-50%, 50%) rotate(-1deg);
+            align-items: center;
+            justify-content: center;
             z-index: 10;
             user-select: none;
-            transition: opacity 0.2s, filter 0.2s;
+            transition: opacity 0.2s, filter 0.2s, transform 0.2s;
+            transform: translate(-50%, 50%);
         }
 
         @media (min-width: 768px) {
-            .sticky-note {
-                width: 140px;
-                height: 140px;
+            .task-star {
+                width: 45px;
+                height: 45px;
             }
         }
 
-        .sticky-note:active {
+        .task-star:active {
             cursor: grabbing;
             z-index: 100;
+            transform: translate(-50%, 50%) scale(1.2);
         }
 
-        .sticky-note.completed {
+        .task-star.completed {
             opacity: 0.4;
             filter: grayscale(1);
         }
 
-        .note-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.25rem;
+        .star-shape {
+            position: absolute;
+            inset: 0;
+            background: var(--amber-400);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .note-drag-handle {
-            color: rgba(0,0,0,0.1);
+        .note-edit {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: 50%;
+            color: var(--slate-400);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .note-edit:hover {
+            color: var(--amber-500);
+            border-color: var(--amber-500);
         }
 
         .note-delete {
-            background: transparent;
-            border: none;
-            color: rgba(0,0,0,0.15);
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: 50%;
+            color: var(--slate-400);
             cursor: pointer;
-            padding: 2px;
+            padding: 4px;
+            display: flex;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .note-delete:hover {
             color: var(--rose-500);
+            border-color: var(--rose-500);
         }
 
-        .note-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+        .star-content {
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
             font-size: 0.75rem;
-            font-weight: 700;
-            line-height: 1.2;
-            color: var(--amber-900);
-            word-break: break-all;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
 
-        @media (min-width: 768px) {
-            .note-content {
-                font-size: 0.875rem;
-            }
+        .task-star:hover .star-content {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
         }
 
-        .note-footer {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.5rem;
-            font-weight: 900;
-            color: rgba(0,0,0,0.2);
-            text-transform: uppercase;
+        .star-content::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--ink) transparent transparent transparent;
         }
 
         /* List View Styles */
@@ -524,6 +555,110 @@
             border-bottom: 6px solid transparent;
             border-left: 10px solid var(--slate-200);
         }
+        /* Calendar Styles */
+        .calendar-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+        .calendar-card.active {
+            display: block;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-title {
+            font-size: 1.125rem;
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            text-align: center;
+        }
+
+        .calendar-day-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--slate-400);
+            text-transform: uppercase;
+            padding-bottom: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            color: var(--slate-500);
+            cursor: default;
+        }
+
+        .calendar-day.today {
+            background: var(--amber-100);
+            color: var(--amber-600);
+            font-weight: 800;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.2;
+        }
+
+        /* Category Colors */
+        .category-church { --cat-color: #3b82f6; } /* Blue */
+        .category-home { --cat-color: #10b981; }   /* Green */
+        .category-personal { --cat-color: #a855f7; } /* Purple */
+        .category-other { --cat-color: #fbbf24; }   /* Amber */
+
+        .star-shape {
+            position: absolute;
+            inset: 0;
+            background: var(--cat-color, var(--amber-400));
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--slate-200);
+            font-size: 1rem;
+            outline: none;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            border-color: var(--amber-400);
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        }
+
+        .category-badge {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: var(--cat-color);
+            color: white;
+            font-weight: 800;
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -545,6 +680,9 @@
                     <button class="toggle-btn" id="list-view-btn" title="목록 보기">
                         <i data-lucide="list"></i>
                     </button>
+                    <button class="toggle-btn" id="calendar-view-btn" title="달력 보기">
+                        <i data-lucide="calendar"></i>
+                    </button>
                 </div>
             </div>
         </header>
@@ -559,6 +697,15 @@
                     <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1.5rem;">새 업무 추가</h2>
                     <form id="task-form">
                         <div class="form-grid">
+                            <div class="input-group">
+                                <label>분류</label>
+                                <select id="category-input">
+                                    <option value="other">기타</option>
+                                    <option value="church">교회</option>
+                                    <option value="home">가정</option>
+                                    <option value="personal">개인</option>
+                                </select>
+                            </div>
                             <div class="input-group">
                                 <label>할 일 내용</label>
                                 <input type="text" id="task-input" placeholder="할 일을 입력하세요..." required>
@@ -618,6 +765,28 @@
                     <p>등록된 업무가 없습니다.</p>
                 </div>
             </div>
+
+            <!-- Calendar Section -->
+            <section class="calendar-card" id="calendar-view">
+                <div class="calendar-header">
+                    <div class="calendar-title" id="calendar-month-year">February 2026</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="toggle-btn" id="prev-month" style="padding: 0.25rem;"><i data-lucide="chevron-left"></i></button>
+                        <button class="toggle-btn" id="next-month" style="padding: 0.25rem;"><i data-lucide="chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Days labels -->
+                    <div class="calendar-day-label">Sun</div>
+                    <div class="calendar-day-label">Mon</div>
+                    <div class="calendar-day-label">Tue</div>
+                    <div class="calendar-day-label">Wed</div>
+                    <div class="calendar-day-label">Thu</div>
+                    <div class="calendar-day-label">Fri</div>
+                    <div class="calendar-day-label">Sat</div>
+                    <!-- Days will be injected here -->
+                </div>
+            </section>
         </main>
 
         <footer>
@@ -629,13 +798,17 @@
         // State Management
         let tasks = JSON.parse(localStorage.getItem('eisenhower-tasks-vanilla')) || [];
         let viewMode = 'graph';
+        let editingTaskId = null;
 
         // DOM Elements
         const taskModal = document.getElementById('task-modal');
+        const modalTitle = taskModal.querySelector('h2');
+        const submitBtn = taskModal.querySelector('button[type="submit"]');
         const openModalBtn = document.getElementById('open-modal-btn');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const taskForm = document.getElementById('task-form');
         const taskInput = document.getElementById('task-input');
+        const categoryInput = document.getElementById('category-input');
         const urgencyInput = document.getElementById('urgency-input');
         const importanceInput = document.getElementById('importance-input');
         const urgencyVal = document.getElementById('urgency-val');
@@ -643,21 +816,38 @@
         
         const graphView = document.getElementById('graph-view');
         const listView = document.getElementById('list-view');
+        const calendarView = document.getElementById('calendar-view');
         const graphViewBtn = document.getElementById('graph-view-btn');
         const listViewBtn = document.getElementById('list-view-btn');
+        const calendarViewBtn = document.getElementById('calendar-view-btn');
         
         const stickyNotesContainer = document.getElementById('sticky-notes-container');
         const taskList = document.getElementById('task-list');
         const graphEmpty = document.getElementById('graph-empty');
         const listEmpty = document.getElementById('list-empty');
 
+        // Calendar Elements
+        const calendarMonthYear = document.getElementById('calendar-month-year');
+        const calendarGrid = document.getElementById('calendar-grid');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+
+        let currentCalendarDate = new Date();
+
         // Initialize Lucide
         lucide.createIcons();
 
         // Event Listeners
         openModalBtn.addEventListener('click', () => {
+            editingTaskId = null;
+            modalTitle.textContent = '새 업무 추가';
+            submitBtn.innerHTML = '<i data-lucide="plus"></i> 업무 추가';
+            taskForm.reset();
+            urgencyVal.textContent = '50%';
+            importanceVal.textContent = '50%';
             taskModal.classList.add('active');
             taskInput.focus();
+            lucide.createIcons();
         });
 
         closeModalBtn.addEventListener('click', () => {
@@ -675,39 +865,64 @@
 
         taskForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const newTask = {
-                id: Date.now().toString(),
-                text: taskInput.value,
-                urgency: parseInt(urgencyInput.value),
-                importance: parseInt(importanceInput.value),
-                completed: false,
-                createdAt: Date.now()
-            };
-            tasks.push(newTask);
+            
+            if (editingTaskId) {
+                tasks = tasks.map(t => t.id === editingTaskId ? {
+                    ...t,
+                    text: taskInput.value,
+                    category: categoryInput.value,
+                    urgency: parseInt(urgencyInput.value),
+                    importance: parseInt(importanceInput.value)
+                } : t);
+            } else {
+                const newTask = {
+                    id: Date.now().toString(),
+                    text: taskInput.value,
+                    category: categoryInput.value,
+                    urgency: parseInt(urgencyInput.value),
+                    importance: parseInt(importanceInput.value),
+                    completed: false,
+                    createdAt: Date.now()
+                };
+                tasks.push(newTask);
+            }
+            
             saveTasks();
             render();
             taskForm.reset();
             urgencyVal.textContent = '50%';
             importanceVal.textContent = '50%';
             taskModal.classList.remove('active');
+            editingTaskId = null;
         });
 
         graphViewBtn.addEventListener('click', () => switchView('graph'));
         listViewBtn.addEventListener('click', () => switchView('list'));
+        calendarViewBtn.addEventListener('click', () => switchView('calendar'));
+
+        prevMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        });
 
         function switchView(mode) {
             viewMode = mode;
-            if (mode === 'graph') {
-                graphView.classList.add('active');
-                listView.classList.remove('active');
-                graphViewBtn.classList.add('active');
-                listViewBtn.classList.remove('active');
-            } else {
-                graphView.classList.remove('active');
-                listView.classList.add('active');
-                graphViewBtn.classList.remove('active');
-                listViewBtn.classList.add('active');
-            }
+            
+            // Update buttons
+            graphViewBtn.classList.toggle('active', mode === 'graph');
+            listViewBtn.classList.toggle('active', mode === 'list');
+            calendarViewBtn.classList.toggle('active', mode === 'calendar');
+            
+            // Update containers
+            graphView.classList.toggle('active', mode === 'graph');
+            listView.classList.toggle('active', mode === 'list');
+            calendarView.classList.toggle('active', mode === 'calendar');
+            
             render();
         }
 
@@ -778,10 +993,6 @@
             activeNote.style.left = `${newUrgency}%`;
             activeNote.style.bottom = `${newImportance}%`;
             
-            // Update the footer text in the note
-            activeNote.querySelector('.urgency-text').textContent = `U:${Math.round(newUrgency)}`;
-            activeNote.querySelector('.importance-text').textContent = `I:${Math.round(newImportance)}`;
-            
             activeNote.dataset.newUrgency = Math.round(newUrgency);
             activeNote.dataset.newImportance = Math.round(newImportance);
         }
@@ -810,6 +1021,75 @@
             } else {
                 renderList();
             }
+            renderCalendar();
+            lucide.createIcons();
+        }
+
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            calendarMonthYear.textContent = `${monthNames[month]} ${year}`;
+            
+            // Clear previous days (keep labels)
+            const labels = Array.from(calendarGrid.querySelectorAll('.calendar-day-label'));
+            calendarGrid.innerHTML = '';
+            labels.forEach(label => calendarGrid.appendChild(label));
+            
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            
+            // Previous month days
+            for (let i = firstDayOfMonth - 1; i >= 0; i--) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.textContent = prevMonthDays - i;
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            // Current month days
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                if (today.getFullYear() === year && today.getMonth() === month && today.getDate() === i) {
+                    dayDiv.classList.add('today');
+                }
+                dayDiv.textContent = i;
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            // Next month days
+            const totalCells = 42; // 6 rows
+            const remainingCells = totalCells - calendarGrid.children.length + 7; // +7 for labels
+            for (let i = 1; i <= totalCells - (daysInMonth + firstDayOfMonth); i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.textContent = i;
+                calendarGrid.appendChild(dayDiv);
+            }
+        }
+
+        function openEditModal(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            
+            editingTaskId = id;
+            modalTitle.textContent = '업무 수정';
+            submitBtn.innerHTML = '<i data-lucide="save"></i> 수정 완료';
+            
+            taskInput.value = task.text;
+            categoryInput.value = task.category || 'other';
+            urgencyInput.value = task.urgency;
+            importanceInput.value = task.importance;
+            urgencyVal.textContent = `${task.urgency}%`;
+            importanceVal.textContent = `${task.importance}%`;
+            
+            taskModal.classList.add('active');
+            taskInput.focus();
             lucide.createIcons();
         }
 
@@ -820,32 +1100,29 @@
             } else {
                 graphEmpty.style.display = 'none';
                 tasks.forEach(task => {
-                    const note = document.createElement('div');
-                    note.className = `sticky-note ${task.completed ? 'completed' : ''}`;
-                    note.style.left = `${task.urgency}%`;
-                    note.style.bottom = `${task.importance}%`;
-                    note.dataset.id = task.id;
+                    const star = document.createElement('div');
+                    star.className = `task-star ${task.completed ? 'completed' : ''} category-${task.category || 'other'}`;
+                    star.style.left = `${task.urgency}%`;
+                    star.style.bottom = `${task.importance}%`;
+                    star.dataset.id = task.id;
                     
-                    note.innerHTML = `
-                        <div class="note-header">
-                            <i data-lucide="grip-vertical" class="note-drag-handle" size="12"></i>
-                            <button class="note-delete" onclick="deleteTask('${task.id}')">
-                                <i data-lucide="trash-2" size="12"></i>
-                            </button>
-                        </div>
-                        <div class="note-content" onclick="toggleTask('${task.id}')">
+                    star.innerHTML = `
+                        <div class="star-shape" onclick="toggleTask('${task.id}')"></div>
+                        <button class="note-edit" onclick="openEditModal('${task.id}')">
+                            <i data-lucide="pencil" size="10"></i>
+                        </button>
+                        <button class="note-delete" onclick="deleteTask('${task.id}')">
+                            <i data-lucide="trash-2" size="10"></i>
+                        </button>
+                        <div class="star-content" onclick="openEditModal('${task.id}')">
                             ${task.text}
-                        </div>
-                        <div class="note-footer">
-                            <span class="urgency-text">U:${task.urgency}</span>
-                            <span class="importance-text">I:${task.importance}</span>
                         </div>
                     `;
                     
-                    note.addEventListener('mousedown', (e) => onMouseDown(e, task));
-                    note.addEventListener('touchstart', (e) => onMouseDown(e, task), { passive: true });
+                    star.addEventListener('mousedown', (e) => onMouseDown(e, task));
+                    star.addEventListener('touchstart', (e) => onMouseDown(e, task), { passive: true });
                     
-                    stickyNotesContainer.appendChild(note);
+                    stickyNotesContainer.appendChild(star);
                 });
             }
         }
@@ -858,14 +1135,16 @@
                 listEmpty.style.display = 'none';
                 [...tasks].sort((a, b) => b.createdAt - a.createdAt).forEach(task => {
                     const li = document.createElement('li');
-                    li.className = 'task-item';
+                    li.className = `task-item category-${task.category || 'other'}`;
                     li.innerHTML = `
                         <button class="task-check ${task.completed ? 'completed' : ''}" onclick="toggleTask('${task.id}')">
                             <i data-lucide="${task.completed ? 'check-circle-2' : 'circle'}"></i>
                         </button>
-                        <div class="task-info">
-                            <div class="task-text ${task.completed ? 'completed' : ''}">${task.text}</div>
-                            <div class="task-meta">긴급: ${task.urgency}% | 중요: ${task.importance}%</div>
+                        <div class="task-info" onclick="openEditModal('${task.id}')" style="cursor: pointer;">
+                            <div class="task-text ${task.completed ? 'completed' : ''}">
+                                <span class="category-badge">${getCategoryName(task.category)}</span>
+                                ${task.text}
+                            </div>
                         </div>
                         <button class="task-delete" onclick="deleteTask('${task.id}')">
                             <i data-lucide="trash-2"></i>
@@ -874,6 +1153,16 @@
                     taskList.appendChild(li);
                 });
             }
+        }
+
+        function getCategoryName(cat) {
+            const names = {
+                church: '교회',
+                home: '가정',
+                personal: '개인',
+                other: '기타'
+            };
+            return names[cat] || '기타';
         }
 
         // Initial Render
