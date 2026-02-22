@@ -1108,12 +1108,6 @@
                     
                     star.innerHTML = `
                         <div class="star-shape" onclick="toggleTask('${task.id}')"></div>
-                        <button class="note-edit" onclick="openEditModal('${task.id}')">
-                            <i data-lucide="pencil" size="10"></i>
-                        </button>
-                        <button class="note-delete" onclick="deleteTask('${task.id}')">
-                            <i data-lucide="trash-2" size="10"></i>
-                        </button>
                         <div class="star-content" onclick="openEditModal('${task.id}')">
                             ${task.text}
                         </div>
