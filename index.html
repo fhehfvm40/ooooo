@@ -5,451 +5,542 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>소방 점검 앱</title>
-    <!-- 이미지 저장을 위한 html2canvas 라이브러리 추가 -->
+    <!-- 이미지 저장을 위한 html2canvas CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { 
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
-            background-color: #f4f4f9; 
-            padding: 10px; 
-            margin: 0; 
-            color: #333; 
+        /* 기본 스타일 및 색상 변수 */
+        :root {
+            --primary: #e53e3e;
+            --primary-dark: #c53030;
+            --blue: #2563eb;
+            --green: #10b981;
+            --gray-100: #f4f4f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-600: #475569;
+            --gray-800: #1e293b;
+            --bg-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background-color: var(--gray-100);
+            margin: 0;
+            padding: 0;
+            color: #333;
+            -webkit-tap-highlight-color: transparent; /* 모바일 터치 하이라이트 제거 */
+        }
+
+        /* --- 네비게이션 탭 --- */
+        .tab-nav {
+            display: flex;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--gray-600);
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* --- 공통 레이아웃 --- */
+        .view-section {
+            display: none;
+            padding: 15px;
+            padding-bottom: 80px; /* 하단 여백 */
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .view-section.active {
+            display: block;
         }
         
-        /* --- 1. 입력 영역 스타일 --- */
-        .container { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-            max-width: 500px; 
-            margin: 0 auto 15px auto; 
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
             box-sizing: border-box;
         }
-        h1 { 
-            text-align: center; 
-            color: #e53e3e; 
-            font-size: 20px; 
-            margin-top: 0; 
-            margin-bottom: 15px; 
-        }
-        
+
+        /* --- 1. 새 점검 작성 화면 --- */
+        h1 { text-align: center; color: var(--primary); font-size: 20px; margin-top: 0; margin-bottom: 15px; }
         .input-group { margin-bottom: 12px; }
-        label { 
-            font-weight: bold; 
-            display: block; 
-            margin-bottom: 5px; 
-            font-size: 13px; 
-            color: #555; 
-        }
-        input[type="text"] { 
-            width: 100%; 
-            padding: 10px; 
-            border: 1px solid #ccc; 
-            border-radius: 6px; 
-            box-sizing: border-box; 
-            font-size: 14px; 
-        }
+        label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 13px; color: #555; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; transition: border-color 0.2s; }
+        input[type="text"]:focus { border-color: var(--primary); outline: none; }
         input[readonly] { background-color: #f9f9f9; color: #777; }
         
-        .photo-section { 
-            border: 1px solid #e2e8f0; 
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border-radius: 8px; 
-            background-color: #f8fafc; 
-        }
-        .photo-title { 
-            font-weight: bold; 
-            margin-bottom: 8px; 
-            font-size: 14px; 
-            color: #1e293b; 
-        }
-        input[type="file"] { width: 100%; font-size: 13px; }
+        .photo-section { border: 1px solid var(--gray-200); padding: 12px; margin-bottom: 12px; border-radius: 8px; background-color: var(--bg-color); }
+        .photo-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; color: var(--gray-800); }
+        input[type="file"] { width: 100%; font-size: 13px; margin-bottom: 5px; }
         
-        /* 미리보기 이미지 (클릭 시 마우스 커서 변경) */
-        .inline-img { 
-            width: 100%; 
-            max-height: 150px; 
-            object-fit: contain; 
-            margin-top: 10px; 
-            display: none; 
-            border-radius: 6px; 
-            border: 1px solid #cbd5e1; 
-            cursor: pointer; 
-        }
+        /* 버튼 바로 밑 미리보기 사진 */
+        .inline-img { width: 100%; max-height: 150px; object-fit: contain; margin-top: 10px; display: none; border-radius: 6px; border: 1px solid var(--gray-300); cursor: pointer; background: #000; }
 
-        /* --- 버튼 스타일 --- */
-        .btn-capture { 
-            display: block; 
-            width: 100%; 
-            max-width: 500px; 
-            margin: 0 auto 20px auto; 
-            background-color: #2563eb; 
-            color: white; 
-            padding: 15px; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
-            cursor: pointer; 
-        }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-preview { flex: 1; background-color: var(--blue); color: white; padding: 14px 10px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; text-align: center; }
+        .btn-save-record { flex: 1; background-color: var(--primary); color: white; padding: 14px 10px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; text-align: center; }
+        .btn-preview:active, .btn-save-record:active { transform: scale(0.98); }
+
+        /* --- 2. 기록 보관함 화면 --- */
+        .empty-state { text-align: center; color: #888; padding: 40px 0; font-size: 15px; }
+        .record-list { display: flex; flex-direction: column; gap: 12px; }
+        .record-card { background: white; border: 1px solid var(--gray-200); border-radius: 10px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.1s; }
+        .record-card:active { transform: scale(0.98); }
+        .record-info { flex: 1; }
+        .record-place { font-weight: bold; font-size: 16px; margin-bottom: 4px; color: #111; }
+        .record-loc-date { font-size: 13px; color: #666; }
+        .record-delete-btn { background: #ffe4e6; color: var(--primary); border: none; padding: 10px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-left: 10px; }
+
+        /* --- 3. 보고서 캡처 모드 화면 --- */
+        /* 조작 버튼 영역 (이 부분은 이미지 저장 시 캡처되지 않음) */
+        .report-actions { display: flex; gap: 8px; margin-bottom: 15px; }
+        .btn-back { background-color: var(--gray-600); color: white; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; flex: 1; cursor: pointer; }
+        .btn-download { background-color: var(--green); color: white; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; flex: 1; cursor: pointer; }
+
+        /* 캡처 대상 보고서 영역 (A4 느낌 테두리) */
+        .report-box { background: white; padding: 15px; border: 2px solid #000; box-sizing: border-box; }
+        .report-title { text-align: center; font-size: 20px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 10px; margin: 0 0 15px 0; letter-spacing: 1px; }
+        .report-info { font-size: 13px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px dashed #999; padding-bottom: 10px; line-height: 1.5; }
+        .info-row { display: flex; justify-content: space-between; }
         
-        .capture-ui { 
-            text-align: center; 
-            margin-bottom: 15px; 
-            display: none; 
-            max-width: 500px;
-            margin: 0 auto 15px auto;
-        }
-        .btn-group { 
-            display: flex; 
-            justify-content: center; 
-            gap: 10px; 
-            margin-bottom: 5px; 
-        }
-        .btn-back { 
-            background-color: #475569; 
-            color: white; 
-            padding: 12px 15px; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 14px; 
-            font-weight: bold; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
-            cursor: pointer; 
-            flex: 1; 
-        }
-        .btn-download { 
-            background-color: #10b981; 
-            color: white; 
-            padding: 12px 15px; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 14px; 
-            font-weight: bold; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
-            cursor: pointer; 
-            flex: 1; 
-        }
-
-        /* --- 2. 보고서 양식 스타일 (캡처/저장용) --- */
-        .report-box { 
-            background: white; 
-            padding: 12px; 
-            border: 2px solid #000; 
-            max-width: 500px; 
-            margin: auto; 
-            box-sizing: border-box; 
-        }
-        .report-title { 
-            text-align: center; 
-            font-size: 18px; 
-            font-weight: bold; 
-            border-bottom: 2px solid #000; 
-            padding-bottom: 8px; 
-            margin: 0 0 10px 0; 
-            letter-spacing: 1px; 
-        }
-        .report-info { 
-            font-size: 12px; 
-            font-weight: bold; 
-            margin-bottom: 10px; 
-            border-bottom: 1px dashed #999; 
-            padding-bottom: 8px; 
-        }
-        .info-row { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 4px; 
-        }
+        .grid-container { display: flex; flex-direction: column; gap: 10px; }
+        .grid-item { border: 1px solid #000; display: flex; flex-direction: column; }
+        .item-title { background: #eee; text-align: center; font-weight: bold; font-size: 13px; padding: 6px; border-bottom: 1px solid #000; }
         
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 8px; 
-        }
-        .grid-item { 
-            border: 1px solid #000; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .item-title { 
-            background: #eee; 
-            text-align: center; 
-            font-weight: bold; 
-            font-size: 12px; 
-            padding: 4px; 
-            border-bottom: 1px solid #000; 
-        }
-        .item-content { 
-            position: relative; 
-            background: #fff; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 150px; 
-            overflow: hidden;
-        }
-        .item-content span { 
-            color: #aaa; 
-            font-size: 12px; 
-        }
-        .item-content img { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            display: none; 
-            cursor: pointer; 
-        }
+        /* 사진 들어가는 영역 높이 고정 (160px) 및 object-fit 적용 */
+        .item-content { position: relative; background: #fff; display: flex; align-items: center; justify-content: center; height: 160px; overflow: hidden; }
+        .item-content span { color: #aaa; font-size: 13px; }
+        .item-content img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; cursor: pointer; background: #f9f9f9; }
 
-        /* --- 3. 이미지 확대 모달 스타일 --- */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            z-index: 9999; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0,0,0,0.9); 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .modal-content { 
-            max-width: 95%; 
-            max-height: 90%; 
-            border-radius: 8px; 
-            object-fit: contain; 
-        }
-        .close-btn { 
-            position: absolute; 
-            top: 15px; 
-            right: 25px; 
-            color: white; 
-            font-size: 35px; 
-            font-weight: bold; 
-            cursor: pointer; 
-        }
+        /* --- 4. 이미지 확대 보기 모달 --- */
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+        .modal-content { max-width: 95%; max-height: 90%; border-radius: 8px; object-fit: contain; }
+        .close-btn { position: absolute; top: 15px; right: 25px; color: white; font-size: 35px; font-weight: bold; cursor: pointer; }
+
     </style>
 </head>
 <body>
 
-    <!-- 캡처 모드 전용 상단 UI (돌아가기 및 저장) -->
-    <div id="captureUI" class="capture-ui">
-        <div class="btn-group">
-            <button class="btn-back" onclick="toggleMode(false)">↩ 다시 입력(수정)</button>
+    <!-- 상단 탭 네비게이션 -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('write')">📝 새 점검 작성</button>
+        <button class="tab-btn" onclick="switchTab('archive')">🗂️ 기록 보관함</button>
+    </div>
+
+    <!-- ==========================================
+         [뷰 1] 새 점검 작성 화면
+    =========================================== -->
+    <div id="viewWrite" class="view-section active">
+        <div class="card">
+            <h1>🚨 소방 점검 현장기록</h1>
+            
+            <div class="input-group">
+                <label>🏢 점검 장소</label>
+                <input type="text" id="placeInput" placeholder="예: 한국아파트 101동">
+            </div>
+
+            <div class="input-group">
+                <label>📍 점검 위치</label>
+                <input type="text" id="locInput" placeholder="예: 1층 A동 소화전">
+            </div>
+            
+            <div class="input-group">
+                <label>📅 점검 일자</label>
+                <input type="text" id="dateInput" readonly>
+            </div>
+
+            <!-- 사진 데이터(Base64) 임시 보관용 hidden input 포함 -->
+            <div class="photo-section">
+                <div class="photo-title">📸 1. 점검 전 (Before)</div>
+                <input type="file" accept="image/*" onchange="handleImageUpload(this, 'imgBefore', 'dataBefore')">
+                <img id="imgBefore" class="inline-img" onclick="openModal(this.src)">
+                <input type="hidden" id="dataBefore">
+            </div>
+
+            <div class="photo-section">
+                <div class="photo-title">📸 2. 점검 중 (During)</div>
+                <input type="file" accept="image/*" onchange="handleImageUpload(this, 'imgDuring', 'dataDuring')">
+                <img id="imgDuring" class="inline-img" onclick="openModal(this.src)">
+                <input type="hidden" id="dataDuring">
+            </div>
+
+            <div class="photo-section">
+                <div class="photo-title">📸 3. 점검 후 (After)</div>
+                <input type="file" accept="image/*" onchange="handleImageUpload(this, 'imgAfter', 'dataAfter')">
+                <img id="imgAfter" class="inline-img" onclick="openModal(this.src)">
+                <input type="hidden" id="dataAfter">
+            </div>
+
+            <!-- 하단 액션 버튼 -->
+            <div class="btn-group">
+                <button class="btn-preview" onclick="previewCurrentReport()">📸 보고서 양식 미리보기</button>
+                <button class="btn-save-record" onclick="saveRecord()">💾 앱에 기록 저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         [뷰 2] 기록 보관함 화면
+    =========================================== -->
+    <div id="viewArchive" class="view-section">
+        <!-- JS로 동적 생성될 리스트 컨테이너 -->
+        <div id="archiveContainer" class="record-list">
+        </div>
+    </div>
+
+    <!-- ==========================================
+         [뷰 3] 보고서 양식(사진 대지) 화면
+    =========================================== -->
+    <div id="viewReport" class="view-section">
+        <!-- 캡처 영역 밖(상단) 조작 버튼 -->
+        <div class="report-actions">
+            <button class="btn-back" onclick="goBack()">↩ 돌아가기</button>
             <button class="btn-download" onclick="downloadImage()">💾 이미지로 저장</button>
         </div>
-        <p style="font-size: 12px; color: #666;">저장 버튼을 누르면 기기에 깔끔하게 다운로드 됩니다.</p>
-    </div>
 
-    <!-- 1. 현장 입력 폼 -->
-    <div id="inputSection" class="container">
-        <h1>🚨 소방 점검 현장기록</h1>
-        
-        <div class="input-group">
-            <label>🏢 점검 장소</label>
-            <input type="text" id="placeInput" placeholder="예: 한국아파트 101동" oninput="updatePlace()">
-        </div>
-
-        <div class="input-group">
-            <label>📍 점검 위치</label>
-            <input type="text" id="locInput" placeholder="예: 1층 A동 소화전" oninput="updateLocation()">
-        </div>
-        
-        <div class="input-group">
-            <label>📅 점검 일자</label>
-            <input type="text" id="dateInput" readonly>
-        </div>
-
-        <div class="photo-section">
-            <div class="photo-title">📸 1. 점검 전 (Before)</div>
-            <input type="file" accept="image/*" onchange="showImage(this, 'inlineBefore', 'repImgBefore', 'repTextBefore')">
-            <img id="inlineBefore" class="inline-img" onclick="openModal(this.src)">
-        </div>
-
-        <div class="photo-section">
-            <div class="photo-title">📸 2. 점검 중 (During)</div>
-            <input type="file" accept="image/*" onchange="showImage(this, 'inlineDuring', 'repImgDuring', 'repTextDuring')">
-            <img id="inlineDuring" class="inline-img" onclick="openModal(this.src)">
-        </div>
-
-        <div class="photo-section">
-            <div class="photo-title">📸 3. 점검 후 (After)</div>
-            <input type="file" accept="image/*" onchange="showImage(this, 'inlineAfter', 'repImgAfter', 'repTextAfter')">
-            <img id="inlineAfter" class="inline-img" onclick="openModal(this.src)">
-        </div>
-    </div>
-
-    <button id="btnCapture" class="btn-capture" onclick="toggleMode(true)">📸 보고서 캡처 모드로 보기</button>
-
-    <!-- 2. 한눈에 보기 최종 양식 (저장용) -->
-    <div class="report-box" id="reportBox">
-        <h2 class="report-title">소방 시설 점검 사진 대지</h2>
-        
-        <div class="report-info">
-            <div class="info-row">
-                <div>장소: <span id="repPlace" style="color:#e53e3e;">미입력</span></div>
-                <div>일자: <span id="repDate"></span></div>
-            </div>
-            <div class="info-row">
-                <div>위치: <span id="repLoc" style="color:#2563eb;">미입력</span></div>
-            </div>
-        </div>
-
-        <div class="grid-container">
-            <div class="grid-item">
-                <div class="item-title">점검 전</div>
-                <div class="item-content">
-                    <span id="repTextBefore">사진 없음</span>
-                    <img id="repImgBefore" onclick="openModal(this.src)">
+        <!-- html2canvas로 캡처될 실제 보고서 영역 -->
+        <div class="report-box" id="reportBox">
+            <h2 class="report-title">소방 시설 점검 사진 대지</h2>
+            
+            <div class="report-info">
+                <div class="info-row">
+                    <div>장소: <span id="repPlace" style="color:var(--primary);"></span></div>
+                    <div>일자: <span id="repDate"></span></div>
+                </div>
+                <div class="info-row" style="margin-top: 4px;">
+                    <div>위치: <span id="repLoc" style="color:var(--blue);"></span></div>
                 </div>
             </div>
 
-            <div class="grid-item">
-                <div class="item-title">점검 중</div>
-                <div class="item-content">
-                    <span id="repTextDuring">사진 없음</span>
-                    <img id="repImgDuring" onclick="openModal(this.src)">
+            <!-- 사진 3개 나열 영역 -->
+            <div class="grid-container">
+                <div class="grid-item">
+                    <div class="item-title">점검 전</div>
+                    <div class="item-content">
+                        <span id="repTextBefore">사진 없음</span>
+                        <img id="repImgBefore" onclick="openModal(this.src)">
+                    </div>
                 </div>
-            </div>
 
-            <div class="grid-item">
-                <div class="item-title">점검 후</div>
-                <div class="item-content">
-                    <span id="repTextAfter">사진 없음</span>
-                    <img id="repImgAfter" onclick="openModal(this.src)">
+                <div class="grid-item">
+                    <div class="item-title">점검 중</div>
+                    <div class="item-content">
+                        <span id="repTextDuring">사진 없음</span>
+                        <img id="repImgDuring" onclick="openModal(this.src)">
+                    </div>
+                </div>
+
+                <div class="grid-item">
+                    <div class="item-title">점검 후</div>
+                    <div class="item-content">
+                        <span id="repTextAfter">사진 없음</span>
+                        <img id="repImgAfter" onclick="openModal(this.src)">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. 이미지 확대 보기 모달 창 -->
+    <!-- ==========================================
+         이미지 원본 확대 보기 모달
+    =========================================== -->
     <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <span class="close-btn">&times;</span>
         <img id="modalImg" class="modal-content">
     </div>
 
     <script>
-        // 앱 실행 시 초기화 및 로컬 스토리지 데이터 불러오기
+        // 전역 상태 변수
+        let records = [];
+        let lastTab = 'write'; // '보고서 화면'에서 돌아갈 목적지 추적용
+
+        // 1. 앱 초기화: 날짜 세팅 및 로컬 스토리지 데이터 로드
         window.onload = function() {
-            // 오늘 날짜 세팅
             const today = new Date();
-            const dateString = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
-            document.getElementById('dateInput').value = dateString;
-            document.getElementById('repDate').innerText = dateString;
-
-            // 로컬 스토리지에 저장된 장소와 위치가 있다면 자동으로 불러오기
-            const savedPlace = localStorage.getItem('fireAppPlace');
-            const savedLoc = localStorage.getItem('fireAppLoc');
-
-            if(savedPlace) {
-                document.getElementById('placeInput').value = savedPlace;
-                updatePlace();
-            }
-            if(savedLoc) {
-                document.getElementById('locInput').value = savedLoc;
-                updateLocation();
-            }
+            document.getElementById('dateInput').value = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+            loadRecords();
         };
 
-        // 장소 입력 시 하단에 반영 및 임시 저장
-        function updatePlace() {
-            const placeValue = document.getElementById('placeInput').value;
-            document.getElementById('repPlace').innerText = placeValue ? placeValue : '미입력';
-            localStorage.setItem('fireAppPlace', placeValue); // 로컬 스토리지 저장
-        }
-
-        // 위치 입력 시 하단에 반영 및 임시 저장
-        function updateLocation() {
-            const locValue = document.getElementById('locInput').value;
-            document.getElementById('repLoc').innerText = locValue ? locValue : '미입력';
-            localStorage.setItem('fireAppLoc', locValue); // 로컬 스토리지 저장
-        }
-
-        // 이미지 파일 선택 시 즉시 표시
-        function showImage(input, inlineImgId, repImgId, repTextId) {
-            if (input.files && input.files[0]) {
-                const imageUrl = URL.createObjectURL(input.files[0]);
+        // 2. 화면 전환 (탭 네비게이션) 제어
+        function switchTab(tabName) {
+            // 보고서가 아닌 화면으로 이동할 땐 lastTab 갱신
+            if (tabName !== 'report') {
+                lastTab = tabName;
                 
-                // 입력폼 미리보기
-                const inlineImg = document.getElementById(inlineImgId);
-                inlineImg.src = imageUrl;
-                inlineImg.style.display = 'block';
-
-                // 보고서 양식 미리보기
-                const repImg = document.getElementById(repImgId);
-                const repText = document.getElementById(repTextId);
-                repImg.src = imageUrl;
-                repImg.style.display = 'block';
-                repText.style.display = 'none';
+                // 탭 버튼 스타일 갱신
+                const btns = document.querySelectorAll('.tab-btn');
+                btns.forEach(btn => btn.classList.remove('active'));
+                if(tabName === 'write') btns[0].classList.add('active');
+                if(tabName === 'archive') btns[1].classList.add('active');
             }
-        }
 
-        // 캡처(보고서) 모드 전환
-        function toggleMode(isCaptureMode) {
-            if (isCaptureMode) {
-                document.getElementById('inputSection').style.display = 'none';
-                document.getElementById('btnCapture').style.display = 'none';
-                document.getElementById('captureUI').style.display = 'block';
-                window.scrollTo(0, 0);
-            } else {
-                document.getElementById('inputSection').style.display = 'block';
-                document.getElementById('btnCapture').style.display = 'block';
-                document.getElementById('captureUI').style.display = 'none';
-            }
-        }
-
-        // html2canvas를 이용해 보고서 레이아웃을 이미지로 다운로드
-        function downloadImage() {
-            const reportElement = document.getElementById('reportBox');
-            const dateStr = document.getElementById('dateInput').value.replace(/ /g, '');
-            const placeStr = document.getElementById('placeInput').value || '장소미상';
+            // 모든 뷰 숨김 처리
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
             
-            // 기존 버튼 텍스트를 잠시 변경하여 사용자에게 피드백 제공
-            const btn = document.querySelector('.btn-download');
-            const originalText = btn.innerText;
-            btn.innerText = "⏳ 저장 중...";
+            // 해당 뷰 보이기
+            if(tabName === 'write') {
+                document.getElementById('viewWrite').classList.add('active');
+                document.querySelector('.tab-nav').style.display = 'flex';
+            } 
+            else if(tabName === 'archive') {
+                document.getElementById('viewArchive').classList.add('active');
+                document.querySelector('.tab-nav').style.display = 'flex';
+                renderArchive(); // 보관함 렌더링 업데이트
+            }
+            else if(tabName === 'report') {
+                document.getElementById('viewReport').classList.add('active');
+                document.querySelector('.tab-nav').style.display = 'none'; // 보고서 화면에서는 탭 숨김
+                window.scrollTo(0, 0); // 화면 최상단으로 이동
+            }
+        }
 
-            html2canvas(reportElement, {
-                scale: 2, // 고해상도 처리
-                useCORS: true,
-                backgroundColor: "#ffffff"
-            }).then(canvas => {
-                const image = canvas.toDataURL("image/png");
-                const link = document.createElement('a');
-                link.href = image;
-                link.download = `소방점검_${placeStr}_${dateStr}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+        // '돌아가기' 버튼 함수
+        function goBack() {
+            switchTab(lastTab);
+        }
+
+        // 3. 사진 압축 및 Base64 Data URL 변환 (Canvas API 활용)
+        function handleImageUpload(input, imgId, dataId) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
                 
-                // 버튼 텍스트 원상복구
-                btn.innerText = originalText;
-            }).catch(err => {
-                console.error("이미지 저장 오류:", err);
-                btn.innerText = originalText;
-                alert("이미지 저장 중 오류가 발생했습니다.");
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const MAX_SIZE = 800; // 최대 길이 제한 (용량 최적화)
+
+                        // 비율 유지하며 리사이징 계산
+                        if (width > height && width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        } else if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // JPEG 포맷, 품질 60(0.6)으로 압축하여 Data URL 생성
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+
+                        // 입력 폼 화면에 썸네일 노출
+                        const inlineImg = document.getElementById(imgId);
+                        inlineImg.src = dataUrl;
+                        inlineImg.style.display = 'block';
+
+                        // 저장용 숨겨진 input에 데이터 입력
+                        document.getElementById(dataId).value = dataUrl;
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 4. 새 점검 작성 중 '보고서 양식 미리보기' 화면 띄우기
+        function previewCurrentReport() {
+            // 현재 폼의 데이터 가져와서 보고서 양식에 넣기
+            document.getElementById('repDate').innerText = document.getElementById('dateInput').value;
+            document.getElementById('repPlace').innerText = document.getElementById('placeInput').value || '미입력';
+            document.getElementById('repLoc').innerText = document.getElementById('locInput').value || '미입력';
+
+            setReportPhoto('Before', document.getElementById('dataBefore').value);
+            setReportPhoto('During', document.getElementById('dataDuring').value);
+            setReportPhoto('After', document.getElementById('dataAfter').value);
+
+            switchTab('report');
+        }
+
+        // 5. 로컬 스토리지에 새 기록 저장하기
+        function saveRecord() {
+            const place = document.getElementById('placeInput').value.trim();
+            const location = document.getElementById('locInput').value.trim();
+            const date = document.getElementById('dateInput').value;
+            
+            if (!place || !location) {
+                alert("점검 장소와 위치를 입력해주세요.");
+                return;
+            }
+
+            // 새로운 기록 객체 생성
+            const newRecord = {
+                id: Date.now().toString(), // 고유 ID
+                date: date,
+                place: place,
+                location: location,
+                photos: {
+                    before: document.getElementById('dataBefore').value || null,
+                    during: document.getElementById('dataDuring').value || null,
+                    after: document.getElementById('dataAfter').value || null
+                }
+            };
+
+            // 최신순을 위해 배열 맨 앞에 추가
+            records.unshift(newRecord);
+
+            // 로컬 스토리지에 저장 시도 (용량 초과 대비 try-catch)
+            try {
+                localStorage.setItem('fireAppRecords', JSON.stringify(records));
+                alert("기록이 성공적으로 저장되었습니다!");
+                clearForm();
+                switchTab('archive'); // 보관함으로 바로 이동
+            } catch (e) {
+                alert("기기 저장 공간이 부족합니다. 불필요한 예전 기록을 삭제해주세요.");
+                records.shift(); // 추가했던 데이터 원상 복구
+            }
+        }
+
+        // 폼 초기화 함수
+        function clearForm() {
+            document.getElementById('placeInput').value = '';
+            document.getElementById('locInput').value = '';
+            ['Before', 'During', 'After'].forEach(type => {
+                const imgEl = document.getElementById('img' + type);
+                imgEl.style.display = 'none';
+                imgEl.src = '';
+                document.getElementById('data' + type).value = '';
+            });
+            document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
+        }
+
+        // 6. 보관함 데이터 로드 및 UI 렌더링
+        function loadRecords() {
+            const saved = localStorage.getItem('fireAppRecords');
+            if (saved) {
+                records = JSON.parse(saved);
+            }
+        }
+
+        function renderArchive() {
+            const container = document.getElementById('archiveContainer');
+            container.innerHTML = ''; // 기존 리스트 비우기
+
+            if (records.length === 0) {
+                container.innerHTML = '<div class="empty-state">저장된 기록이 없습니다.<br>새 점검을 작성해주세요.</div>';
+                return;
+            }
+
+            records.forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'record-card';
+                // 개별 아이템 UI 구성
+                card.innerHTML = `
+                    <div class="record-info" onclick="openArchivedReport('${record.id}')">
+                        <div class="record-place">${record.place}</div>
+                        <div class="record-loc-date">${record.location} | ${record.date}</div>
+                    </div>
+                    <button class="record-delete-btn" onclick="deleteRecord('${record.id}', event)">🗑️</button>
+                `;
+                container.appendChild(card);
             });
         }
 
-        // 이미지 확대 모달 열기
+        // 개별 기록 삭제 기능
+        function deleteRecord(id, event) {
+            event.stopPropagation(); // 카드 클릭(openArchivedReport) 이벤트 방지
+            if (confirm("정말 이 기록을 삭제하시겠습니까?")) {
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem('fireAppRecords', JSON.stringify(records));
+                renderArchive(); // 리스트 갱신
+            }
+        }
+
+        // 7. 보관함 카드 클릭 시 과거 기록으로 보고서 화면 띄우기
+        function openArchivedReport(id) {
+            const record = records.find(r => r.id === id);
+            if(!record) return;
+
+            document.getElementById('repDate').innerText = record.date;
+            document.getElementById('repPlace').innerText = record.place;
+            document.getElementById('repLoc').innerText = record.location;
+
+            setReportPhoto('Before', record.photos.before);
+            setReportPhoto('During', record.photos.during);
+            setReportPhoto('After', record.photos.after);
+
+            switchTab('report');
+        }
+
+        // 보고서 내 개별 사진 배치 유틸리티 함수
+        function setReportPhoto(phase, dataUrl) {
+            const img = document.getElementById(`repImg${phase}`);
+            const text = document.getElementById(`repText${phase}`);
+            if (dataUrl) {
+                img.src = dataUrl;
+                img.style.display = 'block';
+                text.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                img.src = '';
+                text.style.display = 'block'; // '사진 없음' 텍스트 표시
+            }
+        }
+
+        // 8. 전체화면 원본 확대 보기(모달) 로직
         function openModal(src) {
-            if (!src) return; 
+            if (!src || src === window.location.href) return; // 이미지 소스가 없으면 무시
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImg');
             modalImg.src = src;         
             modal.style.display = 'flex'; 
         }
 
-        // 이미지 확대 모달 닫기
         function closeModal() {
             document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // 9. html2canvas를 이용한 고해상도 이미지 캡처 및 다운로드 기능
+        function downloadImage() {
+            const reportElement = document.getElementById('reportBox');
+            
+            // 파일명 규칙 생성 (예: 소방점검_장소명_날짜.png)
+            const dateStr = document.getElementById('repDate').innerText.replace(/ /g, ''); // 공백 제거
+            const placeStr = document.getElementById('repPlace').innerText || '현장';
+            
+            const btn = document.querySelector('.btn-download');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ 처리중...";
+
+            html2canvas(reportElement, {
+                scale: 2, // 모바일 화질 열화 방지를 위해 2배 확대 캡처
+                useCORS: true,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL("image/png");
+                link.download = `소방점검_${placeStr}_${dateStr}.png`;
+                link.click(); // 자동 다운로드 실행
+                btn.innerText = originalText;
+            }).catch(err => {
+                console.error("저장 오류:", err);
+                btn.innerText = originalText;
+                alert("이미지 저장 중 오류가 발생했습니다.");
+            });
         }
     </script>
 </body>
