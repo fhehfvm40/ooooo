@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -6,415 +5,205 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>소방 점검 앱</title>
     <style>
-        /* Base Styles */
-        body { 
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
-            background-color: #f4f4f9; 
-            padding: 10px; 
-            margin: 0; 
-            color: #333; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f4f9; padding: 10px; margin: 0; color: #333; }
         
-        .app-container {
-            width: 100%;
-            max-width: 500px;
-        }
+        /* 1. 입력 영역 스타일 */
+        .container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; margin: auto; margin-bottom: 15px; }
+        h1 { text-align: center; color: #e53e3e; font-size: 20px; margin-top: 0; margin-bottom: 15px; }
+        
+        .input-group { margin-bottom: 12px; }
+        label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 13px; color: #555; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        input[readonly] { background-color: #f9f9f9; color: #777; }
+        
+        .photo-section { border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 10px; border-radius: 8px; background-color: #f8fafc; }
+        .photo-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #1e293b; }
+        input[type="file"] { width: 100%; font-size: 13px; }
+        
+        /* 사진 클릭 시 마우스 커서를 손가락 모양으로 변경 */
+        .inline-img { width: 100%; max-height: 150px; object-fit: contain; margin-top: 10px; display: none; border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; }
 
-        /* --- 1. Input Mode Styles --- */
-        .input-section { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
-            margin-bottom: 20px; 
-        }
-        h1 { 
-            text-align: center; 
-            color: #e53e3e; 
-            font-size: 22px; 
-            margin-top: 0; 
-            margin-bottom: 20px; 
-        }
+        /* 캡처 모드 전환 버튼 */
+        .btn-capture { display: block; width: 100%; max-width: 500px; margin: 0 auto 20px auto; background-color: #2563eb; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; }
         
-        .input-group { margin-bottom: 16px; }
-        label { 
-            font-weight: 700; 
-            display: block; 
-            margin-bottom: 6px; 
-            font-size: 14px; 
-            color: #4a5568; 
-        }
-        input[type="text"] { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid #cbd5e0; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            font-size: 15px; 
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #3182ce;
-        }
-        input[readonly] { 
-            background-color: #edf2f7; 
-            color: #718096; 
-            border-color: #e2e8f0;
-        }
-        
-        .photo-section { 
-            border: 1px solid #e2e8f0; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            border-radius: 8px; 
-            background-color: #f8fafc; 
-        }
-        .photo-title { 
-            font-weight: 700; 
-            margin-bottom: 10px; 
-            font-size: 15px; 
-            color: #1a202c; 
-        }
-        input[type="file"] { 
-            width: 100%; 
-            font-size: 14px; 
-            color: #4a5568;
-        }
-        
-        .inline-img { 
-            width: 100%; 
-            max-height: 180px; 
-            object-fit: contain; 
-            margin-top: 12px; 
-            display: none; 
-            border-radius: 8px; 
-            border: 1px solid #cbd5e1; 
-            background-color: #000;
-        }
+        .capture-ui { text-align: center; margin-bottom: 15px; display: none; }
+        .btn-back { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; }
 
-        .btn-capture { 
-            display: block; 
-            width: 100%; 
-            background-color: #2b6cb0; 
-            color: white; 
-            padding: 16px; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            font-weight: 700; 
-            box-shadow: 0 4px 6px rgba(43, 108, 176, 0.3); 
-            cursor: pointer; 
-            transition: background-color 0.2s;
-            margin-bottom: 30px;
-        }
-        .btn-capture:active { background-color: #2c5282; }
+        /* 2. 캡처용 한눈에 보기 보고서 양식 */
+        .report-box { background: white; padding: 10px; border: 2px solid #000; max-width: 500px; margin: auto; box-sizing: border-box; }
+        .report-title { text-align: center; font-size: 18px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 8px; margin: 0 0 10px 0; letter-spacing: 1px; }
+        
+        .report-info { font-size: 12px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px dashed #999; padding-bottom: 8px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        
+        .grid-container { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .grid-item { border: 1px solid #000; display: flex; flex-direction: column; }
+        
+        .item-title { background: #eee; text-align: center; font-weight: bold; font-size: 12px; padding: 4px; border-bottom: 1px solid #000; }
+        
+        .item-content { position: relative; background: #fff; display: flex; align-items: center; justify-content: center; height: 150px; }
+        .item-content span { color: #aaa; font-size: 12px; }
+        .item-content img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; cursor: pointer; }
 
-        /* --- 2. Capture Mode Styles --- */
-        .capture-ui { 
-            text-align: center; 
-            margin-bottom: 15px; 
-            display: none; 
-            width: 100%;
-        }
-        .btn-back { 
-            background-color: #4a5568; 
-            color: white; 
-            padding: 12px 24px; 
-            border: none; 
-            border-radius: 24px; 
-            font-size: 14px; 
-            font-weight: 700; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
-            cursor: pointer; 
-        }
-        .capture-help-text {
-            font-size: 12px; 
-            color: #718096; 
-            margin-top: 12px;
-            font-weight: 600;
-        }
-
-        /* Formal Report Box */
-        .report-wrapper {
-            display: none; /* Hidden initially */
-            width: 100%;
-        }
-        .report-box { 
-            background: white; 
-            padding: 12px; 
-            border: 2px solid #000; 
-            box-sizing: border-box; 
-            width: 100%;
-        }
-        .report-title { 
-            text-align: center; 
-            font-size: 20px; 
-            font-weight: 900; 
-            border-bottom: 2px solid #000; 
-            padding-bottom: 10px; 
-            margin: 0 0 12px 0; 
-            letter-spacing: 2px; 
-        }
-        
-        .report-info { 
-            font-size: 13px; 
-            font-weight: 700; 
-            margin-bottom: 12px; 
-            border-bottom: 1px dashed #718096; 
-            padding-bottom: 8px; 
-        }
-        .info-row {
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 6px;
-        }
-        .info-row span.placeholder { color: #e53e3e; }
-        .info-row span.filled { color: #2b6cb0; }
-        
-        /* Grid Layout for Photos (Stacked Vertically) */
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 8px; 
-        }
-        .grid-item { 
-            border: 1px solid #000; 
-            display: flex; 
-            flex-direction: column; 
-            background: #fff;
-        }
-        
-        .item-title { 
-            background: #f1f5f9; 
-            text-align: center; 
-            font-weight: 700; 
-            font-size: 13px; 
-            padding: 6px; 
-            border-bottom: 1px solid #000; 
-        }
-        
-        .item-content { 
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: #fff;
-            height: 150px; /* Fixed height for equal sizing */
-        }
-        
-        .item-content span.placeholder-text { 
-            color: #a0aec0; 
-            font-size: 13px; 
-            font-weight: 600;
-        }
-        .item-content img { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            display: none; 
-            background-color: #000;
-        }
+        /* 3. 이미지 확대 보기 모달 스타일 */
+        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+        .modal-content { max-width: 95%; max-height: 90%; border-radius: 8px; object-fit: contain; }
+        .close-btn { position: absolute; top: 15px; right: 25px; color: white; font-size: 35px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        
-        <!-- ==========================================
-             1. CAPTURE MODE UI (Back Button)
-        =========================================== -->
-        <div id="captureUI" class="capture-ui">
-            <button class="btn-back" onclick="toggleMode(false)">↩ 다시 입력(수정)하기</button>
-            <p class="capture-help-text">👇 아래 양식만 깔끔하게 화면 캡처하시면 됩니다!</p>
-        </div>
-
-        <!-- ==========================================
-             2. INPUT MODE
-        =========================================== -->
-        <div id="inputSection" class="input-section">
-            <h1>🚨 소방 점검 현장기록</h1>
-            
-            <div class="input-group">
-                <label>🏢 점검 장소</label>
-                <input type="text" id="placeInput" placeholder="예: 한국아파트 101동" oninput="updatePlace()">
-            </div>
-
-            <div class="input-group">
-                <label>📍 점검 위치</label>
-                <input type="text" id="locInput" placeholder="예: 1층 A동 소화전" oninput="updateLocation()">
-            </div>
-            
-            <div class="input-group">
-                <label>📅 점검 일자</label>
-                <input type="text" id="dateInput" readonly>
-            </div>
-
-            <!-- Before -->
-            <div class="photo-section">
-                <div class="photo-title">📸 1. 점검 전 (Before)</div>
-                <input type="file" accept="image/*" onchange="showImage(this, 'inlineBefore', 'repImgBefore', 'repTextBefore')">
-                <img id="inlineBefore" class="inline-img">
-            </div>
-
-            <!-- During -->
-            <div class="photo-section">
-                <div class="photo-title">📸 2. 점검 중 (During)</div>
-                <input type="file" accept="image/*" onchange="showImage(this, 'inlineDuring', 'repImgDuring', 'repTextDuring')">
-                <img id="inlineDuring" class="inline-img">
-            </div>
-
-            <!-- After -->
-            <div class="photo-section">
-                <div class="photo-title">📸 3. 점검 후 (After)</div>
-                <input type="file" accept="image/*" onchange="showImage(this, 'inlineAfter', 'repImgAfter', 'repTextAfter')">
-                <img id="inlineAfter" class="inline-img">
-            </div>
-        </div>
-
-        <button id="btnCapture" class="btn-capture" onclick="toggleMode(true)">📸 보고서 캡처 모드로 보기</button>
-
-        <!-- ==========================================
-             3. CAPTURE MODE (Report Box)
-        =========================================== -->
-        <div id="reportWrapper" class="report-wrapper">
-            <div class="report-box" id="reportBox">
-                <h2 class="report-title">소방 시설 점검 사진 대지</h2>
-                
-                <div class="report-info">
-                    <div class="info-row">
-                        <div>장소: <span id="repPlace" class="placeholder">미입력</span></div>
-                        <div>일자: <span id="repDate"></span></div>
-                    </div>
-                    <div class="info-row">
-                        <div>위치: <span id="repLoc" class="placeholder">미입력</span></div>
-                    </div>
-                </div>
-
-                <div class="grid-container">
-                    <!-- Before -->
-                    <div class="grid-item">
-                        <div class="item-title">점검 전</div>
-                        <div class="item-content">
-                            <span id="repTextBefore" class="placeholder-text">사진 없음</span>
-                            <img id="repImgBefore">
-                        </div>
-                    </div>
-
-                    <!-- During -->
-                    <div class="grid-item">
-                        <div class="item-title">점검 중</div>
-                        <div class="item-content">
-                            <span id="repTextDuring" class="placeholder-text">사진 없음</span>
-                            <img id="repImgDuring">
-                        </div>
-                    </div>
-
-                    <!-- After -->
-                    <div class="grid-item">
-                        <div class="item-title">점검 후</div>
-                        <div class="item-content">
-                            <span id="repTextAfter" class="placeholder-text">사진 없음</span>
-                            <img id="repImgAfter">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <!-- 돌아가기 버튼 영역 -->
+    <div id="captureUI" class="capture-ui">
+        <button class="btn-back" onclick="toggleMode(false)">↩ 다시 입력(수정)하기</button>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">👇 아래 양식만 깔끔하게 캡처하시면 됩니다!</p>
     </div>
 
-    <!-- ==========================================
-         JAVASCRIPT LOGIC
-    =========================================== -->
+    <!-- 1. 현장 입력 폼 -->
+    <div id="inputSection" class="container">
+        <h1>🚨 소방 점검 현장기록</h1>
+        
+        <div class="input-group">
+            <label>🏢 점검 장소</label>
+            <input type="text" id="placeInput" placeholder="예: 한국아파트 101동" oninput="updatePlace()">
+        </div>
+
+        <div class="input-group">
+            <label>📍 점검 위치</label>
+            <input type="text" id="locInput" placeholder="예: 1층 A동 소화전" oninput="updateLocation()">
+        </div>
+        
+        <div class="input-group">
+            <label>📅 점검 일자</label>
+            <input type="text" id="dateInput" readonly>
+        </div>
+
+        <div class="photo-section">
+            <div class="photo-title">📸 1. 점검 전 (Before)</div>
+            <input type="file" accept="image/*" onchange="showImage(this, 'inlineBefore', 'repImgBefore', 'repTextBefore')">
+            <!-- 클릭 시 확대(openModal) 이벤트 추가 -->
+            <img id="inlineBefore" class="inline-img" onclick="openModal(this.src)">
+        </div>
+
+        <div class="photo-section">
+            <div class="photo-title">📸 2. 점검 중 (During)</div>
+            <input type="file" accept="image/*" onchange="showImage(this, 'inlineDuring', 'repImgDuring', 'repTextDuring')">
+            <img id="inlineDuring" class="inline-img" onclick="openModal(this.src)">
+        </div>
+
+        <div class="photo-section">
+            <div class="photo-title">📸 3. 점검 후 (After)</div>
+            <input type="file" accept="image/*" onchange="showImage(this, 'inlineAfter', 'repImgAfter', 'repTextAfter')">
+            <img id="inlineAfter" class="inline-img" onclick="openModal(this.src)">
+        </div>
+    </div>
+
+    <button id="btnCapture" class="btn-capture" onclick="toggleMode(true)">📸 보고서 캡처 모드로 보기</button>
+
+    <!-- 2. 한눈에 보기 최종 양식 (캡처용) -->
+    <div class="report-box" id="reportBox">
+        <h2 class="report-title">소방 시설 점검 사진 대지</h2>
+        
+        <div class="report-info">
+            <div class="info-row">
+                <div>장소: <span id="repPlace" style="color:#e53e3e;">미입력</span></div>
+                <div>일자: <span id="repDate"></span></div>
+            </div>
+            <div class="info-row">
+                <div>위치: <span id="repLoc" style="color:#2563eb;">미입력</span></div>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div class="grid-item">
+                <div class="item-title">점검 전</div>
+                <div class="item-content">
+                    <span id="repTextBefore">사진 없음</span>
+                    <img id="repImgBefore" onclick="openModal(this.src)">
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <div class="item-title">점검 중</div>
+                <div class="item-content">
+                    <span id="repTextDuring">사진 없음</span>
+                    <img id="repImgDuring" onclick="openModal(this.src)">
+                </div>
+            </div>
+
+            <div class="grid-item">
+                <div class="item-title">점검 후</div>
+                <div class="item-content">
+                    <span id="repTextAfter">사진 없음</span>
+                    <img id="repImgAfter" onclick="openModal(this.src)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 이미지 확대 보기 모달 창 (기본 숨김) -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close-btn">&times;</span>
+        <img id="modalImg" class="modal-content">
+    </div>
+
     <script>
-        // 1. Auto-fill Date on Load
-        document.addEventListener('DOMContentLoaded', () => {
-            const today = new Date();
-            const dateString = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
-            
-            document.getElementById('dateInput').value = dateString;
-            document.getElementById('repDate').innerText = dateString;
-        });
+        const today = new Date();
+        const dateString = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
+        document.getElementById('dateInput').value = dateString;
+        document.getElementById('repDate').innerText = dateString;
 
-        // 2. Real-time Place Update
         function updatePlace() {
-            const placeValue = document.getElementById('placeInput').value.trim();
-            const repPlaceElement = document.getElementById('repPlace');
-            
-            if (placeValue) {
-                repPlaceElement.innerText = placeValue;
-                repPlaceElement.className = 'filled';
-            } else {
-                repPlaceElement.innerText = '미입력';
-                repPlaceElement.className = 'placeholder';
-            }
+            const placeValue = document.getElementById('placeInput').value;
+            document.getElementById('repPlace').innerText = placeValue ? placeValue : '미입력';
         }
 
-        // 3. Real-time Location Update
         function updateLocation() {
-            const locValue = document.getElementById('locInput').value.trim();
-            const repLocElement = document.getElementById('repLoc');
-            
-            if (locValue) {
-                repLocElement.innerText = locValue;
-                repLocElement.className = 'filled';
-            } else {
-                repLocElement.innerText = '미입력';
-                repLocElement.className = 'placeholder';
-            }
+            const locValue = document.getElementById('locInput').value;
+            document.getElementById('repLoc').innerText = locValue ? locValue : '미입력';
         }
 
-        // 4. Handle Image Upload & Preview
         function showImage(input, inlineImgId, repImgId, repTextId) {
             if (input.files && input.files[0]) {
                 const imageUrl = URL.createObjectURL(input.files[0]);
                 
-                // Update Input Mode Inline Preview
                 const inlineImg = document.getElementById(inlineImgId);
                 inlineImg.src = imageUrl;
                 inlineImg.style.display = 'block';
 
-                // Update Capture Mode Report Image
                 const repImg = document.getElementById(repImgId);
                 const repText = document.getElementById(repTextId);
                 repImg.src = imageUrl;
                 repImg.style.display = 'block';
-                repText.style.display = 'none'; // Hide "사진 없음" text
+                repText.style.display = 'none';
             }
         }
 
-        // 5. Toggle Between Input Mode and Capture Mode
         function toggleMode(isCaptureMode) {
-            const inputSection = document.getElementById('inputSection');
-            const btnCapture = document.getElementById('btnCapture');
-            const captureUI = document.getElementById('captureUI');
-            const reportWrapper = document.getElementById('reportWrapper');
-
             if (isCaptureMode) {
-                // Switch to Capture Mode
-                inputSection.style.display = 'none';
-                btnCapture.style.display = 'none';
-                captureUI.style.display = 'block';
-                reportWrapper.style.display = 'block';
-                
-                // Scroll to the top for a clean screenshot
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                document.getElementById('inputSection').style.display = 'none';
+                document.getElementById('btnCapture').style.display = 'none';
+                document.getElementById('captureUI').style.display = 'block';
+                window.scrollTo(0, 0);
             } else {
-                // Switch back to Input Mode
-                inputSection.style.display = 'block';
-                btnCapture.style.display = 'block';
-                captureUI.style.display = 'none';
-                reportWrapper.style.display = 'none';
+                document.getElementById('inputSection').style.display = 'block';
+                document.getElementById('btnCapture').style.display = 'block';
+                document.getElementById('captureUI').style.display = 'none';
             }
+        }
+
+        // --- 새로 추가된 이미지 확대(모달) 기능 ---
+        function openModal(src) {
+            if (!src) return; // 사진이 없으면 무시
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImg');
+            modalImg.src = src;         // 클릭한 이미지 주소를 모달에 전달
+            modal.style.display = 'flex'; // 검은 배경 모달 띄우기
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
         }
     </script>
 </body>
 </html>
-```
