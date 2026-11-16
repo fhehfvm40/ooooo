@@ -20,14 +20,15 @@
         .photo-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #1e293b; }
         input[type="file"] { width: 100%; font-size: 13px; }
         
-        /* 사진 클릭 시 마우스 커서를 손가락 모양으로 변경 */
         .inline-img { width: 100%; max-height: 150px; object-fit: contain; margin-top: 10px; display: none; border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; }
 
-        /* 캡처 모드 전환 버튼 */
+        /* 버튼 스타일 */
         .btn-capture { display: block; width: 100%; max-width: 500px; margin: 0 auto 20px auto; background-color: #2563eb; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; }
         
         .capture-ui { text-align: center; margin-bottom: 15px; display: none; }
-        .btn-back { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; }
+        .btn-group { display: flex; justify-content: center; gap: 10px; }
+        .btn-back { background-color: #475569; color: white; padding: 12px 15px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; flex: 1; max-width: 200px; }
+        .btn-save { background-color: #10b981; color: white; padding: 12px 15px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; flex: 1; max-width: 200px; }
 
         /* 2. 캡처용 한눈에 보기 보고서 양식 */
         .report-box { background: white; padding: 10px; border: 2px solid #000; max-width: 500px; margin: auto; box-sizing: border-box; }
@@ -38,25 +39,37 @@
         
         .grid-container { display: grid; grid-template-columns: 1fr; gap: 8px; }
         .grid-item { border: 1px solid #000; display: flex; flex-direction: column; }
-        
         .item-title { background: #eee; text-align: center; font-weight: bold; font-size: 12px; padding: 4px; border-bottom: 1px solid #000; }
         
         .item-content { position: relative; background: #fff; display: flex; align-items: center; justify-content: center; height: 150px; }
         .item-content span { color: #aaa; font-size: 12px; }
         .item-content img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; cursor: pointer; }
 
-        /* 3. 이미지 확대 보기 모달 스타일 */
+        /* 모달 스타일 */
         .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
         .modal-content { max-width: 95%; max-height: 90%; border-radius: 8px; object-fit: contain; }
         .close-btn { position: absolute; top: 15px; right: 25px; color: white; font-size: 35px; font-weight: bold; cursor: pointer; }
+
+        /* ==========================================
+           3. 저장(인쇄/PDF) 시 적용되는 전용 스타일
+           버튼들은 싹 숨기고 흰 배경에 보고서만 출력되도록 함
+           ========================================== */
+        @media print {
+            body { background: white; margin: 0; padding: 0; }
+            #inputSection, #btnCapture, #captureUI, .modal { display: none !important; }
+            .report-box { border: none; max-width: 100%; width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 돌아가기 버튼 영역 -->
+    <!-- 돌아가기 및 저장 버튼 영역 -->
     <div id="captureUI" class="capture-ui">
-        <button class="btn-back" onclick="toggleMode(false)">↩ 다시 입력(수정)하기</button>
-        <p style="font-size: 12px; color: #666; margin-top: 10px;">👇 아래 양식만 깔끔하게 캡처하시면 됩니다!</p>
+        <div class="btn-group">
+            <button class="btn-back" onclick="toggleMode(false)">↩ 다시 입력(수정)</button>
+            <button class="btn-save" onclick="window.print()">💾 PDF로 저장</button>
+        </div>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">저장 버튼을 누르면 기기에 PDF 파일로 깔끔하게 저장됩니다.</p>
     </div>
 
     <!-- 1. 현장 입력 폼 -->
@@ -81,7 +94,6 @@
         <div class="photo-section">
             <div class="photo-title">📸 1. 점검 전 (Before)</div>
             <input type="file" accept="image/*" onchange="showImage(this, 'inlineBefore', 'repImgBefore', 'repTextBefore')">
-            <!-- 클릭 시 확대(openModal) 이벤트 추가 -->
             <img id="inlineBefore" class="inline-img" onclick="openModal(this.src)">
         </div>
 
@@ -93,117 +105,3 @@
 
         <div class="photo-section">
             <div class="photo-title">📸 3. 점검 후 (After)</div>
-            <input type="file" accept="image/*" onchange="showImage(this, 'inlineAfter', 'repImgAfter', 'repTextAfter')">
-            <img id="inlineAfter" class="inline-img" onclick="openModal(this.src)">
-        </div>
-    </div>
-
-    <button id="btnCapture" class="btn-capture" onclick="toggleMode(true)">📸 보고서 캡처 모드로 보기</button>
-
-    <!-- 2. 한눈에 보기 최종 양식 (캡처용) -->
-    <div class="report-box" id="reportBox">
-        <h2 class="report-title">소방 시설 점검 사진 대지</h2>
-        
-        <div class="report-info">
-            <div class="info-row">
-                <div>장소: <span id="repPlace" style="color:#e53e3e;">미입력</span></div>
-                <div>일자: <span id="repDate"></span></div>
-            </div>
-            <div class="info-row">
-                <div>위치: <span id="repLoc" style="color:#2563eb;">미입력</span></div>
-            </div>
-        </div>
-
-        <div class="grid-container">
-            <div class="grid-item">
-                <div class="item-title">점검 전</div>
-                <div class="item-content">
-                    <span id="repTextBefore">사진 없음</span>
-                    <img id="repImgBefore" onclick="openModal(this.src)">
-                </div>
-            </div>
-
-            <div class="grid-item">
-                <div class="item-title">점검 중</div>
-                <div class="item-content">
-                    <span id="repTextDuring">사진 없음</span>
-                    <img id="repImgDuring" onclick="openModal(this.src)">
-                </div>
-            </div>
-
-            <div class="grid-item">
-                <div class="item-title">점검 후</div>
-                <div class="item-content">
-                    <span id="repTextAfter">사진 없음</span>
-                    <img id="repImgAfter" onclick="openModal(this.src)">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. 이미지 확대 보기 모달 창 (기본 숨김) -->
-    <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="close-btn">&times;</span>
-        <img id="modalImg" class="modal-content">
-    </div>
-
-    <script>
-        const today = new Date();
-        const dateString = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
-        document.getElementById('dateInput').value = dateString;
-        document.getElementById('repDate').innerText = dateString;
-
-        function updatePlace() {
-            const placeValue = document.getElementById('placeInput').value;
-            document.getElementById('repPlace').innerText = placeValue ? placeValue : '미입력';
-        }
-
-        function updateLocation() {
-            const locValue = document.getElementById('locInput').value;
-            document.getElementById('repLoc').innerText = locValue ? locValue : '미입력';
-        }
-
-        function showImage(input, inlineImgId, repImgId, repTextId) {
-            if (input.files && input.files[0]) {
-                const imageUrl = URL.createObjectURL(input.files[0]);
-                
-                const inlineImg = document.getElementById(inlineImgId);
-                inlineImg.src = imageUrl;
-                inlineImg.style.display = 'block';
-
-                const repImg = document.getElementById(repImgId);
-                const repText = document.getElementById(repTextId);
-                repImg.src = imageUrl;
-                repImg.style.display = 'block';
-                repText.style.display = 'none';
-            }
-        }
-
-        function toggleMode(isCaptureMode) {
-            if (isCaptureMode) {
-                document.getElementById('inputSection').style.display = 'none';
-                document.getElementById('btnCapture').style.display = 'none';
-                document.getElementById('captureUI').style.display = 'block';
-                window.scrollTo(0, 0);
-            } else {
-                document.getElementById('inputSection').style.display = 'block';
-                document.getElementById('btnCapture').style.display = 'block';
-                document.getElementById('captureUI').style.display = 'none';
-            }
-        }
-
-        // --- 새로 추가된 이미지 확대(모달) 기능 ---
-        function openModal(src) {
-            if (!src) return; // 사진이 없으면 무시
-            const modal = document.getElementById('imageModal');
-            const modalImg = document.getElementById('modalImg');
-            modalImg.src = src;         // 클릭한 이미지 주소를 모달에 전달
-            modal.style.display = 'flex'; // 검은 배경 모달 띄우기
-        }
-
-        function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
