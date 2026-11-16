@@ -1,62 +1,251 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>소방 점검 앱</title>
+    <!-- 이미지 저장을 위한 html2canvas 라이브러리 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f4f9; padding: 10px; margin: 0; color: #333; }
+        body { 
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+            background-color: #f4f4f9; 
+            padding: 10px; 
+            margin: 0; 
+            color: #333; 
+        }
         
-        /* 1. 입력 영역 스타일 */
-        .container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; margin: auto; margin-bottom: 15px; }
-        h1 { text-align: center; color: #e53e3e; font-size: 20px; margin-top: 0; margin-bottom: 15px; }
+        /* --- 1. 입력 영역 스타일 --- */
+        .container { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            max-width: 500px; 
+            margin: 0 auto 15px auto; 
+            box-sizing: border-box;
+        }
+        h1 { 
+            text-align: center; 
+            color: #e53e3e; 
+            font-size: 20px; 
+            margin-top: 0; 
+            margin-bottom: 15px; 
+        }
         
         .input-group { margin-bottom: 12px; }
-        label { font-weight: bold; display: block; margin-bottom: 4px; font-size: 13px; color: #555; }
-        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        label { 
+            font-weight: bold; 
+            display: block; 
+            margin-bottom: 5px; 
+            font-size: 13px; 
+            color: #555; 
+        }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 14px; 
+        }
         input[readonly] { background-color: #f9f9f9; color: #777; }
         
-        .photo-section { border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 10px; border-radius: 8px; background-color: #f8fafc; }
-        .photo-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #1e293b; }
+        .photo-section { 
+            border: 1px solid #e2e8f0; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            background-color: #f8fafc; 
+        }
+        .photo-title { 
+            font-weight: bold; 
+            margin-bottom: 8px; 
+            font-size: 14px; 
+            color: #1e293b; 
+        }
         input[type="file"] { width: 100%; font-size: 13px; }
         
-        /* 사진 클릭 시 마우스 커서를 손가락 모양으로 변경 */
-        .inline-img { width: 100%; max-height: 150px; object-fit: contain; margin-top: 10px; display: none; border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; }
+        /* 미리보기 이미지 (클릭 시 마우스 커서 변경) */
+        .inline-img { 
+            width: 100%; 
+            max-height: 150px; 
+            object-fit: contain; 
+            margin-top: 10px; 
+            display: none; 
+            border-radius: 6px; 
+            border: 1px solid #cbd5e1; 
+            cursor: pointer; 
+        }
 
-        /* 캡처 모드 전환 버튼 */
-        .btn-capture { display: block; width: 100%; max-width: 500px; margin: 0 auto 20px auto; background-color: #2563eb; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; }
+        /* --- 버튼 스타일 --- */
+        .btn-capture { 
+            display: block; 
+            width: 100%; 
+            max-width: 500px; 
+            margin: 0 auto 20px auto; 
+            background-color: #2563eb; 
+            color: white; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+            cursor: pointer; 
+        }
         
-        .capture-ui { text-align: center; margin-bottom: 15px; display: none; }
-        .btn-back { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; }
+        .capture-ui { 
+            text-align: center; 
+            margin-bottom: 15px; 
+            display: none; 
+            max-width: 500px;
+            margin: 0 auto 15px auto;
+        }
+        .btn-group { 
+            display: flex; 
+            justify-content: center; 
+            gap: 10px; 
+            margin-bottom: 5px; 
+        }
+        .btn-back { 
+            background-color: #475569; 
+            color: white; 
+            padding: 12px 15px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+            cursor: pointer; 
+            flex: 1; 
+        }
+        .btn-download { 
+            background-color: #10b981; 
+            color: white; 
+            padding: 12px 15px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+            cursor: pointer; 
+            flex: 1; 
+        }
 
-        /* 2. 캡처용 한눈에 보기 보고서 양식 */
-        .report-box { background: white; padding: 10px; border: 2px solid #000; max-width: 500px; margin: auto; box-sizing: border-box; }
-        .report-title { text-align: center; font-size: 18px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 8px; margin: 0 0 10px 0; letter-spacing: 1px; }
+        /* --- 2. 보고서 양식 스타일 (캡처/저장용) --- */
+        .report-box { 
+            background: white; 
+            padding: 12px; 
+            border: 2px solid #000; 
+            max-width: 500px; 
+            margin: auto; 
+            box-sizing: border-box; 
+        }
+        .report-title { 
+            text-align: center; 
+            font-size: 18px; 
+            font-weight: bold; 
+            border-bottom: 2px solid #000; 
+            padding-bottom: 8px; 
+            margin: 0 0 10px 0; 
+            letter-spacing: 1px; 
+        }
+        .report-info { 
+            font-size: 12px; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            border-bottom: 1px dashed #999; 
+            padding-bottom: 8px; 
+        }
+        .info-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 4px; 
+        }
         
-        .report-info { font-size: 12px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px dashed #999; padding-bottom: 8px; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        
-        .grid-container { display: grid; grid-template-columns: 1fr; gap: 8px; }
-        .grid-item { border: 1px solid #000; display: flex; flex-direction: column; }
-        
-        .item-title { background: #eee; text-align: center; font-weight: bold; font-size: 12px; padding: 4px; border-bottom: 1px solid #000; }
-        
-        .item-content { position: relative; background: #fff; display: flex; align-items: center; justify-content: center; height: 150px; }
-        .item-content span { color: #aaa; font-size: 12px; }
-        .item-content img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; cursor: pointer; }
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 8px; 
+        }
+        .grid-item { 
+            border: 1px solid #000; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .item-title { 
+            background: #eee; 
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 12px; 
+            padding: 4px; 
+            border-bottom: 1px solid #000; 
+        }
+        .item-content { 
+            position: relative; 
+            background: #fff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 150px; 
+            overflow: hidden;
+        }
+        .item-content span { 
+            color: #aaa; 
+            font-size: 12px; 
+        }
+        .item-content img { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+            display: none; 
+            cursor: pointer; 
+        }
 
-        /* 3. 이미지 확대 보기 모달 스타일 */
-        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
-        .modal-content { max-width: 95%; max-height: 90%; border-radius: 8px; object-fit: contain; }
-        .close-btn { position: absolute; top: 15px; right: 25px; color: white; font-size: 35px; font-weight: bold; cursor: pointer; }
+        /* --- 3. 이미지 확대 모달 스타일 --- */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 9999; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.9); 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal-content { 
+            max-width: 95%; 
+            max-height: 90%; 
+            border-radius: 8px; 
+            object-fit: contain; 
+        }
+        .close-btn { 
+            position: absolute; 
+            top: 15px; 
+            right: 25px; 
+            color: white; 
+            font-size: 35px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
     </style>
 </head>
 <body>
 
-    <!-- 돌아가기 버튼 영역 -->
+    <!-- 캡처 모드 전용 상단 UI (돌아가기 및 저장) -->
     <div id="captureUI" class="capture-ui">
-        <button class="btn-back" onclick="toggleMode(false)">↩ 다시 입력(수정)하기</button>
-        <p style="font-size: 12px; color: #666; margin-top: 10px;">👇 아래 양식만 깔끔하게 캡처하시면 됩니다!</p>
+        <div class="btn-group">
+            <button class="btn-back" onclick="toggleMode(false)">↩ 다시 입력(수정)</button>
+            <button class="btn-download" onclick="downloadImage()">💾 이미지로 저장</button>
+        </div>
+        <p style="font-size: 12px; color: #666;">저장 버튼을 누르면 기기에 깔끔하게 다운로드 됩니다.</p>
     </div>
 
     <!-- 1. 현장 입력 폼 -->
@@ -99,7 +288,7 @@
 
     <button id="btnCapture" class="btn-capture" onclick="toggleMode(true)">📸 보고서 캡처 모드로 보기</button>
 
-    <!-- 2. 한눈에 보기 최종 양식 (캡처용) -->
+    <!-- 2. 한눈에 보기 최종 양식 (저장용) -->
     <div class="report-box" id="reportBox">
         <h2 class="report-title">소방 시설 점검 사진 대지</h2>
         
@@ -142,34 +331,58 @@
 
     <!-- 3. 이미지 확대 보기 모달 창 -->
     <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="close-btn">&times;</span>
+        <span class="close-btn" onclick="closeModal()">&times;</span>
         <img id="modalImg" class="modal-content">
     </div>
 
     <script>
-        const today = new Date();
-        const dateString = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
-        document.getElementById('dateInput').value = dateString;
-        document.getElementById('repDate').innerText = dateString;
+        // 앱 실행 시 초기화 및 로컬 스토리지 데이터 불러오기
+        window.onload = function() {
+            // 오늘 날짜 세팅
+            const today = new Date();
+            const dateString = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
+            document.getElementById('dateInput').value = dateString;
+            document.getElementById('repDate').innerText = dateString;
 
+            // 로컬 스토리지에 저장된 장소와 위치가 있다면 자동으로 불러오기
+            const savedPlace = localStorage.getItem('fireAppPlace');
+            const savedLoc = localStorage.getItem('fireAppLoc');
+
+            if(savedPlace) {
+                document.getElementById('placeInput').value = savedPlace;
+                updatePlace();
+            }
+            if(savedLoc) {
+                document.getElementById('locInput').value = savedLoc;
+                updateLocation();
+            }
+        };
+
+        // 장소 입력 시 하단에 반영 및 임시 저장
         function updatePlace() {
             const placeValue = document.getElementById('placeInput').value;
             document.getElementById('repPlace').innerText = placeValue ? placeValue : '미입력';
+            localStorage.setItem('fireAppPlace', placeValue); // 로컬 스토리지 저장
         }
 
+        // 위치 입력 시 하단에 반영 및 임시 저장
         function updateLocation() {
             const locValue = document.getElementById('locInput').value;
             document.getElementById('repLoc').innerText = locValue ? locValue : '미입력';
+            localStorage.setItem('fireAppLoc', locValue); // 로컬 스토리지 저장
         }
 
+        // 이미지 파일 선택 시 즉시 표시
         function showImage(input, inlineImgId, repImgId, repTextId) {
             if (input.files && input.files[0]) {
                 const imageUrl = URL.createObjectURL(input.files[0]);
                 
+                // 입력폼 미리보기
                 const inlineImg = document.getElementById(inlineImgId);
                 inlineImg.src = imageUrl;
                 inlineImg.style.display = 'block';
 
+                // 보고서 양식 미리보기
                 const repImg = document.getElementById(repImgId);
                 const repText = document.getElementById(repTextId);
                 repImg.src = imageUrl;
@@ -178,6 +391,7 @@
             }
         }
 
+        // 캡처(보고서) 모드 전환
         function toggleMode(isCaptureMode) {
             if (isCaptureMode) {
                 document.getElementById('inputSection').style.display = 'none';
@@ -191,6 +405,40 @@
             }
         }
 
+        // html2canvas를 이용해 보고서 레이아웃을 이미지로 다운로드
+        function downloadImage() {
+            const reportElement = document.getElementById('reportBox');
+            const dateStr = document.getElementById('dateInput').value.replace(/ /g, '');
+            const placeStr = document.getElementById('placeInput').value || '장소미상';
+            
+            // 기존 버튼 텍스트를 잠시 변경하여 사용자에게 피드백 제공
+            const btn = document.querySelector('.btn-download');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ 저장 중...";
+
+            html2canvas(reportElement, {
+                scale: 2, // 고해상도 처리
+                useCORS: true,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = `소방점검_${placeStr}_${dateStr}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 버튼 텍스트 원상복구
+                btn.innerText = originalText;
+            }).catch(err => {
+                console.error("이미지 저장 오류:", err);
+                btn.innerText = originalText;
+                alert("이미지 저장 중 오류가 발생했습니다.");
+            });
+        }
+
+        // 이미지 확대 모달 열기
         function openModal(src) {
             if (!src) return; 
             const modal = document.getElementById('imageModal');
@@ -199,9 +447,11 @@
             modal.style.display = 'flex'; 
         }
 
+        // 이미지 확대 모달 닫기
         function closeModal() {
             document.getElementById('imageModal').style.display = 'none';
         }
     </script>
 </body>
 </html>
+```
