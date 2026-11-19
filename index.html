@@ -3,339 +3,1300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>소방 점검 앱</title>
-    <!-- 이미지 저장을 위한 html2canvas CDN -->
+    <title>소방 점검 현장기록</title>
+    <!-- 보고서 PNG 이미지 저장을 위한 html2canvas CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* 기본 스타일 및 색상 변수 */
+        /* ==========================================
+           기본 변수 및 리셋 스타일
+        =========================================== */
         :root {
             --primary: #e53e3e;
             --primary-dark: #c53030;
+            --primary-light: #fff5f5;
             --blue: #2563eb;
+            --blue-light: #eff6ff;
             --green: #10b981;
-            --gray-100: #f4f4f9;
+            --green-dark: #059669;
+            --green-light: #ecfdf5;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
             --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
             --gray-600: #475569;
             --gray-800: #1e293b;
-            --bg-color: #f8fafc;
+            --text: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
             background-color: var(--gray-100);
+            color: var(--text);
             margin: 0;
             padding: 0;
-            color: #333;
-            -webkit-tap-highlight-color: transparent; /* 모바일 터치 하이라이트 제거 */
+            line-height: 1.4;
         }
 
-        /* --- 네비게이션 탭 --- */
+        /* ==========================================
+           1. 상단 고정 탭 네비게이션
+        =========================================== */
         .tab-nav {
             display: flex;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             position: sticky;
             top: 0;
             z-index: 100;
+            max-width: 500px;
+            margin: 0 auto;
         }
+
         .tab-btn {
             flex: 1;
-            padding: 15px 0;
+            padding: 15px 8px;
             text-align: center;
             font-size: 15px;
-            font-weight: bold;
-            color: var(--gray-600);
+            font-weight: 700;
+            color: var(--gray-500);
             background: transparent;
             border: none;
             border-bottom: 3px solid transparent;
             cursor: pointer;
-            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: color 0.2s, border-color 0.2s, background-color 0.2s;
         }
+
         .tab-btn.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
+            background-color: #fffafa;
         }
 
-        /* --- 공통 레이아웃 --- */
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 999px;
+            background-color: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .tab-btn.active .count-badge {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        /* ==========================================
+           공통 뷰 섹션 및 카드 스타일
+        =========================================== */
         .view-section {
             display: none;
-            padding: 15px;
-            padding-bottom: 80px; /* 하단 여백 */
             max-width: 500px;
             margin: 0 auto;
+            padding: 14px 12px 60px 12px;
         }
+
         .view-section.active {
             display: block;
         }
-        
+
         .card {
-            background: white;
-            padding: 15px;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 14px;
+        }
+
+        .app-title {
+            text-align: center;
+            color: var(--primary);
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 0 16px 0;
+            letter-spacing: -0.3px;
+        }
+
+        /* ==========================================
+           2. 탭 1: 점검 작성 폼 스타일
+        =========================================== */
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+        }
+
+        .text-input,
+        .date-input {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text);
+            background: #ffffff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .text-input:focus,
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.12);
+        }
+
+        /* 사진 첨부 영역 */
+        .photo-section {
+            border: 1.5px solid var(--gray-200);
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
+            padding: 13px;
+            margin-bottom: 12px;
+            background-color: var(--gray-50);
+        }
+
+        .photo-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+        }
+
+        .file-input {
+            width: 100%;
+            font-size: 13px;
+            padding: 6px 0;
+            color: var(--gray-600);
+        }
+
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .inline-img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: contain;
+            display: none;
+            border-radius: 8px;
+            border: 1px solid var(--gray-300);
+            background-color: #111827;
+            cursor: pointer;
+        }
+
+        .btn-remove-photo {
+            display: none;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid #feb2b2;
+            padding: 7px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-remove-photo:active {
+            transform: scale(0.96);
+        }
+
+        /* 하단 액션 버튼 */
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 14px 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-blue {
+            flex: 1;
+            background-color: var(--blue);
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-red {
+            flex: 1;
+            background-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(229, 62, 62, 0.25);
+        }
+
+        .btn-green {
+            flex: 1;
+            background-color: var(--green);
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-gray {
+            flex: 1;
+            background-color: var(--gray-600);
+            color: #ffffff;
+        }
+
+        /* ==========================================
+           3. 탭 2: 월별·일별 캘린더 체크 스타일
+        =========================================== */
+        .cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .cal-nav-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cal-nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--gray-200);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cal-nav-btn:active {
+            background: var(--gray-200);
+        }
+
+        .cal-month-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gray-800);
+            min-width: 112px;
+            text-align: center;
+        }
+
+        .btn-today {
+            padding: 7px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--blue);
+            background: var(--blue-light);
+            color: var(--blue);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* 월간 요약 바 */
+        .month-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--green-light);
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #065f46;
+        }
+
+        .summary-highlight {
+            color: var(--green-dark);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        /* 요일 헤더 */
+        .cal-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 6px;
+            color: var(--gray-500);
+        }
+
+        .cal-weekdays div:first-child {
+            color: var(--primary);
+        }
+
+        .cal-weekdays div:last-child {
+            color: var(--blue);
+        }
+
+        /* 날짜 그리드 */
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .cal-cell {
+            min-height: 54px;
+            border-radius: 10px;
+            padding: 5px 2px 4px 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+            background-color: #ffffff;
+            transition: background-color 0.15s, border-color 0.15s;
+            position: relative;
+        }
+
+        .cal-cell.empty {
+            cursor: default;
+            background: transparent;
+        }
+
+        .cal-cell:not(.empty):hover {
+            background-color: var(--gray-50);
+        }
+
+        .cal-day-num {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-800);
+            line-height: 1.2;
+        }
+
+        .cal-cell.sun .cal-day-num {
+            color: var(--primary);
+        }
+
+        .cal-cell.sat .cal-day-num {
+            color: var(--blue);
+        }
+
+        /* 점검 완료된 날짜 스타일 */
+        .cal-cell.checked {
+            background-color: var(--green-light);
+            border-color: #a7f3d0;
+        }
+
+        /* 오늘 날짜 테두리 */
+        .cal-cell.today {
+            border-color: var(--blue);
+            box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.25);
+        }
+
+        /* 선택된 날짜 강조 링 */
+        .cal-cell.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.22);
+            background-color: #fff5f5;
+        }
+
+        .cal-cell.checked.selected {
+            background-color: #d1fae5;
+            border-color: var(--green-dark);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.28);
+        }
+
+        .cal-check-badge {
+            margin-top: 3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #065f46;
+            background: #ffffff;
+            border: 1px solid #6ee7b7;
+            border-radius: 999px;
+            padding: 1px 4px;
+            line-height: 1.2;
+        }
+
+        /* 캘린더 하단 필터 컨트롤 */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 11px 8px;
+            border-radius: 10px;
+            border: 1.5px solid var(--gray-200);
+            background: #ffffff;
+            color: var(--gray-600);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .filter-btn.active {
+            border-color: var(--blue);
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .quick-add-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 14px;
+            border-radius: 10px;
+            border: 1.5px dashed var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .quick-add-btn:active {
+            background: #fed7d7;
+        }
+
+        /* 저장된 기록 리스트 카드 */
+        .record-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .record-card {
+            background: #ffffff;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .record-date-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--green-dark);
+            background: var(--green-light);
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+
+        .record-place {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--gray-800);
+            margin-bottom: 2px;
+        }
+
+        .record-loc {
+            font-size: 13px;
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+
+        /* 3장 썸네일 스트립 */
+        .thumb-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin: 10px 0 12px 0;
+        }
+
+        .thumb-box {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--gray-50);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .thumb-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            padding: 3px 0;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .thumb-img-wrap {
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .thumb-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .thumb-empty {
+            font-size: 10px;
+            color: var(--gray-400);
+        }
+
+        .record-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-card-report {
+            flex: 2;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: var(--blue);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-card-delete {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .empty-state {
+            text-align: center;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 34px 16px;
+            color: var(--gray-500);
+            font-size: 14px;
+            border: 1px dashed var(--gray-300);
+        }
+
+        .empty-state-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        /* ==========================================
+           4. 보고서 양식 (캡처 / PNG 저장 모드)
+        =========================================== */
+        .report-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .report-tip {
+            text-align: center;
+            font-size: 12px;
+            color: var(--gray-500);
+            margin: 0 0 10px 0;
+        }
+
+        .report-box {
+            background: #ffffff;
+            padding: 14px;
+            border: 2px solid #000000;
             box-sizing: border-box;
         }
 
-        /* --- 1. 새 점검 작성 화면 --- */
-        h1 { text-align: center; color: var(--primary); font-size: 20px; margin-top: 0; margin-bottom: 15px; }
-        .input-group { margin-bottom: 12px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 13px; color: #555; }
-        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; transition: border-color 0.2s; }
-        input[type="text"]:focus { border-color: var(--primary); outline: none; }
-        input[readonly] { background-color: #f9f9f9; color: #777; }
-        
-        .photo-section { border: 1px solid var(--gray-200); padding: 12px; margin-bottom: 12px; border-radius: 8px; background-color: var(--bg-color); }
-        .photo-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; color: var(--gray-800); }
-        input[type="file"] { width: 100%; font-size: 13px; margin-bottom: 5px; }
-        
-        /* 버튼 바로 밑 미리보기 사진 */
-        .inline-img { width: 100%; max-height: 150px; object-fit: contain; margin-top: 10px; display: none; border-radius: 6px; border: 1px solid var(--gray-300); cursor: pointer; background: #000; }
+        .report-title {
+            text-align: center;
+            font-size: 19px;
+            font-weight: 800;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 8px;
+            margin: 0 0 10px 0;
+            letter-spacing: 1px;
+            color: #000000;
+        }
 
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-preview { flex: 1; background-color: var(--blue); color: white; padding: 14px 10px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; text-align: center; }
-        .btn-save-record { flex: 1; background-color: var(--primary); color: white; padding: 14px 10px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; text-align: center; }
-        .btn-preview:active, .btn-save-record:active { transform: scale(0.98); }
+        .report-info {
+            font-size: 12.5px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #888888;
+            padding-bottom: 8px;
+            color: #111111;
+        }
 
-        /* --- 2. 기록 보관함 화면 --- */
-        .empty-state { text-align: center; color: #888; padding: 40px 0; font-size: 15px; }
-        .record-list { display: flex; flex-direction: column; gap: 12px; }
-        .record-card { background: white; border: 1px solid var(--gray-200); border-radius: 10px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.1s; }
-        .record-card:active { transform: scale(0.98); }
-        .record-info { flex: 1; }
-        .record-place { font-weight: bold; font-size: 16px; margin-bottom: 4px; color: #111; }
-        .record-loc-date { font-size: 13px; color: #666; }
-        .record-delete-btn { background: #ffe4e6; color: var(--primary); border: none; padding: 10px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-left: 10px; }
+        .report-info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
 
-        /* --- 3. 보고서 캡처 모드 화면 --- */
-        /* 조작 버튼 영역 (이 부분은 이미지 저장 시 캡처되지 않음) */
-        .report-actions { display: flex; gap: 8px; margin-bottom: 15px; }
-        .btn-back { background-color: var(--gray-600); color: white; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; flex: 1; cursor: pointer; }
-        .btn-download { background-color: var(--green); color: white; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; flex: 1; cursor: pointer; }
+        .report-info-row:last-child {
+            margin-bottom: 0;
+        }
 
-        /* 캡처 대상 보고서 영역 (A4 느낌 테두리) */
-        .report-box { background: white; padding: 15px; border: 2px solid #000; box-sizing: border-box; }
-        .report-title { text-align: center; font-size: 20px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 10px; margin: 0 0 15px 0; letter-spacing: 1px; }
-        .report-info { font-size: 13px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px dashed #999; padding-bottom: 10px; line-height: 1.5; }
-        .info-row { display: flex; justify-content: space-between; }
-        
-        .grid-container { display: flex; flex-direction: column; gap: 10px; }
-        .grid-item { border: 1px solid #000; display: flex; flex-direction: column; }
-        .item-title { background: #eee; text-align: center; font-weight: bold; font-size: 13px; padding: 6px; border-bottom: 1px solid #000; }
-        
-        /* 사진 들어가는 영역 높이 고정 (160px) 및 object-fit 적용 */
-        .item-content { position: relative; background: #fff; display: flex; align-items: center; justify-content: center; height: 160px; overflow: hidden; }
-        .item-content span { color: #aaa; font-size: 13px; }
-        .item-content img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; cursor: pointer; background: #f9f9f9; }
+        .report-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-        /* --- 4. 이미지 확대 보기 모달 --- */
-        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
-        .modal-content { max-width: 95%; max-height: 90%; border-radius: 8px; object-fit: contain; }
-        .close-btn { position: absolute; top: 15px; right: 25px; color: white; font-size: 35px; font-weight: bold; cursor: pointer; }
+        .report-item {
+            border: 1px solid #000000;
+            display: flex;
+            flex-direction: column;
+        }
 
+        .report-item-title {
+            background: #eeeeee;
+            text-align: center;
+            font-weight: 700;
+            font-size: 12.5px;
+            padding: 5px;
+            border-bottom: 1px solid #000000;
+            color: #000000;
+        }
+
+        /* 전/중/후 동일 크기(150px) 사진 박스 */
+        .report-item-content {
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+            overflow: hidden;
+        }
+
+        .report-item-content span {
+            color: #aaaaaa;
+            font-size: 12px;
+        }
+
+        .report-item-content img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            cursor: pointer;
+            background: #fafafa;
+        }
+
+        /* ==========================================
+           5. 전체화면 이미지 확대 모달
+        =========================================== */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.92);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .image-modal img {
+            max-width: 100%;
+            max-height: 88vh;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 20px;
+            color: #ffffff;
+            font-size: 36px;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* ==========================================
+           6. 커스텀 토스트 & 확인 모달 (alert/confirm 대체)
+        =========================================== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background-color: rgba(30, 41, 59, 0.95);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 999px;
+            font-size: 13.5px;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s, transform 0.25s;
+            white-space: nowrap;
+            max-width: 92vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 9998;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .confirm-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 320px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .confirm-msg {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin: 0 0 18px 0;
+            line-height: 1.5;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .confirm-btn-cancel {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            border: 1px solid var(--gray-300);
+            background: #ffffff;
+            color: var(--gray-600);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .confirm-btn-ok {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 상단 탭 네비게이션 -->
-    <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('write')">📝 새 점검 작성</button>
-        <button class="tab-btn" onclick="switchTab('archive')">🗂️ 기록 보관함</button>
-    </div>
+    <!-- ==========================================
+         상단 고정 탭 네비게이션
+    =========================================== -->
+    <nav id="tabNav" class="tab-nav">
+        <button id="tabBtnWrite" class="tab-btn active" onclick="switchTab('write')">
+            📝 점검 작성
+        </button>
+        <button id="tabBtnCalendar" class="tab-btn" onclick="switchTab('calendar')">
+            📅 월별·일별 체크
+            <span id="totalCountBadge" class="count-badge">0</span>
+        </button>
+    </nav>
 
     <!-- ==========================================
-         [뷰 1] 새 점검 작성 화면
+         [탭 1] 점검 작성 (입력 폼)
     =========================================== -->
-    <div id="viewWrite" class="view-section active">
+    <main id="viewWrite" class="view-section active">
         <div class="card">
-            <h1>🚨 소방 점검 현장기록</h1>
-            
+            <h1 class="app-title">🚨 소방 점검 현장기록</h1>
+
             <div class="input-group">
-                <label>🏢 점검 장소</label>
-                <input type="text" id="placeInput" placeholder="예: 한국아파트 101동">
+                <label class="input-label" for="placeInput">🏢 점검 장소</label>
+                <input type="text" id="placeInput" class="text-input" placeholder="예: 한국아파트 101동" oninput="saveDraft()">
             </div>
 
             <div class="input-group">
-                <label>📍 점검 위치</label>
-                <input type="text" id="locInput" placeholder="예: 1층 A동 소화전">
-            </div>
-            
-            <div class="input-group">
-                <label>📅 점검 일자</label>
-                <input type="text" id="dateInput" readonly>
+                <label class="input-label" for="locInput">📍 점검 위치</label>
+                <input type="text" id="locInput" class="text-input" placeholder="예: 1층 A동 소화전" oninput="saveDraft()">
             </div>
 
-            <!-- 사진 데이터(Base64) 임시 보관용 hidden input 포함 -->
+            <div class="input-group">
+                <label class="input-label" for="dateInput">📅 점검 일자</label>
+                <input type="date" id="dateInput" class="date-input">
+            </div>
+
+            <!-- 1. 점검 전 -->
             <div class="photo-section">
                 <div class="photo-title">📸 1. 점검 전 (Before)</div>
-                <input type="file" accept="image/*" onchange="handleImageUpload(this, 'imgBefore', 'dataBefore')">
-                <img id="imgBefore" class="inline-img" onclick="openModal(this.src)">
+                <input type="file" id="uploadBefore" class="file-input" accept="image/*"
+                       onchange="handleImageUpload(this, 'imgBefore', 'dataBefore', 'btnRemoveBefore')">
+                <div class="preview-container">
+                    <img id="imgBefore" class="inline-img" alt="점검 전 사진" onclick="openModal(this.src)">
+                    <button type="button" id="btnRemoveBefore" class="btn-remove-photo"
+                            onclick="removeImage('uploadBefore', 'imgBefore', 'dataBefore', 'btnRemoveBefore')">
+                        🗑️ 사진 지우기
+                    </button>
+                </div>
                 <input type="hidden" id="dataBefore">
             </div>
 
+            <!-- 2. 점검 중 -->
             <div class="photo-section">
                 <div class="photo-title">📸 2. 점검 중 (During)</div>
-                <input type="file" accept="image/*" onchange="handleImageUpload(this, 'imgDuring', 'dataDuring')">
-                <img id="imgDuring" class="inline-img" onclick="openModal(this.src)">
+                <input type="file" id="uploadDuring" class="file-input" accept="image/*"
+                       onchange="handleImageUpload(this, 'imgDuring', 'dataDuring', 'btnRemoveDuring')">
+                <div class="preview-container">
+                    <img id="imgDuring" class="inline-img" alt="점검 중 사진" onclick="openModal(this.src)">
+                    <button type="button" id="btnRemoveDuring" class="btn-remove-photo"
+                            onclick="removeImage('uploadDuring', 'imgDuring', 'dataDuring', 'btnRemoveDuring')">
+                        🗑️ 사진 지우기
+                    </button>
+                </div>
                 <input type="hidden" id="dataDuring">
             </div>
 
+            <!-- 3. 점검 후 -->
             <div class="photo-section">
                 <div class="photo-title">📸 3. 점검 후 (After)</div>
-                <input type="file" accept="image/*" onchange="handleImageUpload(this, 'imgAfter', 'dataAfter')">
-                <img id="imgAfter" class="inline-img" onclick="openModal(this.src)">
+                <input type="file" id="uploadAfter" class="file-input" accept="image/*"
+                       onchange="handleImageUpload(this, 'imgAfter', 'dataAfter', 'btnRemoveAfter')">
+                <div class="preview-container">
+                    <img id="imgAfter" class="inline-img" alt="점검 후 사진" onclick="openModal(this.src)">
+                    <button type="button" id="btnRemoveAfter" class="btn-remove-photo"
+                            onclick="removeImage('uploadAfter', 'imgAfter', 'dataAfter', 'btnRemoveAfter')">
+                        🗑️ 사진 지우기
+                    </button>
+                </div>
                 <input type="hidden" id="dataAfter">
             </div>
 
-            <!-- 하단 액션 버튼 -->
-            <div class="btn-group">
-                <button class="btn-preview" onclick="previewCurrentReport()">📸 보고서 양식 미리보기</button>
-                <button class="btn-save-record" onclick="saveRecord()">💾 앱에 기록 저장하기</button>
+            <div class="form-actions">
+                <button type="button" class="btn btn-blue" onclick="previewCurrentReport()">
+                    📸 보고서 양식 미리보기
+                </button>
+                <button type="button" class="btn btn-red" onclick="saveRecord()">
+                    💾 앱에 기록 저장하기
+                </button>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- ==========================================
-         [뷰 2] 기록 보관함 화면
+         [탭 2] 월별·일별 체크 (캘린더 + 기록 보관함)
     =========================================== -->
-    <div id="viewArchive" class="view-section">
-        <!-- JS로 동적 생성될 리스트 컨테이너 -->
-        <div id="archiveContainer" class="record-list">
+    <section id="viewCalendar" class="view-section">
+        <div class="card">
+            <!-- 월 이동 헤더 -->
+            <div class="cal-header">
+                <div class="cal-nav-group">
+                    <button type="button" class="cal-nav-btn" onclick="changeMonth(-1)" aria-label="이전 달">◀</button>
+                    <div id="calMonthTitle" class="cal-month-title">2026년 11월</div>
+                    <button type="button" class="cal-nav-btn" onclick="changeMonth(1)" aria-label="다음 달">▶</button>
+                </div>
+                <button type="button" class="btn-today" onclick="jumpToToday()">오늘</button>
+            </div>
+
+            <!-- 월간 점검 요약 바 -->
+            <div class="month-summary">
+                <div>이번 달 점검 완료: <span id="summaryDays" class="summary-highlight">0일</span></div>
+                <div>총 점검 건수: <span id="summaryCount" class="summary-highlight">0건</span></div>
+            </div>
+
+            <!-- 요일 헤더 -->
+            <div class="cal-weekdays">
+                <div>일</div>
+                <div>월</div>
+                <div>화</div>
+                <div>수</div>
+                <div>목</div>
+                <div>금</div>
+                <div>토</div>
+            </div>
+
+            <!-- 달력 날짜 셀 컨테이너 -->
+            <div id="calGrid" class="cal-grid"></div>
         </div>
-    </div>
+
+        <!-- 일별 / 월별 필터 토글 -->
+        <div class="filter-bar">
+            <button type="button" id="filterDayBtn" class="filter-btn active" onclick="setFilterMode('day')">
+                📌 선택한 날짜
+            </button>
+            <button type="button" id="filterMonthBtn" class="filter-btn" onclick="setFilterMode('month')">
+                📆 이번 달 전체
+            </button>
+        </div>
+
+        <!-- 선택한 날짜 바로 점검 작성하기 버튼 -->
+        <button type="button" id="quickAddBtn" class="quick-add-btn" onclick="writeForSelectedDate()">
+            + 선택한 날짜 점검 작성하기
+        </button>
+
+        <!-- 필터링된 기록 카드 리스트 -->
+        <div id="recordList" class="record-list"></div>
+    </section>
 
     <!-- ==========================================
-         [뷰 3] 보고서 양식(사진 대지) 화면
+         [오버레이 뷰] 보고서 양식 (캡처 / PNG 저장)
     =========================================== -->
-    <div id="viewReport" class="view-section">
-        <!-- 캡처 영역 밖(상단) 조작 버튼 -->
+    <section id="viewReport" class="view-section">
         <div class="report-actions">
-            <button class="btn-back" onclick="goBack()">↩ 돌아가기</button>
-            <button class="btn-download" onclick="downloadImage()">💾 이미지로 저장</button>
+            <button type="button" class="btn btn-gray" onclick="closeReportView()">↩ 돌아가기</button>
+            <button type="button" id="btnDownloadPng" class="btn btn-green" onclick="downloadReportImage()">
+                💾 이미지로 저장 (PNG)
+            </button>
         </div>
+        <p class="report-tip">👇 아래 양식을 바로 캡처하거나 [이미지로 저장] 버튼을 누르세요.</p>
 
-        <!-- html2canvas로 캡처될 실제 보고서 영역 -->
-        <div class="report-box" id="reportBox">
+        <!-- 실제 PNG로 저장되는 보고서 박스 -->
+        <div id="reportBox" class="report-box">
             <h2 class="report-title">소방 시설 점검 사진 대지</h2>
-            
+
             <div class="report-info">
-                <div class="info-row">
-                    <div>장소: <span id="repPlace" style="color:var(--primary);"></span></div>
-                    <div>일자: <span id="repDate"></span></div>
+                <div class="report-info-row">
+                    <div>장소: <span id="repPlace" style="color: var(--primary);">미입력</span></div>
+                    <div>일자: <span id="repDate">-</span></div>
                 </div>
-                <div class="info-row" style="margin-top: 4px;">
-                    <div>위치: <span id="repLoc" style="color:var(--blue);"></span></div>
+                <div class="report-info-row">
+                    <div>위치: <span id="repLoc" style="color: var(--blue);">미입력</span></div>
                 </div>
             </div>
 
-            <!-- 사진 3개 나열 영역 -->
-            <div class="grid-container">
-                <div class="grid-item">
-                    <div class="item-title">점검 전</div>
-                    <div class="item-content">
+            <div class="report-grid">
+                <div class="report-item">
+                    <div class="report-item-title">점검 전</div>
+                    <div class="report-item-content">
                         <span id="repTextBefore">사진 없음</span>
-                        <img id="repImgBefore" onclick="openModal(this.src)">
+                        <img id="repImgBefore" alt="점검 전" onclick="openModal(this.src)">
                     </div>
                 </div>
 
-                <div class="grid-item">
-                    <div class="item-title">점검 중</div>
-                    <div class="item-content">
+                <div class="report-item">
+                    <div class="report-item-title">점검 중</div>
+                    <div class="report-item-content">
                         <span id="repTextDuring">사진 없음</span>
-                        <img id="repImgDuring" onclick="openModal(this.src)">
+                        <img id="repImgDuring" alt="점검 중" onclick="openModal(this.src)">
                     </div>
                 </div>
 
-                <div class="grid-item">
-                    <div class="item-title">점검 후</div>
-                    <div class="item-content">
+                <div class="report-item">
+                    <div class="report-item-title">점검 후</div>
+                    <div class="report-item-content">
                         <span id="repTextAfter">사진 없음</span>
-                        <img id="repImgAfter" onclick="openModal(this.src)">
+                        <img id="repImgAfter" alt="점검 후" onclick="openModal(this.src)">
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         전체화면 이미지 확대 모달
+    =========================================== -->
+    <div id="imageModal" class="image-modal" onclick="closeModal()">
+        <span class="modal-close">&times;</span>
+        <img id="modalImg" src="" alt="확대 이미지">
+    </div>
+
+    <!-- ==========================================
+         커스텀 확인 모달 (confirm 대체)
+    =========================================== -->
+    <div id="confirmOverlay" class="confirm-overlay">
+        <div class="confirm-box">
+            <p id="confirmMsg" class="confirm-msg">정말 삭제하시겠습니까?</p>
+            <div class="confirm-actions">
+                <button type="button" class="confirm-btn-cancel" onclick="closeConfirm(false)">취소</button>
+                <button type="button" class="confirm-btn-ok" onclick="closeConfirm(true)">삭제</button>
             </div>
         </div>
     </div>
 
     <!-- ==========================================
-         이미지 원본 확대 보기 모달
+         커스텀 토스트 메시지 (alert 대체)
     =========================================== -->
-    <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="close-btn">&times;</span>
-        <img id="modalImg" class="modal-content">
-    </div>
+    <div id="toast" class="toast"></div>
 
     <script>
-        // 전역 상태 변수
-        let records = [];
-        let lastTab = 'write'; // '보고서 화면'에서 돌아갈 목적지 추적용
+        /* ==========================================
+           전역 상태 변수 및 스토리지 키
+        =========================================== */
+        const STORAGE_KEY_RECORDS = 'fireAppRecords';
+        const STORAGE_KEY_DRAFT = 'fireAppDraft';
 
-        // 1. 앱 초기화: 날짜 세팅 및 로컬 스토리지 데이터 로드
-        window.onload = function() {
-            const today = new Date();
-            document.getElementById('dateInput').value = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+        let records = [];
+        let lastTab = 'write';
+
+        // 캘린더 상태 (로컬 타임존 기준 오늘 날짜로 초기화)
+        const now = new Date();
+        let currentYear = now.getFullYear();
+        let currentMonth = now.getMonth(); // 0 ~ 11
+        let selectedDateStr = formatDateYMD(now); // YYYY-MM-DD
+        let filterMode = 'day'; // 'day' 또는 'month'
+
+        // 커스텀 확인 모달 콜백
+        let confirmCallback = null;
+        let toastTimer = null;
+
+        /* ==========================================
+           초기화 (페이지 로드 시 실행)
+        =========================================== */
+        window.onload = function () {
+            document.getElementById('dateInput').value = formatDateYMD(new Date());
+            loadDraft();
             loadRecords();
+            updateTotalBadge();
+            renderCalendarAndList();
         };
 
-        // 2. 화면 전환 (탭 네비게이션) 제어
-        function switchTab(tabName) {
-            // 보고서가 아닌 화면으로 이동할 땐 lastTab 갱신
-            if (tabName !== 'report') {
-                lastTab = tabName;
-                
-                // 탭 버튼 스타일 갱신
-                const btns = document.querySelectorAll('.tab-btn');
-                btns.forEach(btn => btn.classList.remove('active'));
-                if(tabName === 'write') btns[0].classList.add('active');
-                if(tabName === 'archive') btns[1].classList.add('active');
-            }
-
-            // 모든 뷰 숨김 처리
-            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-            
-            // 해당 뷰 보이기
-            if(tabName === 'write') {
-                document.getElementById('viewWrite').classList.add('active');
-                document.querySelector('.tab-nav').style.display = 'flex';
-            } 
-            else if(tabName === 'archive') {
-                document.getElementById('viewArchive').classList.add('active');
-                document.querySelector('.tab-nav').style.display = 'flex';
-                renderArchive(); // 보관함 렌더링 업데이트
-            }
-            else if(tabName === 'report') {
-                document.getElementById('viewReport').classList.add('active');
-                document.querySelector('.tab-nav').style.display = 'none'; // 보고서 화면에서는 탭 숨김
-                window.scrollTo(0, 0); // 화면 최상단으로 이동
-            }
+        /* ==========================================
+           날짜 포맷 유틸리티 함수
+        =========================================== */
+        function formatDateYMD(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         }
 
-        // '돌아가기' 버튼 함수
-        function goBack() {
+        function formatKoreanDate(ymd) {
+            if (!ymd) return '-';
+            const parts = ymd.split('-');
+            if (parts.length !== 3) return ymd;
+            return `${parts[0]}년 ${parseInt(parts[1], 10)}월 ${parseInt(parts[2], 10)}일`;
+        }
+
+        function formatMonthDay(ymd) {
+            if (!ymd) return '';
+            const parts = ymd.split('-');
+            if (parts.length !== 3) return ymd;
+            return `${parseInt(parts[1], 10)}월 ${parseInt(parts[2], 10)}일`;
+        }
+
+        // 기존 구버전 데이터("2026년 11월 19일")가 있을 경우 YYYY-MM-DD로 자동 변환
+        function normalizeDateStr(record) {
+            if (record.dateStr && /^\d{4}-\d{2}-\d{2}$/.test(record.dateStr)) {
+                return record.dateStr;
+            }
+            if (record.date) {
+                const match = record.date.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+                if (match) {
+                    const y = match[1];
+                    const m = String(match[2]).padStart(2, '0');
+                    const d = String(match[3]).padStart(2, '0');
+                    return `${y}-${m}-${d}`;
+                }
+            }
+            return formatDateYMD(new Date());
+        }
+
+        /* ==========================================
+           커스텀 토스트 및 확인 모달 (alert/confirm 미사용)
+        =========================================== */
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2400);
+        }
+
+        function openConfirm(message, onConfirm) {
+            document.getElementById('confirmMsg').innerText = message;
+            confirmCallback = onConfirm;
+            document.getElementById('confirmOverlay').style.display = 'flex';
+        }
+
+        function closeConfirm(isConfirmed) {
+            document.getElementById('confirmOverlay').style.display = 'none';
+            if (isConfirmed && typeof confirmCallback === 'function') {
+                confirmCallback();
+            }
+            confirmCallback = null;
+        }
+
+        /* ==========================================
+           탭 전환 및 화면 제어
+        =========================================== */
+        function switchTab(tabName) {
+            const tabNav = document.getElementById('tabNav');
+            const views = document.querySelectorAll('.view-section');
+            views.forEach(v => v.classList.remove('active'));
+
+            if (tabName === 'report') {
+                tabNav.style.display = 'none';
+                document.getElementById('viewReport').classList.add('active');
+                window.scrollTo(0, 0);
+                return;
+            }
+
+            lastTab = tabName;
+            tabNav.style.display = 'flex';
+
+            document.getElementById('tabBtnWrite').classList.toggle('active', tabName === 'write');
+            document.getElementById('tabBtnCalendar').classList.toggle('active', tabName === 'calendar');
+
+            if (tabName === 'write') {
+                document.getElementById('viewWrite').classList.add('active');
+            } else if (tabName === 'calendar') {
+                document.getElementById('viewCalendar').classList.add('active');
+                renderCalendarAndList();
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function closeReportView() {
             switchTab(lastTab);
         }
 
-        // 3. 사진 압축 및 Base64 Data URL 변환 (Canvas API 활용)
-        function handleImageUpload(input, imgId, dataId) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
+        /* ==========================================
+           입력 텍스트 자동 임시 저장 (Draft)
+        =========================================== */
+        function saveDraft() {
+            try {
+                const draft = {
+                    place: document.getElementById('placeInput').value,
+                    location: document.getElementById('locInput').value
+                };
+                localStorage.setItem(STORAGE_KEY_DRAFT, JSON.stringify(draft));
+            } catch (e) {
+                console.error('임시 저장 오류:', e);
+            }
+        }
+
+        function loadDraft() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY_DRAFT);
+                if (saved) {
+                    const draft = JSON.parse(saved);
+                    if (draft.place) document.getElementById('placeInput').value = draft.place;
+                    if (draft.location) document.getElementById('locInput').value = draft.location;
+                }
+            } catch (e) {
+                console.error('임시 저장 불러오기 오류:', e);
+            }
+        }
+
+        function clearDraft() {
+            try {
+                localStorage.removeItem(STORAGE_KEY_DRAFT);
+            } catch (e) {
+                console.error('임시 저장 삭제 오류:', e);
+            }
+        }
+
+        /* ==========================================
+           사진 업로드, Canvas 자동 압축 및 초기화
+        =========================================== */
+        function handleImageUpload(input, imgId, dataId, removeBtnId) {
+            if (!input.files || !input.files[0]) return;
+
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    try {
+                        // Canvas를 이용해 최대 800px, JPEG 60% 화질로 압축
                         const canvas = document.createElement('canvas');
                         let width = img.width;
                         let height = img.height;
-                        const MAX_SIZE = 800; // 최대 길이 제한 (용량 최적화)
+                        const MAX_SIZE = 800;
 
-                        // 비율 유지하며 리사이징 계산
                         if (width > height && width > MAX_SIZE) {
-                            height *= MAX_SIZE / width;
+                            height = Math.round(height * (MAX_SIZE / width));
                             width = MAX_SIZE;
                         } else if (height > MAX_SIZE) {
-                            width *= MAX_SIZE / height;
+                            width = Math.round(width * (MAX_SIZE / height));
                             height = MAX_SIZE;
                         }
 
@@ -344,52 +1305,98 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // JPEG 포맷, 품질 60(0.6)으로 압축하여 Data URL 생성
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
 
-                        // 입력 폼 화면에 썸네일 노출
-                        const inlineImg = document.getElementById(imgId);
-                        inlineImg.src = dataUrl;
-                        inlineImg.style.display = 'block';
+                        const previewImg = document.getElementById(imgId);
+                        previewImg.src = compressedDataUrl;
+                        previewImg.style.display = 'block';
 
-                        // 저장용 숨겨진 input에 데이터 입력
-                        document.getElementById(dataId).value = dataUrl;
-                    };
-                    img.src = e.target.result;
+                        document.getElementById(removeBtnId).style.display = 'inline-block';
+                        document.getElementById(dataId).value = compressedDataUrl;
+                    } catch (err) {
+                        console.error('이미지 압축 오류:', err);
+                        showToast('사진을 처리하는 중 오류가 발생했습니다.');
+                    }
                 };
-                reader.readAsDataURL(file);
+                img.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // 사진 및 파일 입력값 완전 초기화 (같은 사진 재첨부 가능)
+        function removeImage(inputId, imgId, dataId, removeBtnId) {
+            const inputEl = document.getElementById(inputId);
+            inputEl.value = '';
+
+            const imgEl = document.getElementById(imgId);
+            imgEl.style.display = 'none';
+            imgEl.src = '';
+
+            document.getElementById(dataId).value = '';
+            document.getElementById(removeBtnId).style.display = 'none';
+        }
+
+        function resetForm() {
+            document.getElementById('placeInput').value = '';
+            document.getElementById('locInput').value = '';
+            clearDraft();
+
+            removeImage('uploadBefore', 'imgBefore', 'dataBefore', 'btnRemoveBefore');
+            removeImage('uploadDuring', 'imgDuring', 'dataDuring', 'btnRemoveDuring');
+            removeImage('uploadAfter', 'imgAfter', 'dataAfter', 'btnRemoveAfter');
+        }
+
+        /* ==========================================
+           기록 저장 및 불러오기 (localStorage)
+        =========================================== */
+        function loadRecords() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_RECORDS);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        records = parsed.map(r => ({
+                            ...r,
+                            dateStr: normalizeDateStr(r)
+                        }));
+                    }
+                }
+            } catch (e) {
+                console.error('기록 불러오기 오류:', e);
+                records = [];
             }
         }
 
-        // 4. 새 점검 작성 중 '보고서 양식 미리보기' 화면 띄우기
-        function previewCurrentReport() {
-            // 현재 폼의 데이터 가져와서 보고서 양식에 넣기
-            document.getElementById('repDate').innerText = document.getElementById('dateInput').value;
-            document.getElementById('repPlace').innerText = document.getElementById('placeInput').value || '미입력';
-            document.getElementById('repLoc').innerText = document.getElementById('locInput').value || '미입력';
-
-            setReportPhoto('Before', document.getElementById('dataBefore').value);
-            setReportPhoto('During', document.getElementById('dataDuring').value);
-            setReportPhoto('After', document.getElementById('dataAfter').value);
-
-            switchTab('report');
+        function persistRecords() {
+            localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
+            updateTotalBadge();
         }
 
-        // 5. 로컬 스토리지에 새 기록 저장하기
+        function updateTotalBadge() {
+            document.getElementById('totalCountBadge').innerText = records.length;
+        }
+
         function saveRecord() {
             const place = document.getElementById('placeInput').value.trim();
             const location = document.getElementById('locInput').value.trim();
-            const date = document.getElementById('dateInput').value;
-            
-            if (!place || !location) {
-                alert("점검 장소와 위치를 입력해주세요.");
+            const dateStr = document.getElementById('dateInput').value || formatDateYMD(new Date());
+
+            if (!place) {
+                showToast('점검 장소를 입력해주세요.');
+                document.getElementById('placeInput').focus();
+                return;
+            }
+            if (!location) {
+                showToast('점검 위치를 입력해주세요.');
+                document.getElementById('locInput').focus();
                 return;
             }
 
-            // 새로운 기록 객체 생성
             const newRecord = {
-                id: Date.now().toString(), // 고유 ID
-                date: date,
+                id: String(Date.now()),
+                dateStr: dateStr,
+                date: formatKoreanDate(dateStr),
                 place: place,
                 location: location,
                 photos: {
@@ -399,93 +1406,307 @@
                 }
             };
 
-            // 최신순을 위해 배열 맨 앞에 추가
             records.unshift(newRecord);
 
-            // 로컬 스토리지에 저장 시도 (용량 초과 대비 try-catch)
             try {
-                localStorage.setItem('fireAppRecords', JSON.stringify(records));
-                alert("기록이 성공적으로 저장되었습니다!");
-                clearForm();
-                switchTab('archive'); // 보관함으로 바로 이동
+                persistRecords();
+                resetForm();
+
+                // 저장한 날짜가 보이도록 캘린더 상태 이동 후 탭 전환
+                const parts = dateStr.split('-');
+                currentYear = parseInt(parts[0], 10);
+                currentMonth = parseInt(parts[1], 10) - 1;
+                selectedDateStr = dateStr;
+                filterMode = 'day';
+
+                showToast('✅ 기록이 저장되어 캘린더에 체크되었습니다!');
+                switchTab('calendar');
             } catch (e) {
-                alert("기기 저장 공간이 부족합니다. 불필요한 예전 기록을 삭제해주세요.");
-                records.shift(); // 추가했던 데이터 원상 복구
+                records.shift();
+                console.error('저장 공간 부족 오류:', e);
+                showToast('저장 공간이 부족합니다. 오래된 기록을 삭제해주세요.');
             }
         }
 
-        // 폼 초기화 함수
-        function clearForm() {
-            document.getElementById('placeInput').value = '';
-            document.getElementById('locInput').value = '';
-            ['Before', 'During', 'After'].forEach(type => {
-                const imgEl = document.getElementById('img' + type);
-                imgEl.style.display = 'none';
-                imgEl.src = '';
-                document.getElementById('data' + type).value = '';
+        function requestDeleteRecord(id) {
+            openConfirm('이 점검 기록을 삭제하시겠습니까?', function () {
+                records = records.filter(r => r.id !== id);
+                try {
+                    persistRecords();
+                    renderCalendarAndList();
+                    showToast('기록이 삭제되었습니다.');
+                } catch (e) {
+                    showToast('삭제 중 오류가 발생했습니다.');
+                }
             });
-            document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
         }
 
-        // 6. 보관함 데이터 로드 및 UI 렌더링
-        function loadRecords() {
-            const saved = localStorage.getItem('fireAppRecords');
-            if (saved) {
-                records = JSON.parse(saved);
+        /* ==========================================
+           월별·일별 캘린더 렌더링 및 필터 로직
+        =========================================== */
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear -= 1;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear += 1;
+            }
+            // 달을 이동하면 월 전체 보기 또는 해당 달 1일로 자연스럽게 선택 유지
+            const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+            if (!selectedDateStr.startsWith(monthPrefix)) {
+                selectedDateStr = `${monthPrefix}-01`;
+            }
+            renderCalendarAndList();
+        }
+
+        function jumpToToday() {
+            const today = new Date();
+            currentYear = today.getFullYear();
+            currentMonth = today.getMonth();
+            selectedDateStr = formatDateYMD(today);
+            filterMode = 'day';
+            renderCalendarAndList();
+        }
+
+        function selectDate(ymd) {
+            selectedDateStr = ymd;
+            filterMode = 'day';
+            renderCalendarAndList();
+        }
+
+        function setFilterMode(mode) {
+            filterMode = mode;
+            renderFilterUI();
+            renderRecordList();
+        }
+
+        function writeForSelectedDate() {
+            document.getElementById('dateInput').value = selectedDateStr;
+            switchTab('write');
+            showToast(`${formatMonthDay(selectedDateStr)} 점검을 작성합니다.`);
+        }
+
+        function renderCalendarAndList() {
+            const monthNum = currentMonth + 1;
+            const monthPrefix = `${currentYear}-${String(monthNum).padStart(2, '0')}`;
+            const todayStr = formatDateYMD(new Date());
+
+            // 1. 헤더 월 표시
+            document.getElementById('calMonthTitle').innerText = `${currentYear}년 ${monthNum}월`;
+
+            // 2. 현재 달의 날짜별 기록 건수 집계
+            const countByDate = {};
+            let monthTotalRecords = 0;
+
+            records.forEach(r => {
+                if (r.dateStr && r.dateStr.startsWith(monthPrefix)) {
+                    countByDate[r.dateStr] = (countByDate[r.dateStr] || 0) + 1;
+                    monthTotalRecords += 1;
+                }
+            });
+
+            const checkedDaysCount = Object.keys(countByDate).length;
+            document.getElementById('summaryDays').innerText = `${checkedDaysCount}일`;
+            document.getElementById('summaryCount').innerText = `${monthTotalRecords}건`;
+
+            // 3. 달력 그리드 생성
+            const grid = document.getElementById('calGrid');
+            grid.innerHTML = '';
+
+            const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay(); // 0(일)~6(토)
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // 앞쪽 빈 칸
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'cal-cell empty';
+                grid.appendChild(emptyCell);
+            }
+
+            // 날짜 셀 채우기
+            for (let day = 1; day <= daysInMonth; day++) {
+                const ymd = `${monthPrefix}-${String(day).padStart(2, '0')}`;
+                const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+                const count = countByDate[ymd] || 0;
+
+                const cell = document.createElement('div');
+                cell.className = 'cal-cell';
+
+                if (dayOfWeek === 0) cell.classList.add('sun');
+                if (dayOfWeek === 6) cell.classList.add('sat');
+                if (count > 0) cell.classList.add('checked');
+                if (ymd === todayStr) cell.classList.add('today');
+                if (ymd === selectedDateStr) cell.classList.add('selected');
+
+                cell.onclick = function () {
+                    selectDate(ymd);
+                };
+
+                let html = `<div class="cal-day-num">${day}</div>`;
+                if (count > 0) {
+                    html += `<div class="cal-check-badge">✅${count}</div>`;
+                }
+                cell.innerHTML = html;
+                grid.appendChild(cell);
+            }
+
+            renderFilterUI();
+            renderRecordList();
+        }
+
+        function renderFilterUI() {
+            const monthNum = currentMonth + 1;
+            const dayBtn = document.getElementById('filterDayBtn');
+            const monthBtn = document.getElementById('filterMonthBtn');
+            const quickAddBtn = document.getElementById('quickAddBtn');
+
+            dayBtn.innerText = `📌 선택한 날짜 (${formatMonthDay(selectedDateStr)})`;
+            monthBtn.innerText = `📆 이번 달 전체 (${monthNum}월)`;
+
+            dayBtn.classList.toggle('active', filterMode === 'day');
+            monthBtn.classList.toggle('active', filterMode === 'month');
+
+            if (filterMode === 'day') {
+                quickAddBtn.style.display = 'flex';
+                quickAddBtn.innerText = `+ ${formatMonthDay(selectedDateStr)} 점검 작성하기`;
+            } else {
+                quickAddBtn.style.display = 'none';
             }
         }
 
-        function renderArchive() {
-            const container = document.getElementById('archiveContainer');
-            container.innerHTML = ''; // 기존 리스트 비우기
+        function renderRecordList() {
+            const container = document.getElementById('recordList');
+            container.innerHTML = '';
 
-            if (records.length === 0) {
-                container.innerHTML = '<div class="empty-state">저장된 기록이 없습니다.<br>새 점검을 작성해주세요.</div>';
+            const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+            const filtered = records.filter(r => {
+                if (filterMode === 'day') {
+                    return r.dateStr === selectedDateStr;
+                }
+                return r.dateStr && r.dateStr.startsWith(monthPrefix);
+            });
+
+            // 날짜 최신순 정렬
+            filtered.sort((a, b) => {
+                if (a.dateStr !== b.dateStr) {
+                    return a.dateStr < b.dateStr ? 1 : -1;
+                }
+                return Number(b.id) - Number(a.id);
+            });
+
+            if (filtered.length === 0) {
+                const emptyText = filterMode === 'day'
+                    ? `${formatMonthDay(selectedDateStr)}에 등록된 점검 기록이 없습니다.<br>위 버튼을 눌러 바로 점검을 작성해보세요.`
+                    : `${currentYear}년 ${currentMonth + 1}월에 등록된 점검 기록이 없습니다.`;
+
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <div>${emptyText}</div>
+                    </div>
+                `;
                 return;
             }
 
-            records.forEach(record => {
+            filtered.forEach(record => {
                 const card = document.createElement('div');
                 card.className = 'record-card';
-                // 개별 아이템 UI 구성
+
+                const beforeHtml = record.photos && record.photos.before
+                    ? `<img src="${record.photos.before}" alt="전" onclick="openModal(this.src)">`
+                    : `<span class="thumb-empty">없음</span>`;
+                const duringHtml = record.photos && record.photos.during
+                    ? `<img src="${record.photos.during}" alt="중" onclick="openModal(this.src)">`
+                    : `<span class="thumb-empty">없음</span>`;
+                const afterHtml = record.photos && record.photos.after
+                    ? `<img src="${record.photos.after}" alt="후" onclick="openModal(this.src)">`
+                    : `<span class="thumb-empty">없음</span>`;
+
                 card.innerHTML = `
-                    <div class="record-info" onclick="openArchivedReport('${record.id}')">
-                        <div class="record-place">${record.place}</div>
-                        <div class="record-loc-date">${record.location} | ${record.date}</div>
+                    <div class="record-header">
+                        <div>
+                            <div class="record-date-tag">✅ ${formatKoreanDate(record.dateStr)}</div>
+                            <div class="record-place">${escapeHtml(record.place)}</div>
+                            <div class="record-loc">📍 ${escapeHtml(record.location)}</div>
+                        </div>
                     </div>
-                    <button class="record-delete-btn" onclick="deleteRecord('${record.id}', event)">🗑️</button>
+                    <div class="thumb-strip">
+                        <div class="thumb-box">
+                            <div class="thumb-label">점검 전</div>
+                            <div class="thumb-img-wrap">${beforeHtml}</div>
+                        </div>
+                        <div class="thumb-box">
+                            <div class="thumb-label">점검 중</div>
+                            <div class="thumb-img-wrap">${duringHtml}</div>
+                        </div>
+                        <div class="thumb-box">
+                            <div class="thumb-label">점검 후</div>
+                            <div class="thumb-img-wrap">${afterHtml}</div>
+                        </div>
+                    </div>
+                    <div class="record-card-actions">
+                        <button type="button" class="btn-card-report" onclick="openArchivedReport('${record.id}')">
+                            📄 보고서 보기
+                        </button>
+                        <button type="button" class="btn-card-delete" onclick="requestDeleteRecord('${record.id}')">
+                            🗑️ 삭제
+                        </button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // 개별 기록 삭제 기능
-        function deleteRecord(id, event) {
-            event.stopPropagation(); // 카드 클릭(openArchivedReport) 이벤트 방지
-            if (confirm("정말 이 기록을 삭제하시겠습니까?")) {
-                records = records.filter(r => r.id !== id);
-                localStorage.setItem('fireAppRecords', JSON.stringify(records));
-                renderArchive(); // 리스트 갱신
-            }
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
-        // 7. 보관함 카드 클릭 시 과거 기록으로 보고서 화면 띄우기
-        function openArchivedReport(id) {
-            const record = records.find(r => r.id === id);
-            if(!record) return;
+        /* ==========================================
+           보고서 양식 미리보기 및 PNG 이미지 저장
+        =========================================== */
+        function previewCurrentReport() {
+            const dateStr = document.getElementById('dateInput').value || formatDateYMD(new Date());
+            const place = document.getElementById('placeInput').value.trim() || '미입력';
+            const location = document.getElementById('locInput').value.trim() || '미입력';
 
-            document.getElementById('repDate').innerText = record.date;
-            document.getElementById('repPlace').innerText = record.place;
-            document.getElementById('repLoc').innerText = record.location;
-
-            setReportPhoto('Before', record.photos.before);
-            setReportPhoto('During', record.photos.during);
-            setReportPhoto('After', record.photos.after);
+            populateReport({
+                dateStr: dateStr,
+                place: place,
+                location: location,
+                photos: {
+                    before: document.getElementById('dataBefore').value || null,
+                    during: document.getElementById('dataDuring').value || null,
+                    after: document.getElementById('dataAfter').value || null
+                }
+            });
 
             switchTab('report');
         }
 
-        // 보고서 내 개별 사진 배치 유틸리티 함수
+        function openArchivedReport(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+            populateReport(record);
+            switchTab('report');
+        }
+
+        function populateReport(data) {
+            document.getElementById('repPlace').innerText = data.place || '미입력';
+            document.getElementById('repLoc').innerText = data.location || '미입력';
+            document.getElementById('repDate').innerText = formatKoreanDate(data.dateStr);
+
+            setReportPhoto('Before', data.photos ? data.photos.before : null);
+            setReportPhoto('During', data.photos ? data.photos.during : null);
+            setReportPhoto('After', data.photos ? data.photos.after : null);
+        }
+
         function setReportPhoto(phase, dataUrl) {
             const img = document.getElementById(`repImg${phase}`);
             const text = document.getElementById(`repText${phase}`);
@@ -494,52 +1715,59 @@
                 img.style.display = 'block';
                 text.style.display = 'none';
             } else {
-                img.style.display = 'none';
                 img.src = '';
-                text.style.display = 'block'; // '사진 없음' 텍스트 표시
+                img.style.display = 'none';
+                text.style.display = 'block';
             }
         }
 
-        // 8. 전체화면 원본 확대 보기(모달) 로직
+        function downloadReportImage() {
+            if (typeof html2canvas === 'undefined') {
+                showToast('이미지 저장 라이브러리를 불러오는 중입니다.');
+                return;
+            }
+
+            const reportElement = document.getElementById('reportBox');
+            const btn = document.getElementById('btnDownloadPng');
+            const originalText = btn.innerText;
+
+            const placeStr = (document.getElementById('repPlace').innerText || '현장').replace(/[\\/:*?"<>|\s]+/g, '_');
+            const dateStr = (document.getElementById('repDate').innerText || '').replace(/\s+/g, '');
+
+            btn.innerText = '⏳ 저장 중...';
+            btn.disabled = true;
+
+            html2canvas(reportElement, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `소방점검_${placeStr}_${dateStr}.png`;
+                link.click();
+                showToast('💾 보고서 이미지(PNG)가 저장되었습니다!');
+            }).catch(err => {
+                console.error('PNG 저장 오류:', err);
+                showToast('이미지 저장 중 오류가 발생했습니다.');
+            }).finally(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        /* ==========================================
+           전체화면 이미지 확대 모달
+        =========================================== */
         function openModal(src) {
-            if (!src || src === window.location.href) return; // 이미지 소스가 없으면 무시
+            if (!src || src === window.location.href) return;
             const modal = document.getElementById('imageModal');
-            const modalImg = document.getElementById('modalImg');
-            modalImg.src = src;         
-            modal.style.display = 'flex'; 
+            document.getElementById('modalImg').src = src;
+            modal.style.display = 'flex';
         }
 
         function closeModal() {
             document.getElementById('imageModal').style.display = 'none';
-        }
-
-        // 9. html2canvas를 이용한 고해상도 이미지 캡처 및 다운로드 기능
-        function downloadImage() {
-            const reportElement = document.getElementById('reportBox');
-            
-            // 파일명 규칙 생성 (예: 소방점검_장소명_날짜.png)
-            const dateStr = document.getElementById('repDate').innerText.replace(/ /g, ''); // 공백 제거
-            const placeStr = document.getElementById('repPlace').innerText || '현장';
-            
-            const btn = document.querySelector('.btn-download');
-            const originalText = btn.innerText;
-            btn.innerText = "⏳ 처리중...";
-
-            html2canvas(reportElement, {
-                scale: 2, // 모바일 화질 열화 방지를 위해 2배 확대 캡처
-                useCORS: true,
-                backgroundColor: "#ffffff"
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.href = canvas.toDataURL("image/png");
-                link.download = `소방점검_${placeStr}_${dateStr}.png`;
-                link.click(); // 자동 다운로드 실행
-                btn.innerText = originalText;
-            }).catch(err => {
-                console.error("저장 오류:", err);
-                btn.innerText = originalText;
-                alert("이미지 저장 중 오류가 발생했습니다.");
-            });
         }
     </script>
 </body>
