@@ -1,30 +1,33 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>소방 점검 앱</title>
-    <!-- 보고서 PNG 이미지 내보내기를 위한 html2canvas CDN -->
+    <!-- 보고서 PNG 이미지 저장을 위한 html2canvas CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* ==========================================
-           1. 디자인 토큰 및 기본 리셋
-        =========================================== */
+        /* =========================================================
+           1. 기본 리셋 및 디자인 토큰
+        ========================================================= */
         :root {
             --primary: #dc2626;
             --primary-dark: #b91c1c;
             --primary-light: #fef2f2;
-            --amber: #d97706;
-            --amber-dark: #b45309;
-            --amber-light: #fffbeb;
-            --amber-border: #fcd34d;
+            --primary-border: #fecaca;
             --blue: #2563eb;
             --blue-dark: #1d4ed8;
             --blue-light: #eff6ff;
+            --blue-border: #bfdbfe;
             --green: #059669;
             --green-dark: #047857;
             --green-light: #ecfdf5;
             --green-border: #a7f3d0;
+            --amber: #d97706;
+            --amber-dark: #b45309;
+            --amber-light: #fffbeb;
+            --amber-border: #fcd34d;
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
@@ -35,7 +38,6 @@
             --gray-700: #334155;
             --gray-800: #1e293b;
             --text: #0f172a;
-            --radius: 12px;
         }
 
         * {
@@ -48,28 +50,28 @@
             padding: 0;
             width: 100%;
             overflow-x: hidden;
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--gray-100);
             color: var(--text);
             line-height: 1.45;
         }
 
-        /* ==========================================
+        /* =========================================================
            2. 상단 고정 3탭 네비게이션
-        =========================================== */
-        .top-header-wrap {
+        ========================================================= */
+        .top-header {
             position: sticky;
             top: 0;
             z-index: 100;
             background: #ffffff;
-            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.07);
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
         }
 
         .tab-nav {
             display: flex;
+            width: 100%;
             max-width: 520px;
             margin: 0 auto;
-            background: #ffffff;
         }
 
         .tab-btn {
@@ -88,8 +90,8 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
-            transition: color 0.15s, border-color 0.15s, background-color 0.15s;
             white-space: nowrap;
+            transition: color 0.15s, border-color 0.15s, background-color 0.15s;
         }
 
         .tab-btn.active {
@@ -123,15 +125,57 @@
             color: #ffffff;
         }
 
-        /* ==========================================
-           3. 공통 섹션 및 카드 레이아웃
-        =========================================== */
+        /* 자동 복구 완료 알림 배너 */
+        .recovery-banner {
+            display: none;
+            width: 100%;
+            max-width: 520px;
+            margin: 10px auto 0 auto;
+            padding: 0 12px;
+        }
+
+        .recovery-banner.show {
+            display: block;
+        }
+
+        .recovery-banner-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: var(--green-light);
+            border: 1.5px solid var(--green-border);
+            color: #065f46;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 13.5px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.12);
+        }
+
+        .recovery-close-btn {
+            flex-shrink: 0;
+            border: none;
+            background: #ffffff;
+            color: #065f46;
+            border: 1px solid var(--green-border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        /* =========================================================
+           3. 공통 뷰 및 카드 스타일
+        ========================================================= */
         .view-section {
             display: none;
             width: 100%;
             max-width: 520px;
             margin: 0 auto;
-            padding: 14px 12px 64px 12px;
+            padding: 14px 12px 68px 12px;
         }
 
         .view-section.active {
@@ -142,9 +186,9 @@
             background: #ffffff;
             border-radius: 14px;
             padding: 16px;
-            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
             margin-bottom: 14px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            border: 1px solid var(--gray-200);
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
         }
 
         .app-title {
@@ -156,19 +200,19 @@
             letter-spacing: -0.3px;
         }
 
-        /* ==========================================
+        /* =========================================================
            4. 탭 1: 점검 작성 / 수정 폼
-        =========================================== */
+        ========================================================= */
         .edit-banner {
             display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
             background: var(--amber-light);
             border: 1.5px solid var(--amber-border);
             border-radius: 12px;
             padding: 12px 14px;
             margin-bottom: 14px;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
         }
 
         .edit-banner.show {
@@ -179,24 +223,20 @@
             font-size: 13.5px;
             font-weight: 800;
             color: var(--amber-dark);
-            line-height: 1.35;
         }
 
         .btn-cancel-edit {
             flex-shrink: 0;
-            padding: 8px 12px;
+            min-height: 36px;
+            padding: 6px 12px;
             border-radius: 8px;
-            border: 1px solid var(--amber);
+            border: 1.5px solid var(--amber);
             background: #ffffff;
             color: var(--amber-dark);
             font-size: 12.5px;
-            font-weight: 700;
+            font-weight: 800;
             font-family: inherit;
             cursor: pointer;
-        }
-
-        .btn-cancel-edit:active {
-            background: #fef3c7;
         }
 
         .input-group {
@@ -215,7 +255,7 @@
         .date-input {
             width: 100%;
             min-height: 46px;
-            padding: 11px 12px;
+            padding: 10px 12px;
             border: 1.5px solid var(--gray-300);
             border-radius: 10px;
             font-size: 15px;
@@ -275,9 +315,10 @@
 
         .btn-remove-photo {
             display: none;
-            padding: 8px 16px;
+            min-height: 36px;
+            padding: 6px 16px;
             border-radius: 999px;
-            border: 1px solid #fecaca;
+            border: 1px solid var(--primary-border);
             background: var(--primary-light);
             color: var(--primary);
             font-size: 12.5px;
@@ -287,20 +328,14 @@
         }
 
         .btn-remove-photo:active {
-            transform: scale(0.96);
+            transform: scale(0.97);
         }
 
-        /* 폼 하단 버튼 그룹 */
-        .form-btn-stack {
+        .form-actions {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-top: 18px;
-        }
-
-        .form-btn-row {
-            display: flex;
-            gap: 8px;
         }
 
         .btn {
@@ -338,35 +373,26 @@
         }
 
         .btn-blue {
-            flex: 1.4;
+            width: 100%;
             background: var(--blue);
             color: #ffffff;
             box-shadow: 0 3px 8px rgba(37, 99, 235, 0.22);
         }
 
-        .btn-outline {
-            flex: 1;
-            background: #ffffff;
-            color: var(--gray-700);
-            border: 1.5px solid var(--gray-300);
-        }
-
         .btn-green {
-            flex: 1;
             background: var(--green);
             color: #ffffff;
             box-shadow: 0 3px 8px rgba(5, 150, 105, 0.22);
         }
 
         .btn-gray {
-            flex: 0.9;
             background: var(--gray-600);
             color: #ffffff;
         }
 
-        /* ==========================================
+        /* =========================================================
            5. 탭 2: 월별·일별 캘린더 체크
-        =========================================== */
+        ========================================================= */
         .cal-header {
             display: flex;
             align-items: center;
@@ -395,10 +421,6 @@
             justify-content: center;
         }
 
-        .cal-nav-btn:active {
-            background: var(--gray-200);
-        }
-
         .cal-month-title {
             font-size: 18px;
             font-weight: 800;
@@ -408,9 +430,9 @@
         }
 
         .btn-today {
-            min-height: 36px;
+            min-height: 38px;
             padding: 6px 14px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1.5px solid var(--blue);
             background: var(--blue-light);
             color: var(--blue);
@@ -431,14 +453,13 @@
             border-radius: 10px;
             padding: 10px 14px;
             margin-bottom: 12px;
-            font-size: 13px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #065f46;
         }
 
         .summary-num {
             color: var(--green-dark);
-            font-size: 14.5px;
             font-weight: 800;
         }
 
@@ -471,7 +492,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            border: 1.5px solid transparent;
+            border: 2px solid transparent;
             background: #ffffff;
             cursor: pointer;
             transition: background-color 0.12s, border-color 0.12s;
@@ -480,10 +501,6 @@
         .cal-cell.empty {
             cursor: default;
             background: transparent;
-        }
-
-        .cal-cell:not(.empty):hover {
-            background: var(--gray-50);
         }
 
         .cal-day-num {
@@ -500,20 +517,20 @@
             border-color: var(--green-border);
         }
 
-        .cal-cell.today {
-            border-color: var(--blue);
+        .cal-cell.today .cal-day-num {
+            text-decoration: underline;
+            font-weight: 900;
         }
 
         .cal-cell.selected {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.18);
+            border-color: var(--blue);
+            background: var(--blue-light);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
         }
 
         .cal-cell.checked.selected {
             background: #d1fae5;
-            border-color: var(--green-dark);
-            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.25);
+            border-color: var(--blue);
         }
 
         .cal-check-badge {
@@ -528,27 +545,35 @@
             line-height: 1.2;
         }
 
-        .filter-bar {
+        .cal-filter-header {
             display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 8px;
             margin-bottom: 10px;
         }
 
-        .filter-btn {
-            flex: 1;
-            min-height: 42px;
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1.5px solid var(--gray-200);
+        .cal-filter-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--gray-800);
+        }
+
+        .btn-month-all {
+            min-height: 36px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1.5px solid var(--gray-300);
             background: #ffffff;
-            color: var(--gray-600);
-            font-size: 13px;
+            color: var(--gray-700);
+            font-size: 12.5px;
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
+            white-space: nowrap;
         }
 
-        .filter-btn.active {
+        .btn-month-all.active {
             border-color: var(--blue);
             background: var(--blue-light);
             color: var(--blue);
@@ -573,34 +598,123 @@
             gap: 6px;
         }
 
-        .quick-add-btn:active {
-            background: #fee2e2;
-        }
-
-        /* ==========================================
-           6. 기록 카드 리스트 (캘린더 & 보관함 공용)
-        =========================================== */
-        .archive-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* =========================================================
+           6. 탭 3: 기록 보관함 + 데이터 안전 관리
+        ========================================================= */
+        .safety-box {
+            background: #ffffff;
+            border: 1.5px solid var(--blue-border);
+            border-radius: 14px;
+            padding: 13px;
             margin-bottom: 12px;
-            padding: 0 2px;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
         }
 
-        .archive-title {
-            font-size: 17px;
+        .safety-title {
+            font-size: 13.5px;
             font-weight: 800;
-            color: var(--gray-800);
-            margin: 0;
+            color: var(--blue-dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .archive-subtitle {
-            font-size: 12.5px;
-            font-weight: 700;
+        .safety-sub {
+            font-size: 11.5px;
+            font-weight: 600;
             color: var(--gray-500);
         }
 
+        .safety-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .btn-safety {
+            min-height: 42px;
+            padding: 8px 4px;
+            border-radius: 9px;
+            border: 1px solid var(--gray-200);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            font-size: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.25;
+        }
+
+        .btn-safety:active {
+            transform: scale(0.97);
+        }
+
+        .btn-safety.backup {
+            background: var(--blue-light);
+            border-color: var(--blue-border);
+            color: var(--blue-dark);
+        }
+
+        .btn-safety.restore {
+            background: var(--green-light);
+            border-color: var(--green-border);
+            color: var(--green-dark);
+        }
+
+        .btn-safety.recover {
+            background: var(--amber-light);
+            border-color: var(--amber-border);
+            color: var(--amber-dark);
+        }
+
+        .search-wrap {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 38px 10px 14px;
+            border: 1.5px solid var(--gray-300);
+            border-radius: 10px;
+            background: #ffffff;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .search-clear-btn {
+            display: none;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            border: none;
+            background: var(--gray-200);
+            color: var(--gray-700);
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* =========================================================
+           7. 기록 카드 리스트 (캘린더 & 보관함 공용)
+        ========================================================= */
         .record-list {
             display: flex;
             flex-direction: column;
@@ -678,7 +792,7 @@
         }
 
         .thumb-img-wrap {
-            height: 68px;
+            height: 66px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -733,43 +847,43 @@
         .btn-card-delete {
             background: var(--primary-light);
             color: var(--primary);
-            border: 1px solid #fecaca;
+            border: 1px solid var(--primary-border);
         }
 
         .empty-state {
             text-align: center;
             background: #ffffff;
             border-radius: 12px;
-            padding: 36px 16px;
+            padding: 34px 16px;
             color: var(--gray-500);
             font-size: 14px;
             border: 1.5px dashed var(--gray-300);
         }
 
         .empty-state-icon {
-            font-size: 32px;
+            font-size: 30px;
             margin-bottom: 8px;
         }
 
-        /* ==========================================
-           7. 보고서 양식 (캡처 / PNG 저장 모드)
-        =========================================== */
-        .report-top-bar {
+        /* =========================================================
+           8. 보고서 양식 (사진 대지 / PNG 내보내기 뷰)
+        ========================================================= */
+        .report-toolbar {
             display: flex;
             gap: 6px;
             margin-bottom: 10px;
         }
 
-        .report-top-bar .btn {
+        .report-toolbar .btn {
+            flex: 1;
+            min-height: 44px;
             font-size: 13px;
-            padding: 10px 8px;
+            padding: 10px 6px;
         }
 
         .report-edit-btn {
-            flex: 1;
             background: var(--amber);
             color: #ffffff;
-            box-shadow: 0 3px 8px rgba(217, 119, 6, 0.22);
         }
 
         .report-tip {
@@ -839,7 +953,7 @@
             border-bottom: 1px solid #000000;
         }
 
-        /* 전/중/후 모두 동일한 고정 높이 155px */
+        /* 전/중/후 100% 동일한 고정 높이 155px */
         .report-item-content {
             position: relative;
             height: 155px;
@@ -864,18 +978,18 @@
             object-fit: contain;
             display: none;
             cursor: pointer;
-            background: #fafafa;
+            background: #ffffff;
         }
 
-        /* ==========================================
-           8. 전체화면 이미지 확대 모달
-        =========================================== */
+        /* =========================================================
+           9. 전체화면 이미지 확대 모달
+        ========================================================= */
         .image-modal {
             display: none;
             position: fixed;
             inset: 0;
             z-index: 9999;
-            background: rgba(0, 0, 0, 0.92);
+            background: rgba(0, 0, 0, 0.9);
             align-items: center;
             justify-content: center;
             padding: 16px;
@@ -899,9 +1013,9 @@
             cursor: pointer;
         }
 
-        /* ==========================================
-           9. 커스텀 알림 토스트 & 확인 모달
-        =========================================== */
+        /* =========================================================
+           10. 커스텀 알림(Toast) & 확인/안내 모달 (alert/confirm 대체)
+        ========================================================= */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -927,7 +1041,7 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        .confirm-overlay {
+        .dialog-overlay {
             display: none;
             position: fixed;
             inset: 0;
@@ -938,9 +1052,9 @@
             padding: 20px;
         }
 
-        .confirm-box {
+        .dialog-box {
             width: 100%;
-            max-width: 320px;
+            max-width: 340px;
             background: #ffffff;
             border-radius: 16px;
             padding: 20px;
@@ -948,20 +1062,28 @@
             text-align: center;
         }
 
-        .confirm-msg {
-            margin: 0 0 18px 0;
-            font-size: 15px;
-            font-weight: 700;
+        .dialog-title {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            font-weight: 800;
             color: var(--gray-800);
-            line-height: 1.5;
         }
 
-        .confirm-actions {
+        .dialog-msg {
+            margin: 0 0 18px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-600);
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .dialog-actions {
             display: flex;
             gap: 10px;
         }
 
-        .confirm-btn-cancel {
+        .dialog-btn-cancel {
             flex: 1;
             min-height: 44px;
             border-radius: 10px;
@@ -974,7 +1096,7 @@
             cursor: pointer;
         }
 
-        .confirm-btn-ok {
+        .dialog-btn-ok {
             flex: 1;
             min-height: 44px;
             border-radius: 10px;
@@ -986,14 +1108,18 @@
             font-family: inherit;
             cursor: pointer;
         }
+
+        .dialog-btn-ok.info {
+            background: var(--blue);
+        }
     </style>
 </head>
 <body>
 
-    <!-- ==========================================
+    <!-- =========================================================
          상단 고정 3탭 네비게이션
-    =========================================== -->
-    <header id="topHeader" class="top-header-wrap">
+    ========================================================= -->
+    <header id="topHeader" class="top-header">
         <nav class="tab-nav">
             <button type="button" id="tabBtnWrite" class="tab-btn active" onclick="switchTab('write')">
                 📝 점검 작성
@@ -1008,14 +1134,22 @@
         </nav>
     </header>
 
-    <!-- ==========================================
-         [탭 1] 점검 작성 및 기존 보고서 수정 폼
-    =========================================== -->
+    <!-- 시작 시 옛날 기록이 자동 복구되었을 때 표시되는 녹색 알림 배너 -->
+    <div id="recoveryBanner" class="recovery-banner">
+        <div class="recovery-banner-inner">
+            <span id="recoveryBannerText">✅ 이전 버전의 기록을 복구했습니다!</span>
+            <button type="button" class="recovery-close-btn" onclick="dismissRecoveryBanner()">확인</button>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         [탭 1] 점검 작성 및 기존 보고서 수정
+    ========================================================= -->
     <main id="viewWrite" class="view-section active">
         <div class="card">
             <h1 class="app-title">🚨 소방 점검 현장기록</h1>
 
-            <!-- 기존 보고서 수정 모드 배너 -->
+            <!-- 수정 모드 알림 배너 (기본 숨김) -->
             <div id="editBanner" class="edit-banner">
                 <div class="edit-banner-text">✏️ 기존 보고서를 수정하고 있습니다</div>
                 <button type="button" class="btn-cancel-edit" onclick="cancelEditMode()">수정 취소</button>
@@ -1023,12 +1157,12 @@
 
             <div class="input-group">
                 <label class="input-label" for="placeInput">🏢 점검 장소</label>
-                <input type="text" id="placeInput" class="text-input" placeholder="예: 한국아파트 101동" oninput="handleDraftChange()">
+                <input type="text" id="placeInput" class="text-input" placeholder="예: 한국아파트 101동" oninput="saveDraft()">
             </div>
 
             <div class="input-group">
                 <label class="input-label" for="locInput">📍 점검 위치</label>
-                <input type="text" id="locInput" class="text-input" placeholder="예: 1층 A동 소화전" oninput="handleDraftChange()">
+                <input type="text" id="locInput" class="text-input" placeholder="예: 1층 A동 소화전" oninput="saveDraft()">
             </div>
 
             <div class="input-group">
@@ -1036,7 +1170,7 @@
                 <input type="date" id="dateInput" class="date-input">
             </div>
 
-            <!-- 1. 점검 전 (Before) -->
+            <!-- 1. 점검 전 -->
             <div class="photo-section">
                 <div class="photo-title">📸 1. 점검 전 (Before)</div>
                 <input type="file" id="uploadBefore" class="file-input" accept="image/*"
@@ -1049,7 +1183,7 @@
                 </div>
             </div>
 
-            <!-- 2. 점검 중 (During) -->
+            <!-- 2. 점검 중 -->
             <div class="photo-section">
                 <div class="photo-title">📸 2. 점검 중 (During)</div>
                 <input type="file" id="uploadDuring" class="file-input" accept="image/*"
@@ -1062,7 +1196,7 @@
                 </div>
             </div>
 
-            <!-- 3. 점검 후 (After) -->
+            <!-- 3. 점검 후 -->
             <div class="photo-section">
                 <div class="photo-title">📸 3. 점검 후 (After)</div>
                 <input type="file" id="uploadAfter" class="file-input" accept="image/*"
@@ -1075,26 +1209,20 @@
                 </div>
             </div>
 
-            <!-- 저장 / 미리보기 / 초기화 버튼 -->
-            <div class="form-btn-stack">
-                <button type="button" id="btnSavePrimary" class="btn btn-primary" onclick="saveOrUpdateRecord()">
+            <div class="form-actions">
+                <button type="button" id="btnSaveRecord" class="btn btn-primary" onclick="saveOrUpdateRecord()">
                     💾 앱에 기록 저장하기
                 </button>
-                <div class="form-btn-row">
-                    <button type="button" class="btn btn-blue" onclick="openFormReportPreview()">
-                        📸 보고서 양식 미리보기
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="requestResetForm()">
-                        🔄 입력 초기화
-                    </button>
-                </div>
+                <button type="button" class="btn btn-blue" onclick="openFormReportPreview()">
+                    📸 보고서 양식 미리보기
+                </button>
             </div>
         </div>
     </main>
 
-    <!-- ==========================================
+    <!-- =========================================================
          [탭 2] 월별·일별 캘린더 체크
-    =========================================== -->
+    ========================================================= -->
     <section id="viewCalendar" class="view-section">
         <div class="card">
             <div class="cal-header">
@@ -1107,7 +1235,7 @@
             </div>
 
             <div class="month-summary">
-                <div>이번 달 점검 완료 일수: <span id="summaryDays" class="summary-num">0일</span></div>
+                <div>이번 달 점검일: <span id="summaryDays" class="summary-num">0일</span></div>
                 <div>총 점검 건수: <span id="summaryCount" class="summary-num">0건</span></div>
             </div>
 
@@ -1124,43 +1252,66 @@
             <div id="calGrid" class="cal-grid"></div>
         </div>
 
-        <div class="filter-bar">
-            <button type="button" id="filterDayBtn" class="filter-btn active" onclick="setCalendarFilter('day')">
-                📌 선택한 날짜
-            </button>
-            <button type="button" id="filterMonthBtn" class="filter-btn" onclick="setCalendarFilter('month')">
-                📆 이번 달 전체 보기
+        <div class="cal-filter-header">
+            <div id="calFilterTitle" class="cal-filter-title">📌 선택한 날짜</div>
+            <button type="button" id="btnMonthAll" class="btn-month-all" onclick="toggleMonthFilter()">
+                📆 이번 달 전체
             </button>
         </div>
 
         <button type="button" id="quickAddBtn" class="quick-add-btn" onclick="startWriteForSelectedDate()">
-            + 선택한 날짜 점검 작성하기
+            + 점검 작성하기
         </button>
 
         <div id="calendarRecordList" class="record-list"></div>
     </section>
 
-    <!-- ==========================================
-         [탭 3] 기록 보관함 (전체 목록)
-    =========================================== -->
+    <!-- =========================================================
+         [탭 3] 기록 보관함 (백업/복원/복구 + 검색 + 전체 리스트)
+    ========================================================= -->
     <section id="viewArchive" class="view-section">
-        <div class="archive-header">
-            <h2 class="archive-title">🗂️ 저장된 점검 기록</h2>
-            <span id="archiveTotalText" class="archive-subtitle">총 0건</span>
+        <!-- 데이터 안전 관리 영역 -->
+        <div class="safety-box">
+            <div class="safety-title">
+                <span>🛡️ 데이터 안전 관리</span>
+                <span class="safety-sub">업데이트 대비 영구 보관</span>
+            </div>
+            <div class="safety-actions">
+                <button type="button" class="btn-safety backup" onclick="exportBackupJson()">
+                    📤 파일로 백업
+                </button>
+                <button type="button" class="btn-safety restore" onclick="triggerRestoreFile()">
+                    📥 백업 불러오기
+                </button>
+                <button type="button" class="btn-safety recover" onclick="runManualLegacyRecovery()">
+                    🔍 옛날 기록 찾기
+                </button>
+            </div>
+            <!-- 숨겨진 JSON 백업 불러오기 입력 -->
+            <input type="file" id="restoreJsonInput" accept=".json,application/json" style="display:none;"
+                   onchange="handleRestoreJsonFile(this)">
         </div>
+
+        <!-- 장소/위치 검색창 -->
+        <div class="search-wrap">
+            <input type="text" id="archiveSearchInput" class="search-input"
+                   placeholder="🔍 장소 또는 위치로 검색..." oninput="handleSearchInput()">
+            <button type="button" id="searchClearBtn" class="search-clear-btn" onclick="clearArchiveSearch()" aria-label="검색어 지우기">×</button>
+        </div>
+
         <div id="archiveRecordList" class="record-list"></div>
     </section>
 
-    <!-- ==========================================
-         [전용 뷰] 보고서 양식 (캡처 / PNG 저장)
-    =========================================== -->
+    <!-- =========================================================
+         [전용 뷰] 보고서 양식 (사진 대지 / PNG 저장)
+    ========================================================= -->
     <section id="viewReport" class="view-section">
-        <div class="report-top-bar">
+        <div class="report-toolbar">
             <button type="button" class="btn btn-gray" onclick="closeReportView()">↩ 돌아가기</button>
-            <button type="button" class="btn report-edit-btn" onclick="editCurrentReport()">✏️ 보고서 수정</button>
+            <button type="button" id="btnReportEdit" class="btn report-edit-btn" onclick="editActiveReport()">✏️ 보고서 수정</button>
             <button type="button" id="btnDownloadPng" class="btn btn-green" onclick="downloadReportPng()">💾 이미지로 저장</button>
         </div>
-        <p class="report-tip">👇 아래 양식을 캡처하거나 [이미지로 저장]을 눌러 PNG로 보관하세요.</p>
+        <p class="report-tip">👇 화면을 캡처하거나 [이미지로 저장]을 눌러 PNG로 저장하세요.</p>
 
         <div id="reportBox" class="report-box">
             <h2 class="report-title">소방 시설 점검 사진 대지</h2>
@@ -1203,80 +1354,122 @@
         </div>
     </section>
 
-    <!-- ==========================================
+    <!-- =========================================================
          전체화면 이미지 확대 모달
-    =========================================== -->
+    ========================================================= -->
     <div id="imageModal" class="image-modal" onclick="closeModal()">
         <span class="modal-close" aria-label="닫기">&times;</span>
         <img id="modalImg" src="" alt="확대 사진">
     </div>
 
-    <!-- ==========================================
-         커스텀 확인 모달 (confirm 대체)
-    =========================================== -->
-    <div id="confirmOverlay" class="confirm-overlay">
-        <div class="confirm-box">
-            <p id="confirmMsg" class="confirm-msg"></p>
-            <div class="confirm-actions">
-                <button type="button" class="confirm-btn-cancel" onclick="resolveConfirm(false)">취소</button>
-                <button type="button" id="confirmOkBtn" class="confirm-btn-ok" onclick="resolveConfirm(true)">확인</button>
+    <!-- =========================================================
+         커스텀 확인/안내 다이얼로그 (confirm / alert 대체)
+    ========================================================= -->
+    <div id="dialogOverlay" class="dialog-overlay">
+        <div class="dialog-box">
+            <h3 id="dialogTitle" class="dialog-title">알림</h3>
+            <p id="dialogMsg" class="dialog-msg"></p>
+            <div class="dialog-actions">
+                <button type="button" id="dialogCancelBtn" class="dialog-btn-cancel" onclick="resolveDialog(false)">취소</button>
+                <button type="button" id="dialogOkBtn" class="dialog-btn-ok" onclick="resolveDialog(true)">확인</button>
             </div>
         </div>
     </div>
 
-    <!-- ==========================================
-         커스텀 알림 토스트 (alert 대체)
-    =========================================== -->
+    <!-- =========================================================
+         하단 토스트 메시지
+    ========================================================= -->
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script>
-        /* ==========================================
-           상수 및 전역 상태 관리
-        =========================================== */
-        const STORAGE_KEY_RECORDS = 'fire_inspection_records_v2';
-        const STORAGE_KEY_DRAFT = 'fire_inspection_draft_v2';
+        /* =========================================================
+           1. 영구 저장소 키 및 전역 상태
+        ========================================================= */
+        const CANONICAL_RECORDS_KEY = 'FIRE_INSPECTION_RECORDS_V1';
+        const DRAFT_KEY = 'FIRE_INSPECTION_DRAFT_V1';
 
         let records = [];
         let formPhotos = { before: null, during: null, after: null };
 
-        // 수정 모드 상태: null이면 신규 작성, 문자열 ID면 기존 보고서 수정 중
+        // 수정 모드 상태 (null이면 신규 작성, 문자열이면 기존 기록 수정 중)
         let editingRecordId = null;
-        // 보고서 뷰 상태: 현재 보고서 화면이 참조하는 기록 ID (신규 미리보기면 null)
+        // 보고서 화면에서 현재 보고 있는 저장된 기록 ID (폼 미리보기면 null)
         let activeReportRecordId = null;
-        // 보고서 화면에서 돌아갈 이전 탭
+        // 보고서 화면에서 복귀할 이전 탭
         let previousTab = 'write';
 
-        // 캘린더 상태 (로컬 시간 기준 오늘 날짜)
-        const initialToday = new Date();
-        let calYear = initialToday.getFullYear();
-        let calMonth = initialToday.getMonth(); // 0 ~ 11
-        let selectedDateStr = getLocalDateYMD(initialToday);
+        // 캘린더 상태
+        const nowDate = new Date();
+        let calYear = nowDate.getFullYear();
+        let calMonth = nowDate.getMonth(); // 0 ~ 11
+        let selectedDateStr = getLocalDateYMD(nowDate);
         let calendarFilterMode = 'day'; // 'day' | 'month'
 
-        // 모달/토스트 제어용
-        let confirmCallback = null;
+        // 다이얼로그 / 토스트 제어
+        let dialogCallback = null;
         let toastTimer = null;
 
-        /* ==========================================
-           초기화 (DOM 로드 완료 시)
-        =========================================== */
+        /* =========================================================
+           2. 앱 초기화 (자동 로드 + 옛날 기록 자동 복구)
+        ========================================================= */
         window.onload = function () {
             document.getElementById('dateInput').value = getLocalDateYMD(new Date());
+
+            // 1) 표준 저장소 로드
             loadRecordsFromStorage();
-            loadDraftToForm();
-            updateAllCounts();
+
+            // 2) 이전 버전 localStorage 키 자동 스캔 및 무손실 병합
+            const recoveredCount = scanAndMigrateLegacyRecords(false);
+            if (recoveredCount > 0) {
+                showRecoveryBanner(`✅ 이전 버전에서 저장된 기록 ${recoveredCount}건을 자동으로 찾아 복구했습니다!`);
+                showToast(`🎉 숨어있던 이전 기록 ${recoveredCount}건을 복구했습니다!`);
+            }
+
+            // 3) 임시 저장된 텍스트 불러오기 & 화면 렌더링
+            loadDraft();
+            updateArchiveBadge();
             renderCalendarView();
             renderArchiveView();
         };
 
-        /* ==========================================
-           날짜 및 문자열 유틸리티
-        =========================================== */
+        /* =========================================================
+           3. 날짜 / 문자열 유틸리티
+        ========================================================= */
         function getLocalDateYMD(dateObj) {
             const y = dateObj.getFullYear();
             const m = String(dateObj.getMonth() + 1).padStart(2, '0');
             const d = String(dateObj.getDate()).padStart(2, '0');
             return `${y}-${m}-${d}`;
+        }
+
+        // 다양한 날짜 형식('2026년 11월 20일', '2026.11.20', ISO 등)을 YYYY-MM-DD로 정규화
+        function normalizeDateToYMD(rawDate) {
+            if (!rawDate) return getLocalDateYMD(new Date());
+            const str = String(rawDate).trim();
+
+            // 이미 YYYY-MM-DD 형태이거나 ISO 문자열 앞부분인 경우
+            const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (isoMatch) {
+                return `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+            }
+
+            // '2026년 11월 20일' 형태
+            const korMatch = str.match(/(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일?/);
+            if (korMatch) {
+                return `${korMatch[1]}-${korMatch[2].padStart(2, '0')}-${korMatch[3].padStart(2, '0')}`;
+            }
+
+            // '2026.11.20' 또는 '2026/11/20' 형태
+            const sepMatch = str.match(/(\d{4})[./\s]+(\d{1,2})[./\s]+(\d{1,2})/);
+            if (sepMatch) {
+                return `${sepMatch[1]}-${sepMatch[2].padStart(2, '0')}-${sepMatch[3].padStart(2, '0')}`;
+            }
+
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) {
+                return getLocalDateYMD(parsed);
+            }
+            return getLocalDateYMD(new Date());
         }
 
         function formatKoreanDate(ymd) {
@@ -1302,53 +1495,379 @@
                 .replace(/'/g, '&#39;');
         }
 
-        function sortRecordsDesc(list) {
+        function sortRecordsNewestFirst(list) {
             return [...list].sort((a, b) => {
-                if (a.dateStr !== b.dateStr) {
-                    return a.dateStr < b.dateStr ? 1 : -1;
+                if (a.date !== b.date) {
+                    return a.date < b.date ? 1 : -1;
                 }
-                return (b.updatedAt || Number(b.id) || 0) - (a.updatedAt || Number(a.id) || 0);
+                const timeA = Number(a.updatedAt || a.createdAt || a.id) || 0;
+                const timeB = Number(b.updatedAt || b.createdAt || b.id) || 0;
+                return timeB - timeA;
             });
         }
 
-        /* ==========================================
-           커스텀 토스트 및 확인 모달
-        =========================================== */
-        function showToast(message) {
+        /* =========================================================
+           4. 커스텀 토스트 / 배너 / 다이얼로그 (alert, confirm 대체)
+        ========================================================= */
+        function showToast(msg) {
             const toast = document.getElementById('toast');
-            toast.innerText = message;
+            toast.innerText = msg;
             toast.classList.add('show');
             if (toastTimer) clearTimeout(toastTimer);
             toastTimer = setTimeout(() => {
                 toast.classList.remove('show');
-            }, 2500);
+            }, 2800);
         }
 
-        function openConfirm(message, okLabel, onConfirm) {
-            document.getElementById('confirmMsg').innerText = message;
-            document.getElementById('confirmOkBtn').innerText = okLabel || '확인';
-            confirmCallback = onConfirm;
-            document.getElementById('confirmOverlay').style.display = 'flex';
+        function showRecoveryBanner(msg) {
+            document.getElementById('recoveryBannerText').innerText = msg;
+            document.getElementById('recoveryBanner').classList.add('show');
         }
 
-        function resolveConfirm(isConfirmed) {
-            document.getElementById('confirmOverlay').style.display = 'none';
-            if (isConfirmed && typeof confirmCallback === 'function') {
-                confirmCallback();
+        function dismissRecoveryBanner() {
+            document.getElementById('recoveryBanner').classList.remove('show');
+        }
+
+        function showConfirmDialog(title, message, okLabel, onConfirm) {
+            document.getElementById('dialogTitle').innerText = title || '확인';
+            document.getElementById('dialogMsg').innerText = message;
+            document.getElementById('dialogCancelBtn').style.display = 'block';
+            const okBtn = document.getElementById('dialogOkBtn');
+            okBtn.innerText = okLabel || '확인';
+            okBtn.className = 'dialog-btn-ok';
+            dialogCallback = onConfirm;
+            document.getElementById('dialogOverlay').style.display = 'flex';
+        }
+
+        function showNoticeDialog(title, message) {
+            document.getElementById('dialogTitle').innerText = title || '안내';
+            document.getElementById('dialogMsg').innerText = message;
+            document.getElementById('dialogCancelBtn').style.display = 'none';
+            const okBtn = document.getElementById('dialogOkBtn');
+            okBtn.innerText = '확인';
+            okBtn.className = 'dialog-btn-ok info';
+            dialogCallback = null;
+            document.getElementById('dialogOverlay').style.display = 'flex';
+        }
+
+        function resolveDialog(isOk) {
+            document.getElementById('dialogOverlay').style.display = 'none';
+            if (isOk && typeof dialogCallback === 'function') {
+                dialogCallback();
             }
-            confirmCallback = null;
+            dialogCallback = null;
         }
 
-        /* ==========================================
-           탭 전환 및 뷰 표시 제어
-        =========================================== */
+        /* =========================================================
+           5. 데이터 스키마 정규화 & 자동 이전 데이터 복구(Migration)
+        ========================================================= */
+        function looksLikeInspectionRecord(obj) {
+            if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+            const knownKeys = [
+                'place', 'location', 'loc', 'date', 'dateStr',
+                'before', 'during', 'after',
+                'imgBefore', 'imgDuring', 'imgAfter',
+                'beforeImg', 'duringImg', 'afterImg',
+                'photos'
+            ];
+            let matchCount = 0;
+            for (let i = 0; i < knownKeys.length; i++) {
+                if (Object.prototype.hasOwnProperty.call(obj, knownKeys[i])) {
+                    matchCount++;
+                }
+            }
+            return matchCount >= 2;
+        }
+
+        function normalizeRecord(raw, fallbackIndex) {
+            if (!raw || typeof raw !== 'object') return null;
+
+            const photosObj = (raw.photos && typeof raw.photos === 'object') ? raw.photos : {};
+            const before = raw.before || raw.imgBefore || raw.beforeImg || photosObj.before || null;
+            const during = raw.during || raw.imgDuring || raw.duringImg || photosObj.during || null;
+            const after = raw.after || raw.imgAfter || raw.afterImg || photosObj.after || null;
+
+            const place = String(raw.place || raw.site || '').trim();
+            const location = String(raw.location || raw.loc || '').trim();
+            const date = normalizeDateToYMD(raw.date || raw.dateStr || raw.createdAt);
+
+            const now = Date.now();
+            const id = raw.id
+                ? String(raw.id)
+                : `rec_${now}_${fallbackIndex || Math.floor(Math.random() * 100000)}`;
+
+            return {
+                id: id,
+                place: place || '미입력',
+                location: location || '미입력',
+                date: date,
+                before: typeof before === 'string' && before.length > 0 ? before : null,
+                during: typeof during === 'string' && during.length > 0 ? during : null,
+                after: typeof after === 'string' && after.length > 0 ? after : null,
+                createdAt: Number(raw.createdAt) || Number(raw.id) || now,
+                updatedAt: Number(raw.updatedAt) || Number(raw.createdAt) || now
+            };
+        }
+
+        function isDuplicateRecord(candidate, existingList) {
+            const candKey = `${candidate.date}|${candidate.place.trim()}|${candidate.location.trim()}`;
+            return existingList.some(item => {
+                if (item.id && candidate.id && String(item.id) === String(candidate.id)) {
+                    return true;
+                }
+                const itemKey = `${item.date}|${item.place.trim()}|${item.location.trim()}`;
+                return candKey === itemKey && (candidate.place !== '미입력' || candidate.location !== '미입력');
+            });
+        }
+
+        function mergeRecordsIntoState(incomingRawArray) {
+            if (!Array.isArray(incomingRawArray)) return 0;
+            let addedCount = 0;
+
+            incomingRawArray.forEach((rawItem, idx) => {
+                if (!looksLikeInspectionRecord(rawItem)) return;
+                const normalized = normalizeRecord(rawItem, idx);
+                if (!normalized) return;
+                if (!isDuplicateRecord(normalized, records)) {
+                    records.push(normalized);
+                    addedCount++;
+                }
+            });
+
+            if (addedCount > 0) {
+                records = sortRecordsNewestFirst(records);
+            }
+            return addedCount;
+        }
+
+        // localStorage의 모든 키를 스캔해 이전 버전 기록을 찾아 안전하게 병합 (기존 키는 삭제하지 않음)
+        function scanAndMigrateLegacyRecords(showEmptyNotice) {
+            let totalRecovered = 0;
+            const backupSnapshot = [...records];
+
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || key === CANONICAL_RECORDS_KEY || key === DRAFT_KEY) {
+                        continue;
+                    }
+                    const rawValue = localStorage.getItem(key);
+                    if (!rawValue || rawValue.trim().charAt(0) !== '[') {
+                        continue;
+                    }
+                    try {
+                        const parsed = JSON.parse(rawValue);
+                        if (Array.isArray(parsed) && parsed.length > 0 && parsed.some(looksLikeInspectionRecord)) {
+                            totalRecovered += mergeRecordsIntoState(parsed);
+                        }
+                    } catch (parseErr) {
+                        // JSON 배열이 아닌 키는 무시
+                    }
+                }
+
+                if (totalRecovered > 0) {
+                    const saved = persistRecordsToStorage();
+                    if (!saved) {
+                        records = backupSnapshot;
+                        return 0;
+                    }
+                    updateArchiveBadge();
+                    renderCalendarView();
+                    renderArchiveView();
+                } else if (showEmptyNotice) {
+                    showNoticeDialog('옛날 기록 찾기 완료', '새로 복구할 숨겨진 이전 기록이 없습니다.\n현재 모든 기록이 정상적으로 보관함에 표시되고 있습니다.');
+                }
+            } catch (err) {
+                console.error('이전 기록 스캔 오류:', err);
+                if (showEmptyNotice) {
+                    showNoticeDialog('스캔 오류', '브라우저 저장소를 확인하는 중 오류가 발생했습니다.');
+                }
+            }
+            return totalRecovered;
+        }
+
+        function runManualLegacyRecovery() {
+            const count = scanAndMigrateLegacyRecords(true);
+            if (count > 0) {
+                showNoticeDialog('이전 기록 복구 완료!', `브라우저에 숨어 있던 이전 점검 기록 ${count}건을 찾아 보관함에 복구했습니다.`);
+            }
+        }
+
+        /* =========================================================
+           6. localStorage 읽기/쓰기 및 용량 초과(QuotaExceededError) 처리
+        ========================================================= */
+        function loadRecordsFromStorage() {
+            try {
+                const raw = localStorage.getItem(CANONICAL_RECORDS_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        records = sortRecordsNewestFirst(
+                            parsed.map((item, idx) => normalizeRecord(item, idx)).filter(Boolean)
+                        );
+                        return;
+                    }
+                }
+                records = [];
+            } catch (e) {
+                console.error('기록 로드 실패:', e);
+                records = [];
+            }
+        }
+
+        function persistRecordsToStorage() {
+            try {
+                localStorage.setItem(CANONICAL_RECORDS_KEY, JSON.stringify(records));
+                return true;
+            } catch (e) {
+                console.error('저장소 쓰기 실패:', e);
+                const isQuota = e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014);
+                if (isQuota) {
+                    showNoticeDialog(
+                        '저장 공간이 부족합니다',
+                        '브라우저 저장 공간이 가득 찼습니다.\n\n[🗂️ 기록 보관함] → [📤 파일로 백업]을 눌러 기존 기록을 파일로 안전하게 저장한 뒤, 오래된 기록을 일부 삭제하고 다시 시도해주세요.'
+                    );
+                } else {
+                    showNoticeDialog('저장 오류', '데이터를 저장하는 중 오류가 발생했습니다.');
+                }
+                return false;
+            }
+        }
+
+        function updateArchiveBadge() {
+            document.getElementById('archiveCountBadge').innerText = records.length;
+        }
+
+        // 임시 저장 (신규 작성 모드에서만 작동)
+        function saveDraft() {
+            if (editingRecordId !== null) return;
+            try {
+                const draft = {
+                    place: document.getElementById('placeInput').value,
+                    location: document.getElementById('locInput').value
+                };
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+            } catch (e) {
+                // 임시 저장 실패는 무시
+            }
+        }
+
+        function loadDraft() {
+            if (editingRecordId !== null) return;
+            try {
+                const raw = localStorage.getItem(DRAFT_KEY);
+                if (!raw) return;
+                const draft = JSON.parse(raw);
+                document.getElementById('placeInput').value = draft.place || '';
+                document.getElementById('locInput').value = draft.location || '';
+            } catch (e) {
+                // 무시
+            }
+        }
+
+        function clearDraft() {
+            try {
+                localStorage.removeItem(DRAFT_KEY);
+            } catch (e) {
+                // 무시
+            }
+        }
+
+        /* =========================================================
+           7. JSON 파일 백업 및 복원 (영구 안전 관리)
+        ========================================================= */
+        function exportBackupJson() {
+            if (records.length === 0) {
+                showToast('백업할 저장된 기록이 아직 없습니다.');
+                return;
+            }
+            try {
+                const payload = {
+                    app: 'fire-safety-inspection-app',
+                    version: 1,
+                    exportedAt: new Date().toISOString(),
+                    records: records
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const todayYMD = getLocalDateYMD(new Date());
+
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `소방점검_백업_${todayYMD}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                showToast(`📤 총 ${records.length}건의 기록을 JSON 파일로 백업했습니다.`);
+            } catch (err) {
+                console.error('백업 내보내기 오류:', err);
+                showNoticeDialog('백업 실패', '백업 파일을 생성하는 중 오류가 발생했습니다.');
+            }
+        }
+
+        function triggerRestoreFile() {
+            const input = document.getElementById('restoreJsonInput');
+            input.value = '';
+            input.click();
+        }
+
+        function handleRestoreJsonFile(inputEl) {
+            if (!inputEl.files || !inputEl.files[0]) return;
+            const file = inputEl.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                try {
+                    const parsed = JSON.parse(event.target.result);
+                    const incomingList = Array.isArray(parsed)
+                        ? parsed
+                        : (parsed && Array.isArray(parsed.records) ? parsed.records : null);
+
+                    if (!incomingList) {
+                        showNoticeDialog('올바르지 않은 백업 파일', '소방 점검 백업 JSON 파일이 아닙니다.');
+                        return;
+                    }
+
+                    const backupSnapshot = [...records];
+                    const addedCount = mergeRecordsIntoState(incomingList);
+
+                    if (addedCount === 0) {
+                        showNoticeDialog('백업 불러오기 완료', '새로 추가할 기록이 없습니다.\n(이미 모두 보관함에 저장되어 있는 기록입니다.)');
+                        return;
+                    }
+
+                    if (!persistRecordsToStorage()) {
+                        records = backupSnapshot;
+                        return;
+                    }
+
+                    updateArchiveBadge();
+                    renderCalendarView();
+                    renderArchiveView();
+                    showNoticeDialog('백업 불러오기 완료!', `백업 파일에서 ${addedCount}건의 기록을 안전하게 복원했습니다.`);
+                } catch (err) {
+                    console.error('백업 파일 파싱 오류:', err);
+                    showNoticeDialog('파일 읽기 실패', 'JSON 파일 형식이 손상되었거나 읽을 수 없습니다.');
+                } finally {
+                    inputEl.value = '';
+                }
+            };
+
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        /* =========================================================
+           8. 탭 전환 및 뷰 제어
+        ========================================================= */
         function switchTab(tabName) {
             const topHeader = document.getElementById('topHeader');
-            const sections = document.querySelectorAll('.view-section');
-            sections.forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
 
             if (tabName === 'report') {
                 topHeader.style.display = 'none';
+                document.getElementById('recoveryBanner').classList.remove('show');
                 document.getElementById('viewReport').classList.add('active');
                 window.scrollTo(0, 0);
                 return;
@@ -1384,76 +1903,10 @@
             switchTab(previousTab || 'write');
         }
 
-        /* ==========================================
-           localStorage 데이터 저장/로드 및 임시 저장
-        =========================================== */
-        function loadRecordsFromStorage() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY_RECORDS);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) {
-                        records = parsed;
-                        return;
-                    }
-                }
-                records = [];
-            } catch (e) {
-                console.error('기록 불러오기 실패:', e);
-                records = [];
-            }
-        }
-
-        function saveRecordsToStorage() {
-            localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
-            updateAllCounts();
-        }
-
-        function updateAllCounts() {
-            document.getElementById('archiveCountBadge').innerText = records.length;
-            document.getElementById('archiveTotalText').innerText = `총 ${records.length}건`;
-        }
-
-        // 신규 작성 모드일 때만 장소/위치 텍스트 자동 임시 저장
-        function handleDraftChange() {
-            if (editingRecordId !== null) return;
-            try {
-                const draft = {
-                    place: document.getElementById('placeInput').value,
-                    location: document.getElementById('locInput').value
-                };
-                localStorage.setItem(STORAGE_KEY_DRAFT, JSON.stringify(draft));
-            } catch (e) {
-                console.error('임시 저장 오류:', e);
-            }
-        }
-
-        function loadDraftToForm() {
-            if (editingRecordId !== null) return;
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY_DRAFT);
-                if (raw) {
-                    const draft = JSON.parse(raw);
-                    document.getElementById('placeInput').value = draft.place || '';
-                    document.getElementById('locInput').value = draft.location || '';
-                }
-            } catch (e) {
-                console.error('임시 저장 로드 오류:', e);
-            }
-        }
-
-        function clearDraftStorage() {
-            try {
-                localStorage.removeItem(STORAGE_KEY_DRAFT);
-            } catch (e) {
-                console.error('임시 저장 삭제 오류:', e);
-            }
-        }
-
-        /* ==========================================
-           사진 업로드 (Canvas 800px / JPEG 0.65 압축) 및 삭제
-        =========================================== */
-        function getPhotoDomIds(phase) {
+        /* =========================================================
+           9. 사진 업로드 (Canvas 800px / JPEG 0.65 압축) 및 삭제
+        ========================================================= */
+        function getPhotoIds(phase) {
             const cap = phase.charAt(0).toUpperCase() + phase.slice(1);
             return {
                 input: `upload${cap}`,
@@ -1462,8 +1915,8 @@
             };
         }
 
-        function applyPhotoPreview(phase, dataUrl) {
-            const ids = getPhotoDomIds(phase);
+        function setFormPhotoPreview(phase, dataUrl) {
+            const ids = getPhotoIds(phase);
             const imgEl = document.getElementById(ids.img);
             const btnEl = document.getElementById(ids.removeBtn);
 
@@ -1490,28 +1943,28 @@
                 const img = new Image();
                 img.onload = function () {
                     try {
-                        const MAX_DIM = 800;
-                        let w = img.width;
-                        let h = img.height;
+                        const MAX_SIZE = 800;
+                        let width = img.width;
+                        let height = img.height;
 
-                        if (w > h && w > MAX_DIM) {
-                            h = Math.round(h * (MAX_DIM / w));
-                            w = MAX_DIM;
-                        } else if (h > MAX_DIM) {
-                            w = Math.round(w * (MAX_DIM / h));
-                            h = MAX_DIM;
+                        if (width > height && width > MAX_SIZE) {
+                            height = Math.round(height * (MAX_SIZE / width));
+                            width = MAX_SIZE;
+                        } else if (height > MAX_SIZE) {
+                            width = Math.round(width * (MAX_SIZE / height));
+                            height = MAX_SIZE;
                         }
 
                         const canvas = document.createElement('canvas');
-                        canvas.width = w;
-                        canvas.height = h;
+                        canvas.width = width;
+                        canvas.height = height;
                         const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, w, h);
+                        ctx.drawImage(img, 0, 0, width, height);
 
-                        const compressed = canvas.toDataURL('image/jpeg', 0.65);
-                        applyPhotoPreview(phase, compressed);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+                        setFormPhotoPreview(phase, compressedDataUrl);
                     } catch (err) {
-                        console.error('이미지 압축 실패:', err);
+                        console.error('사진 압축 오류:', err);
                         showToast('사진을 처리하는 중 오류가 발생했습니다.');
                     }
                 };
@@ -1525,24 +1978,23 @@
         }
 
         function clearPhoto(phase) {
-            const ids = getPhotoDomIds(phase);
-            const inputEl = document.getElementById(ids.input);
-            // 동일 파일 재첨부가 가능하도록 input.value 초기화
-            inputEl.value = '';
-            applyPhotoPreview(phase, null);
+            const ids = getPhotoIds(phase);
+            // 같은 파일을 바로 다시 첨부할 수 있도록 input.value 초기화
+            document.getElementById(ids.input).value = '';
+            setFormPhotoPreview(phase, null);
         }
 
-        /* ==========================================
-           수정 모드(Edit Mode) 진입 / 취소 / 초기화
-        =========================================== */
+        /* =========================================================
+           10. 점검 작성 / 수정 모드 / 저장 및 삭제
+        ========================================================= */
         function syncEditModeUI() {
             const banner = document.getElementById('editBanner');
             const tabBtn = document.getElementById('tabBtnWrite');
-            const saveBtn = document.getElementById('btnSavePrimary');
+            const saveBtn = document.getElementById('btnSaveRecord');
 
             if (editingRecordId !== null) {
                 banner.classList.add('show');
-                tabBtn.innerText = '✏️ 기존 보고서 수정 중';
+                tabBtn.innerText = '✏️ 보고서 수정 중';
                 saveBtn.innerText = '✅ 수정 내용 저장하기';
                 saveBtn.className = 'btn btn-amber';
             } else {
@@ -1550,6 +2002,18 @@
                 tabBtn.innerText = '📝 점검 작성';
                 saveBtn.innerText = '💾 앱에 기록 저장하기';
                 saveBtn.className = 'btn btn-primary';
+            }
+        }
+
+        function resetFormFields(shouldClearDraft) {
+            document.getElementById('placeInput').value = '';
+            document.getElementById('locInput').value = '';
+            document.getElementById('dateInput').value = getLocalDateYMD(new Date());
+            clearPhoto('before');
+            clearPhoto('during');
+            clearPhoto('after');
+            if (shouldClearDraft) {
+                clearDraft();
             }
         }
 
@@ -1561,16 +2025,14 @@
             }
 
             editingRecordId = target.id;
-            document.getElementById('placeInput').value = target.place || '';
-            document.getElementById('locInput').value = target.location || '';
-            document.getElementById('dateInput').value = target.dateStr || getLocalDateYMD(new Date());
+            document.getElementById('placeInput').value = target.place === '미입력' ? '' : target.place;
+            document.getElementById('locInput').value = target.location === '미입력' ? '' : target.location;
+            document.getElementById('dateInput').value = target.date || getLocalDateYMD(new Date());
 
-            // 파일 입력창 초기화 후 기존 사진 세팅
             ['before', 'during', 'after'].forEach(phase => {
-                const ids = getPhotoDomIds(phase);
+                const ids = getPhotoIds(phase);
                 document.getElementById(ids.input).value = '';
-                const photoData = target.photos ? target.photos[phase] : null;
-                applyPhotoPreview(phase, photoData);
+                setFormPhotoPreview(phase, target[phase] || null);
             });
 
             syncEditModeUI();
@@ -1580,45 +2042,17 @@
 
         function cancelEditMode() {
             editingRecordId = null;
-            clearFormFields(false);
-            loadDraftToForm();
+            resetFormFields(false);
+            loadDraft();
             syncEditModeUI();
             switchTab('write');
             showToast('수정을 취소했습니다.');
         }
 
-        function clearFormFields(alsoClearDraft) {
-            document.getElementById('placeInput').value = '';
-            document.getElementById('locInput').value = '';
-            document.getElementById('dateInput').value = getLocalDateYMD(new Date());
-            clearPhoto('before');
-            clearPhoto('during');
-            clearPhoto('after');
-            if (alsoClearDraft) {
-                clearDraftStorage();
-            }
-        }
-
-        function requestResetForm() {
-            const msg = editingRecordId
-                ? '수정 중인 내용을 초기화하고 새 작성 모드로 전환할까요?'
-                : '현재 입력한 내용과 사진을 모두 초기화할까요?';
-            openConfirm(msg, '초기화', function () {
-                editingRecordId = null;
-                clearFormFields(true);
-                syncEditModeUI();
-                switchTab('write');
-                showToast('입력 내용을 초기화했습니다.');
-            });
-        }
-
-        /* ==========================================
-           기록 저장 및 수정 반영 (localStorage)
-        =========================================== */
         function saveOrUpdateRecord() {
             const place = document.getElementById('placeInput').value.trim();
             const location = document.getElementById('locInput').value.trim();
-            const dateStr = document.getElementById('dateInput').value || getLocalDateYMD(new Date());
+            const date = document.getElementById('dateInput').value || getLocalDateYMD(new Date());
 
             if (!place) {
                 showToast('점검 장소를 입력해주세요.');
@@ -1631,97 +2065,102 @@
                 return;
             }
 
-            const photosSnapshot = {
-                before: formPhotos.before || null,
-                during: formPhotos.during || null,
-                after: formPhotos.after || null
-            };
-
             const isEditing = editingRecordId !== null;
-            const backupRecords = [...records];
+            const backupSnapshot = [...records];
+            const now = Date.now();
 
             if (isEditing) {
                 const idx = records.findIndex(r => r.id === editingRecordId);
-                if (idx === -1) {
-                    showToast('원본 보고서를 찾을 수 없어 새로 저장합니다.');
-                    editingRecordId = null;
-                } else {
+                if (idx !== -1) {
                     records[idx] = {
                         ...records[idx],
                         place: place,
                         location: location,
-                        dateStr: dateStr,
-                        photos: photosSnapshot,
-                        updatedAt: Date.now()
+                        date: date,
+                        before: formPhotos.before || null,
+                        during: formPhotos.during || null,
+                        after: formPhotos.after || null,
+                        updatedAt: now
                     };
+                } else {
+                    records.unshift({
+                        id: String(now),
+                        place: place,
+                        location: location,
+                        date: date,
+                        before: formPhotos.before || null,
+                        during: formPhotos.during || null,
+                        after: formPhotos.after || null,
+                        createdAt: now,
+                        updatedAt: now
+                    });
                 }
-            }
-
-            if (!isEditing || editingRecordId === null) {
-                const newRecord = {
-                    id: String(Date.now()),
+            } else {
+                records.unshift({
+                    id: String(now),
                     place: place,
                     location: location,
-                    dateStr: dateStr,
-                    photos: photosSnapshot,
-                    updatedAt: Date.now()
-                };
-                records.unshift(newRecord);
+                    date: date,
+                    before: formPhotos.before || null,
+                    during: formPhotos.during || null,
+                    after: formPhotos.after || null,
+                    createdAt: now,
+                    updatedAt: now
+                });
             }
 
-            try {
-                saveRecordsToStorage();
+            records = sortRecordsNewestFirst(records);
 
-                // 캘린더를 저장/수정한 날짜로 동기화
-                const parts = dateStr.split('-');
-                if (parts.length === 3) {
-                    calYear = parseInt(parts[0], 10);
-                    calMonth = parseInt(parts[1], 10) - 1;
-                    selectedDateStr = dateStr;
-                    calendarFilterMode = 'day';
-                }
-
-                editingRecordId = null;
-                clearFormFields(!isEditing);
-                if (isEditing) {
-                    loadDraftToForm();
-                }
-                syncEditModeUI();
-                renderCalendarView();
-                renderArchiveView();
-
-                showToast(isEditing ? '✅ 보고서 수정 내용이 저장되었습니다!' : '💾 점검 기록이 저장되었습니다!');
-                switchTab(isEditing ? 'archive' : 'calendar');
-            } catch (err) {
-                // 용량 초과 시 안전하게 복구 및 한국어 안내
-                records = backupRecords;
-                console.error('localStorage 저장 오류:', err);
-                showToast('저장 공간이 부족합니다! 기록 보관함에서 오래된 기록을 삭제한 후 다시 시도해주세요.');
+            if (!persistRecordsToStorage()) {
+                records = backupSnapshot;
+                return;
             }
+
+            // 캘린더를 저장/수정한 날짜로 동기화
+            const parts = date.split('-');
+            if (parts.length === 3) {
+                calYear = parseInt(parts[0], 10);
+                calMonth = parseInt(parts[1], 10) - 1;
+                selectedDateStr = date;
+                calendarFilterMode = 'day';
+            }
+
+            editingRecordId = null;
+            resetFormFields(!isEditing);
+            if (isEditing) loadDraft();
+            syncEditModeUI();
+            updateArchiveBadge();
+            renderCalendarView();
+            renderArchiveView();
+
+            showToast(isEditing ? '✅ 수정된 보고서가 저장되었습니다!' : '💾 점검 기록이 안전하게 저장되었습니다!');
+            switchTab(isEditing ? 'archive' : 'calendar');
         }
 
         function requestDeleteRecord(recordId) {
-            openConfirm('이 점검 기록을 영구 삭제하시겠습니까?', '삭제', function () {
-                records = records.filter(r => r.id !== recordId);
-                if (editingRecordId === recordId) {
-                    editingRecordId = null;
-                    clearFormFields(false);
-                    syncEditModeUI();
-                }
-                try {
-                    saveRecordsToStorage();
+            showConfirmDialog(
+                '기록 삭제',
+                '이 점검 기록을 영구적으로 삭제하시겠습니까?',
+                '삭제',
+                function () {
+                    records = records.filter(r => r.id !== recordId);
+                    if (editingRecordId === recordId) {
+                        editingRecordId = null;
+                        resetFormFields(false);
+                        syncEditModeUI();
+                    }
+                    persistRecordsToStorage();
+                    updateArchiveBadge();
                     renderCalendarView();
                     renderArchiveView();
                     showToast('🗑️ 기록이 삭제되었습니다.');
-                } catch (e) {
-                    showToast('삭제 처리 중 오류가 발생했습니다.');
                 }
-            });
+            );
         }
 
-        /* ==========================================
-           탭 2: 월별·일별 캘린더 렌더링
-        =========================================== */
+        /* =========================================================
+           11. 탭 2: 월별·일별 캘린더 체크 렌더링
+        ========================================================= */
         function changeMonth(delta) {
             calMonth += delta;
             if (calMonth < 0) {
@@ -1753,17 +2192,16 @@
             renderCalendarView();
         }
 
-        function setCalendarFilter(mode) {
-            calendarFilterMode = mode;
-            renderCalendarControls();
-            renderCalendarRecordList();
+        function toggleMonthFilter() {
+            calendarFilterMode = (calendarFilterMode === 'month') ? 'day' : 'month';
+            renderCalendarControlsAndList();
         }
 
         function startWriteForSelectedDate() {
             if (editingRecordId !== null) {
                 editingRecordId = null;
-                clearFormFields(false);
-                loadDraftToForm();
+                resetFormFields(false);
+                loadDraft();
                 syncEditModeUI();
             }
             document.getElementById('dateInput').value = selectedDateStr;
@@ -1781,10 +2219,10 @@
             // 해당 월의 날짜별 기록 수 집계
             const countByDate = {};
             let monthTotal = 0;
-            records.forEach(r => {
-                if (r.dateStr && r.dateStr.startsWith(monthPrefix)) {
-                    countByDate[r.dateStr] = (countByDate[r.dateStr] || 0) + 1;
-                    monthTotal += 1;
+            records.forEach(rec => {
+                if (rec.date && rec.date.startsWith(monthPrefix)) {
+                    countByDate[rec.date] = (countByDate[rec.date] || 0) + 1;
+                    monthTotal++;
                 }
             });
 
@@ -1820,70 +2258,82 @@
                     selectCalendarDate(ymd);
                 };
 
-                let cellHtml = `<div class="cal-day-num">${day}</div>`;
+                let html = `<div class="cal-day-num">${day}</div>`;
                 if (count > 0) {
-                    cellHtml += `<div class="cal-check-badge">✅${count}</div>`;
+                    html += `<div class="cal-check-badge">✅${count}</div>`;
                 }
-                cell.innerHTML = cellHtml;
+                cell.innerHTML = html;
                 grid.appendChild(cell);
             }
 
-            renderCalendarControls();
-            renderCalendarRecordList();
+            renderCalendarControlsAndList();
         }
 
-        function renderCalendarControls() {
+        function renderCalendarControlsAndList() {
             const monthNum = calMonth + 1;
-            const dayBtn = document.getElementById('filterDayBtn');
-            const monthBtn = document.getElementById('filterMonthBtn');
-            const quickBtn = document.getElementById('quickAddBtn');
+            const monthPrefix = `${calYear}-${String(monthNum).padStart(2, '0')}`;
+            const titleEl = document.getElementById('calFilterTitle');
+            const monthAllBtn = document.getElementById('btnMonthAll');
+            const quickAddBtn = document.getElementById('quickAddBtn');
 
-            dayBtn.innerText = `📌 ${formatMonthDay(selectedDateStr)} 보기`;
-            monthBtn.innerText = `📆 ${monthNum}월 전체 보기`;
-
-            dayBtn.classList.toggle('active', calendarFilterMode === 'day');
-            monthBtn.classList.toggle('active', calendarFilterMode === 'month');
-
-            if (calendarFilterMode === 'day') {
-                quickBtn.style.display = 'flex';
-                quickBtn.innerText = `+ ${formatMonthDay(selectedDateStr)} 점검 작성하기`;
+            if (calendarFilterMode === 'month') {
+                titleEl.innerText = `📆 ${calYear}년 ${monthNum}월 전체 기록`;
+                monthAllBtn.classList.add('active');
+                quickAddBtn.style.display = 'none';
             } else {
-                quickBtn.style.display = 'none';
+                titleEl.innerText = `📌 ${formatKoreanDate(selectedDateStr)}`;
+                monthAllBtn.classList.remove('active');
+                quickAddBtn.style.display = 'flex';
+                quickAddBtn.innerText = `+ ${formatMonthDay(selectedDateStr)} 점검 작성하기`;
             }
-        }
 
-        function renderCalendarRecordList() {
-            const container = document.getElementById('calendarRecordList');
-            const monthPrefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
-
-            const filtered = sortRecordsDesc(records.filter(r => {
+            const filtered = records.filter(rec => {
                 if (calendarFilterMode === 'day') {
-                    return r.dateStr === selectedDateStr;
+                    return rec.date === selectedDateStr;
                 }
-                return r.dateStr && r.dateStr.startsWith(monthPrefix);
-            }));
+                return rec.date && rec.date.startsWith(monthPrefix);
+            });
 
-            const emptyMessage = calendarFilterMode === 'day'
+            const emptyHtml = calendarFilterMode === 'day'
                 ? `${formatMonthDay(selectedDateStr)}에 저장된 점검 기록이 없습니다.<br>위 버튼을 눌러 바로 작성해 보세요.`
-                : `${calYear}년 ${calMonth + 1}월에 저장된 점검 기록이 없습니다.`;
+                : `${calYear}년 ${monthNum}월에 저장된 점검 기록이 없습니다.`;
 
-            renderRecordCardsInto(container, filtered, emptyMessage);
+            renderRecordListInto(document.getElementById('calendarRecordList'), filtered, emptyHtml);
         }
 
-        /* ==========================================
-           탭 3: 기록 보관함 렌더링
-        =========================================== */
+        /* =========================================================
+           12. 탭 3: 기록 보관함 검색 및 렌더링
+        ========================================================= */
+        function handleSearchInput() {
+            const val = document.getElementById('archiveSearchInput').value;
+            document.getElementById('searchClearBtn').style.display = val ? 'block' : 'none';
+            renderArchiveView();
+        }
+
+        function clearArchiveSearch() {
+            document.getElementById('archiveSearchInput').value = '';
+            document.getElementById('searchClearBtn').style.display = 'none';
+            renderArchiveView();
+        }
+
         function renderArchiveView() {
-            const container = document.getElementById('archiveRecordList');
-            const sorted = sortRecordsDesc(records);
-            renderRecordCardsInto(
-                container,
-                sorted,
-                '아직 저장된 소방 점검 기록이 없습니다.<br>[📝 점검 작성] 탭에서 첫 기록을 남겨보세요.'
-            );
+            const query = (document.getElementById('archiveSearchInput').value || '').trim().toLowerCase();
+            const filtered = query
+                ? records.filter(rec =>
+                    (rec.place || '').toLowerCase().includes(query) ||
+                    (rec.location || '').toLowerCase().includes(query) ||
+                    (rec.date || '').includes(query)
+                )
+                : records;
+
+            const emptyHtml = query
+                ? `"${escapeHtml(query)}"에 해당하는 점검 기록이 없습니다.`
+                : '아직 저장된 점검 기록이 없습니다.<br>[📝 점검 작성] 탭에서 첫 기록을 저장해 보세요.';
+
+            renderRecordListInto(document.getElementById('archiveRecordList'), filtered, emptyHtml);
         }
 
-        function renderRecordCardsInto(container, list, emptyHtml) {
+        function renderRecordListInto(container, list, emptyHtml) {
             container.innerHTML = '';
 
             if (!list.length) {
@@ -1896,46 +2346,43 @@
                 return;
             }
 
-            list.forEach(record => {
-                const photos = record.photos || {};
-                const photoCount = [photos.before, photos.during, photos.after].filter(Boolean).length;
-
-                const card = document.createElement('div');
-                card.className = 'record-card';
-
+            list.forEach(rec => {
+                const photoCount = [rec.before, rec.during, rec.after].filter(Boolean).length;
                 const makeThumb = (src, alt) => src
                     ? `<img src="${src}" alt="${alt}" onclick="openModal(this.src)">`
                     : `<span class="thumb-empty">없음</span>`;
 
+                const card = document.createElement('div');
+                card.className = 'record-card';
                 card.innerHTML = `
                     <div class="record-meta">
-                        <span class="record-date-tag">✅ ${formatKoreanDate(record.dateStr)}</span>
+                        <span class="record-date-tag">✅ ${formatKoreanDate(rec.date)}</span>
                         <span class="photo-count-tag">사진 ${photoCount}/3</span>
                     </div>
-                    <div class="record-place">${escapeHtml(record.place)}</div>
-                    <div class="record-loc">📍 ${escapeHtml(record.location)}</div>
+                    <div class="record-place">${escapeHtml(rec.place)}</div>
+                    <div class="record-loc">📍 ${escapeHtml(rec.location)}</div>
                     <div class="thumb-strip">
                         <div class="thumb-box">
                             <div class="thumb-label">점검 전</div>
-                            <div class="thumb-img-wrap">${makeThumb(photos.before, '점검 전')}</div>
+                            <div class="thumb-img-wrap">${makeThumb(rec.before, '점검 전')}</div>
                         </div>
                         <div class="thumb-box">
                             <div class="thumb-label">점검 중</div>
-                            <div class="thumb-img-wrap">${makeThumb(photos.during, '점검 중')}</div>
+                            <div class="thumb-img-wrap">${makeThumb(rec.during, '점검 중')}</div>
                         </div>
                         <div class="thumb-box">
                             <div class="thumb-label">점검 후</div>
-                            <div class="thumb-img-wrap">${makeThumb(photos.after, '점검 후')}</div>
+                            <div class="thumb-img-wrap">${makeThumb(rec.after, '점검 후')}</div>
                         </div>
                     </div>
                     <div class="card-actions">
-                        <button type="button" class="btn-card btn-card-report" onclick="openSavedReport('${record.id}')">
+                        <button type="button" class="btn-card btn-card-report" onclick="openSavedReport('${rec.id}')">
                             📄 보고서
                         </button>
-                        <button type="button" class="btn-card btn-card-edit" onclick="startEditRecord('${record.id}')">
+                        <button type="button" class="btn-card btn-card-edit" onclick="startEditRecord('${rec.id}')">
                             ✏️ 수정
                         </button>
-                        <button type="button" class="btn-card btn-card-delete" onclick="requestDeleteRecord('${record.id}')">
+                        <button type="button" class="btn-card btn-card-delete" onclick="requestDeleteRecord('${rec.id}')">
                             🗑️ 삭제
                         </button>
                     </div>
@@ -1944,17 +2391,20 @@
             });
         }
 
-        /* ==========================================
-           보고서 양식 뷰 / 보고서에서 바로 수정 / PNG 다운로드
-        =========================================== */
+        /* =========================================================
+           13. 보고서 양식 뷰 & PNG 이미지 다운로드
+        ========================================================= */
         function openFormReportPreview() {
-            // 현재 작성(또는 수정) 중인 폼 내용으로 보고서 열기
             activeReportRecordId = editingRecordId;
-            populateReportBox({
+            document.getElementById('btnReportEdit').style.display = activeReportRecordId ? 'inline-flex' : 'none';
+
+            fillReportView({
                 place: document.getElementById('placeInput').value.trim() || '미입력',
                 location: document.getElementById('locInput').value.trim() || '미입력',
-                dateStr: document.getElementById('dateInput').value || getLocalDateYMD(new Date()),
-                photos: formPhotos
+                date: document.getElementById('dateInput').value || getLocalDateYMD(new Date()),
+                before: formPhotos.before,
+                during: formPhotos.during,
+                after: formPhotos.after
             });
             switchTab('report');
         }
@@ -1966,36 +2416,31 @@
                 return;
             }
             activeReportRecordId = target.id;
-            populateReportBox(target);
+            document.getElementById('btnReportEdit').style.display = 'inline-flex';
+            fillReportView(target);
             switchTab('report');
         }
 
-        function editCurrentReport() {
-            // 저장된 보고서를 보고 있었다면 바로 수정 모드로 로드
+        function editActiveReport() {
             if (activeReportRecordId) {
-                if (editingRecordId === activeReportRecordId && previousTab === 'write') {
-                    switchTab('write');
-                    return;
-                }
                 startEditRecord(activeReportRecordId);
-                return;
+            } else {
+                switchTab('write');
             }
-            // 아직 저장 전인 폼 미리보기였다면 작성 탭으로 바로 복귀
-            switchTab('write');
         }
 
-        function populateReportBox(data) {
+        function fillReportView(data) {
             document.getElementById('repPlace').innerText = data.place || '미입력';
             document.getElementById('repLoc').innerText = data.location || '미입력';
-            document.getElementById('repDate').innerText = formatKoreanDate(data.dateStr);
+            document.getElementById('repDate').innerText = formatKoreanDate(data.date);
+            document.getElementById('repDate').dataset.ymd = data.date || getLocalDateYMD(new Date());
 
-            const photos = data.photos || {};
-            setReportPhotoSlot('Before', photos.before);
-            setReportPhotoSlot('During', photos.during);
-            setReportPhotoSlot('After', photos.after);
+            setReportSlot('Before', data.before);
+            setReportSlot('During', data.during);
+            setReportSlot('After', data.after);
         }
 
-        function setReportPhotoSlot(capPhase, src) {
+        function setReportSlot(capPhase, src) {
             const img = document.getElementById(`repImg${capPhase}`);
             const text = document.getElementById(`repText${capPhase}`);
             if (src) {
@@ -2011,42 +2456,44 @@
 
         function downloadReportPng() {
             if (typeof html2canvas === 'undefined') {
-                showToast('이미지 저장 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                showToast('이미지 저장 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
                 return;
             }
 
-            const box = document.getElementById('reportBox');
+            const reportBox = document.getElementById('reportBox');
             const btn = document.getElementById('btnDownloadPng');
-            const originalText = btn.innerText;
+            const originalLabel = btn.innerText;
 
             const safePlace = (document.getElementById('repPlace').innerText || '현장').replace(/[\\/:*?"<>|\s]+/g, '_');
-            const safeDate = (document.getElementById('repDate').innerText || '').replace(/\s+/g, '');
+            const ymd = document.getElementById('repDate').dataset.ymd || getLocalDateYMD(new Date());
 
             btn.innerText = '⏳ 저장 중...';
             btn.disabled = true;
 
-            html2canvas(box, {
+            html2canvas(reportBox, {
                 scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff'
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.href = canvas.toDataURL('image/png');
-                link.download = `소방점검_${safePlace}_${safeDate}.png`;
+                link.download = `소방점검_${safePlace}_${ymd}.png`;
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
                 showToast('💾 보고서 이미지(PNG)가 저장되었습니다!');
             }).catch(err => {
-                console.error('PNG 내보내기 오류:', err);
+                console.error('PNG 저장 오류:', err);
                 showToast('이미지 저장 중 오류가 발생했습니다.');
             }).finally(() => {
-                btn.innerText = originalText;
+                btn.innerText = originalLabel;
                 btn.disabled = false;
             });
         }
 
-        /* ==========================================
-           전체화면 이미지 확대 모달
-        =========================================== */
+        /* =========================================================
+           14. 전체화면 이미지 확대 모달
+        ========================================================= */
         function openModal(src) {
             if (!src || src === window.location.href) return;
             document.getElementById('modalImg').src = src;
@@ -2059,3 +2506,4 @@
     </script>
 </body>
 </html>
+```
