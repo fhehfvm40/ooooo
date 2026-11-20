@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -123,48 +122,6 @@
         .tab-btn.active .count-badge {
             background: var(--primary);
             color: #ffffff;
-        }
-
-        /* 자동 복구 완료 알림 배너 */
-        .recovery-banner {
-            display: none;
-            width: 100%;
-            max-width: 520px;
-            margin: 10px auto 0 auto;
-            padding: 0 12px;
-        }
-
-        .recovery-banner.show {
-            display: block;
-        }
-
-        .recovery-banner-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            background: var(--green-light);
-            border: 1.5px solid var(--green-border);
-            color: #065f46;
-            border-radius: 12px;
-            padding: 12px 14px;
-            font-size: 13.5px;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.12);
-        }
-
-        .recovery-close-btn {
-            flex-shrink: 0;
-            border: none;
-            background: #ffffff;
-            color: #065f46;
-            border: 1px solid var(--green-border);
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 700;
-            font-family: inherit;
-            cursor: pointer;
         }
 
         /* =========================================================
@@ -599,7 +556,7 @@
         }
 
         /* =========================================================
-           6. 탭 3: 기록 보관함 + 데이터 안전 관리
+           6. 탭 3: 기록 보관함 + 데이터 안전 관리 (백업/복원 2버튼)
         ========================================================= */
         .safety-box {
             background: #ffffff;
@@ -628,30 +585,30 @@
 
         .safety-actions {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
         }
 
         .btn-safety {
-            min-height: 42px;
-            padding: 8px 4px;
-            border-radius: 9px;
+            min-height: 44px;
+            padding: 10px 8px;
+            border-radius: 10px;
             border: 1px solid var(--gray-200);
             background: var(--gray-50);
             color: var(--gray-800);
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 800;
             font-family: inherit;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
             text-align: center;
-            line-height: 1.25;
         }
 
         .btn-safety:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
         }
 
         .btn-safety.backup {
@@ -664,12 +621,6 @@
             background: var(--green-light);
             border-color: var(--green-border);
             color: var(--green-dark);
-        }
-
-        .btn-safety.recover {
-            background: var(--amber-light);
-            border-color: var(--amber-border);
-            color: var(--amber-dark);
         }
 
         .search-wrap {
@@ -814,7 +765,7 @@
 
         .card-actions {
             display: grid;
-            grid-template-columns: 1.2fr 1fr 0.9fr;
+            grid-template-columns: 1.25fr 1fr 0.9fr;
             gap: 6px;
         }
 
@@ -895,7 +846,7 @@
 
         .report-box {
             background: #ffffff;
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #000000;
             box-sizing: border-box;
         }
@@ -953,10 +904,10 @@
             border-bottom: 1px solid #000000;
         }
 
-        /* 전/중/후 100% 동일한 고정 높이 155px */
+        /* 전/중/후 3개 사진 영역 모두 동일한 높이(150px)로 통일 */
         .report-item-content {
             position: relative;
-            height: 155px;
+            height: 150px;
             background: #ffffff;
             display: flex;
             align-items: center;
@@ -1134,14 +1085,6 @@
         </nav>
     </header>
 
-    <!-- 시작 시 옛날 기록이 자동 복구되었을 때 표시되는 녹색 알림 배너 -->
-    <div id="recoveryBanner" class="recovery-banner">
-        <div class="recovery-banner-inner">
-            <span id="recoveryBannerText">✅ 이전 버전의 기록을 복구했습니다!</span>
-            <button type="button" class="recovery-close-btn" onclick="dismissRecoveryBanner()">확인</button>
-        </div>
-    </div>
-
     <!-- =========================================================
          [탭 1] 점검 작성 및 기존 보고서 수정
     ========================================================= -->
@@ -1149,7 +1092,7 @@
         <div class="card">
             <h1 class="app-title">🚨 소방 점검 현장기록</h1>
 
-            <!-- 수정 모드 알림 배너 (기본 숨김) -->
+            <!-- 수정 모드 알림 배너 (수정 시에만 표시) -->
             <div id="editBanner" class="edit-banner">
                 <div class="edit-banner-text">✏️ 기존 보고서를 수정하고 있습니다</div>
                 <button type="button" class="btn-cancel-edit" onclick="cancelEditMode()">수정 취소</button>
@@ -1170,7 +1113,7 @@
                 <input type="date" id="dateInput" class="date-input">
             </div>
 
-            <!-- 1. 점검 전 -->
+            <!-- 1. 점검 전 (capture 속성 제거로 카메라/갤러리 선택 가능) -->
             <div class="photo-section">
                 <div class="photo-title">📸 1. 점검 전 (Before)</div>
                 <input type="file" id="uploadBefore" class="file-input" accept="image/*"
@@ -1210,11 +1153,11 @@
             </div>
 
             <div class="form-actions">
-                <button type="button" id="btnSaveRecord" class="btn btn-primary" onclick="saveOrUpdateRecord()">
-                    💾 앱에 기록 저장하기
-                </button>
                 <button type="button" class="btn btn-blue" onclick="openFormReportPreview()">
                     📸 보고서 양식 미리보기
+                </button>
+                <button type="button" id="btnSaveRecord" class="btn btn-primary" onclick="saveOrUpdateRecord()">
+                    💾 앱에 기록 저장하기
                 </button>
             </div>
         </div>
@@ -1267,14 +1210,14 @@
     </section>
 
     <!-- =========================================================
-         [탭 3] 기록 보관함 (백업/복원/복구 + 검색 + 전체 리스트)
+         [탭 3] 기록 보관함 (백업/불러오기 + 검색 + 전체 리스트)
     ========================================================= -->
     <section id="viewArchive" class="view-section">
-        <!-- 데이터 안전 관리 영역 -->
+        <!-- 데이터 안전 관리 영역 (파일로 백업 / 백업 불러오기 2개 버튼) -->
         <div class="safety-box">
             <div class="safety-title">
                 <span>🛡️ 데이터 안전 관리</span>
-                <span class="safety-sub">업데이트 대비 영구 보관</span>
+                <span class="safety-sub">JSON 백업 및 복원</span>
             </div>
             <div class="safety-actions">
                 <button type="button" class="btn-safety backup" onclick="exportBackupJson()">
@@ -1283,11 +1226,8 @@
                 <button type="button" class="btn-safety restore" onclick="triggerRestoreFile()">
                     📥 백업 불러오기
                 </button>
-                <button type="button" class="btn-safety recover" onclick="runManualLegacyRecovery()">
-                    🔍 옛날 기록 찾기
-                </button>
             </div>
-            <!-- 숨겨진 JSON 백업 불러오기 입력 -->
+            <!-- 숨겨진 JSON 백업 파일 선택 입력 -->
             <input type="file" id="restoreJsonInput" accept=".json,application/json" style="display:none;"
                    onchange="handleRestoreJsonFile(this)">
         </div>
@@ -1303,7 +1243,7 @@
     </section>
 
     <!-- =========================================================
-         [전용 뷰] 보고서 양식 (사진 대지 / PNG 저장)
+         [전용 뷰] 보고서 양식 (사진 대지 / 캡처 및 PNG 저장)
     ========================================================= -->
     <section id="viewReport" class="view-section">
         <div class="report-toolbar">
@@ -1410,22 +1350,11 @@
         let toastTimer = null;
 
         /* =========================================================
-           2. 앱 초기화 (자동 로드 + 옛날 기록 자동 복구)
+           2. 앱 초기화
         ========================================================= */
         window.onload = function () {
             document.getElementById('dateInput').value = getLocalDateYMD(new Date());
-
-            // 1) 표준 저장소 로드
             loadRecordsFromStorage();
-
-            // 2) 이전 버전 localStorage 키 자동 스캔 및 무손실 병합
-            const recoveredCount = scanAndMigrateLegacyRecords(false);
-            if (recoveredCount > 0) {
-                showRecoveryBanner(`✅ 이전 버전에서 저장된 기록 ${recoveredCount}건을 자동으로 찾아 복구했습니다!`);
-                showToast(`🎉 숨어있던 이전 기록 ${recoveredCount}건을 복구했습니다!`);
-            }
-
-            // 3) 임시 저장된 텍스트 불러오기 & 화면 렌더링
             loadDraft();
             updateArchiveBadge();
             renderCalendarView();
@@ -1442,24 +1371,20 @@
             return `${y}-${m}-${d}`;
         }
 
-        // 다양한 날짜 형식('2026년 11월 20일', '2026.11.20', ISO 등)을 YYYY-MM-DD로 정규화
         function normalizeDateToYMD(rawDate) {
             if (!rawDate) return getLocalDateYMD(new Date());
             const str = String(rawDate).trim();
 
-            // 이미 YYYY-MM-DD 형태이거나 ISO 문자열 앞부분인 경우
             const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (isoMatch) {
                 return `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
             }
 
-            // '2026년 11월 20일' 형태
             const korMatch = str.match(/(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일?/);
             if (korMatch) {
                 return `${korMatch[1]}-${korMatch[2].padStart(2, '0')}-${korMatch[3].padStart(2, '0')}`;
             }
 
-            // '2026.11.20' 또는 '2026/11/20' 형태
             const sepMatch = str.match(/(\d{4})[./\s]+(\d{1,2})[./\s]+(\d{1,2})/);
             if (sepMatch) {
                 return `${sepMatch[1]}-${sepMatch[2].padStart(2, '0')}-${sepMatch[3].padStart(2, '0')}`;
@@ -1507,7 +1432,7 @@
         }
 
         /* =========================================================
-           4. 커스텀 토스트 / 배너 / 다이얼로그 (alert, confirm 대체)
+           4. 커스텀 토스트 & 다이얼로그 (alert, confirm 대체)
         ========================================================= */
         function showToast(msg) {
             const toast = document.getElementById('toast');
@@ -1517,15 +1442,6 @@
             toastTimer = setTimeout(() => {
                 toast.classList.remove('show');
             }, 2800);
-        }
-
-        function showRecoveryBanner(msg) {
-            document.getElementById('recoveryBannerText').innerText = msg;
-            document.getElementById('recoveryBanner').classList.add('show');
-        }
-
-        function dismissRecoveryBanner() {
-            document.getElementById('recoveryBanner').classList.remove('show');
         }
 
         function showConfirmDialog(title, message, okLabel, onConfirm) {
@@ -1559,26 +1475,8 @@
         }
 
         /* =========================================================
-           5. 데이터 스키마 정규화 & 자동 이전 데이터 복구(Migration)
+           5. 데이터 정규화 및 localStorage 읽기/쓰기
         ========================================================= */
-        function looksLikeInspectionRecord(obj) {
-            if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
-            const knownKeys = [
-                'place', 'location', 'loc', 'date', 'dateStr',
-                'before', 'during', 'after',
-                'imgBefore', 'imgDuring', 'imgAfter',
-                'beforeImg', 'duringImg', 'afterImg',
-                'photos'
-            ];
-            let matchCount = 0;
-            for (let i = 0; i < knownKeys.length; i++) {
-                if (Object.prototype.hasOwnProperty.call(obj, knownKeys[i])) {
-                    matchCount++;
-                }
-            }
-            return matchCount >= 2;
-        }
-
         function normalizeRecord(raw, fallbackIndex) {
             if (!raw || typeof raw !== 'object') return null;
 
@@ -1587,7 +1485,7 @@
             const during = raw.during || raw.imgDuring || raw.duringImg || photosObj.during || null;
             const after = raw.after || raw.imgAfter || raw.afterImg || photosObj.after || null;
 
-            const place = String(raw.place || raw.site || '').trim();
+            const place = String(raw.place || '').trim();
             const location = String(raw.location || raw.loc || '').trim();
             const date = normalizeDateToYMD(raw.date || raw.dateStr || raw.createdAt);
 
@@ -1609,93 +1507,6 @@
             };
         }
 
-        function isDuplicateRecord(candidate, existingList) {
-            const candKey = `${candidate.date}|${candidate.place.trim()}|${candidate.location.trim()}`;
-            return existingList.some(item => {
-                if (item.id && candidate.id && String(item.id) === String(candidate.id)) {
-                    return true;
-                }
-                const itemKey = `${item.date}|${item.place.trim()}|${item.location.trim()}`;
-                return candKey === itemKey && (candidate.place !== '미입력' || candidate.location !== '미입력');
-            });
-        }
-
-        function mergeRecordsIntoState(incomingRawArray) {
-            if (!Array.isArray(incomingRawArray)) return 0;
-            let addedCount = 0;
-
-            incomingRawArray.forEach((rawItem, idx) => {
-                if (!looksLikeInspectionRecord(rawItem)) return;
-                const normalized = normalizeRecord(rawItem, idx);
-                if (!normalized) return;
-                if (!isDuplicateRecord(normalized, records)) {
-                    records.push(normalized);
-                    addedCount++;
-                }
-            });
-
-            if (addedCount > 0) {
-                records = sortRecordsNewestFirst(records);
-            }
-            return addedCount;
-        }
-
-        // localStorage의 모든 키를 스캔해 이전 버전 기록을 찾아 안전하게 병합 (기존 키는 삭제하지 않음)
-        function scanAndMigrateLegacyRecords(showEmptyNotice) {
-            let totalRecovered = 0;
-            const backupSnapshot = [...records];
-
-            try {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (!key || key === CANONICAL_RECORDS_KEY || key === DRAFT_KEY) {
-                        continue;
-                    }
-                    const rawValue = localStorage.getItem(key);
-                    if (!rawValue || rawValue.trim().charAt(0) !== '[') {
-                        continue;
-                    }
-                    try {
-                        const parsed = JSON.parse(rawValue);
-                        if (Array.isArray(parsed) && parsed.length > 0 && parsed.some(looksLikeInspectionRecord)) {
-                            totalRecovered += mergeRecordsIntoState(parsed);
-                        }
-                    } catch (parseErr) {
-                        // JSON 배열이 아닌 키는 무시
-                    }
-                }
-
-                if (totalRecovered > 0) {
-                    const saved = persistRecordsToStorage();
-                    if (!saved) {
-                        records = backupSnapshot;
-                        return 0;
-                    }
-                    updateArchiveBadge();
-                    renderCalendarView();
-                    renderArchiveView();
-                } else if (showEmptyNotice) {
-                    showNoticeDialog('옛날 기록 찾기 완료', '새로 복구할 숨겨진 이전 기록이 없습니다.\n현재 모든 기록이 정상적으로 보관함에 표시되고 있습니다.');
-                }
-            } catch (err) {
-                console.error('이전 기록 스캔 오류:', err);
-                if (showEmptyNotice) {
-                    showNoticeDialog('스캔 오류', '브라우저 저장소를 확인하는 중 오류가 발생했습니다.');
-                }
-            }
-            return totalRecovered;
-        }
-
-        function runManualLegacyRecovery() {
-            const count = scanAndMigrateLegacyRecords(true);
-            if (count > 0) {
-                showNoticeDialog('이전 기록 복구 완료!', `브라우저에 숨어 있던 이전 점검 기록 ${count}건을 찾아 보관함에 복구했습니다.`);
-            }
-        }
-
-        /* =========================================================
-           6. localStorage 읽기/쓰기 및 용량 초과(QuotaExceededError) 처리
-        ========================================================= */
         function loadRecordsFromStorage() {
             try {
                 const raw = localStorage.getItem(CANONICAL_RECORDS_KEY);
@@ -1725,7 +1536,7 @@
                 if (isQuota) {
                     showNoticeDialog(
                         '저장 공간이 부족합니다',
-                        '브라우저 저장 공간이 가득 찼습니다.\n\n[🗂️ 기록 보관함] → [📤 파일로 백업]을 눌러 기존 기록을 파일로 안전하게 저장한 뒤, 오래된 기록을 일부 삭제하고 다시 시도해주세요.'
+                        '브라우저 저장 공간이 가득 찼습니다.\n\n[🗂️ 기록 보관함] → [📤 파일로 백업]을 눌러 기존 기록을 파일로 저장한 뒤, 오래된 기록을 일부 삭제하고 다시 시도해주세요.'
                     );
                 } else {
                     showNoticeDialog('저장 오류', '데이터를 저장하는 중 오류가 발생했습니다.');
@@ -1774,7 +1585,7 @@
         }
 
         /* =========================================================
-           7. JSON 파일 백업 및 복원 (영구 안전 관리)
+           6. JSON 파일 백업 및 불러오기 (ID 기준 중복 방지)
         ========================================================= */
         function exportBackupJson() {
             if (records.length === 0) {
@@ -1831,13 +1642,25 @@
                     }
 
                     const backupSnapshot = [...records];
-                    const addedCount = mergeRecordsIntoState(incomingList);
+                    const existingIds = new Set(records.map(r => String(r.id)));
+                    let addedCount = 0;
+
+                    incomingList.forEach((rawItem, idx) => {
+                        const normalized = normalizeRecord(rawItem, idx);
+                        if (!normalized) return;
+                        if (!existingIds.has(String(normalized.id))) {
+                            records.push(normalized);
+                            existingIds.add(String(normalized.id));
+                            addedCount++;
+                        }
+                    });
 
                     if (addedCount === 0) {
                         showNoticeDialog('백업 불러오기 완료', '새로 추가할 기록이 없습니다.\n(이미 모두 보관함에 저장되어 있는 기록입니다.)');
                         return;
                     }
 
+                    records = sortRecordsNewestFirst(records);
                     if (!persistRecordsToStorage()) {
                         records = backupSnapshot;
                         return;
@@ -1859,7 +1682,7 @@
         }
 
         /* =========================================================
-           8. 탭 전환 및 뷰 제어
+           7. 탭 전환 및 뷰 제어
         ========================================================= */
         function switchTab(tabName) {
             const topHeader = document.getElementById('topHeader');
@@ -1867,7 +1690,6 @@
 
             if (tabName === 'report') {
                 topHeader.style.display = 'none';
-                document.getElementById('recoveryBanner').classList.remove('show');
                 document.getElementById('viewReport').classList.add('active');
                 window.scrollTo(0, 0);
                 return;
@@ -1904,7 +1726,7 @@
         }
 
         /* =========================================================
-           9. 사진 업로드 (Canvas 800px / JPEG 0.65 압축) 및 삭제
+           8. 사진 업로드 (Canvas 800px / JPEG 0.65 압축) 및 삭제
         ========================================================= */
         function getPhotoIds(phase) {
             const cap = phase.charAt(0).toUpperCase() + phase.slice(1);
@@ -1985,7 +1807,7 @@
         }
 
         /* =========================================================
-           10. 점검 작성 / 수정 모드 / 저장 및 삭제
+           9. 점검 작성 / 수정 모드 / 저장 및 삭제
         ========================================================= */
         function syncEditModeUI() {
             const banner = document.getElementById('editBanner');
@@ -2159,7 +1981,7 @@
         }
 
         /* =========================================================
-           11. 탭 2: 월별·일별 캘린더 체크 렌더링
+           10. 탭 2: 월별·일별 캘린더 체크 렌더링
         ========================================================= */
         function changeMonth(delta) {
             calMonth += delta;
@@ -2216,7 +2038,6 @@
 
             document.getElementById('calMonthTitle').innerText = `${calYear}년 ${monthNum}월`;
 
-            // 해당 월의 날짜별 기록 수 집계
             const countByDate = {};
             let monthTotal = 0;
             records.forEach(rec => {
@@ -2302,7 +2123,7 @@
         }
 
         /* =========================================================
-           12. 탭 3: 기록 보관함 검색 및 렌더링
+           11. 탭 3: 기록 보관함 검색 및 렌더링
         ========================================================= */
         function handleSearchInput() {
             const val = document.getElementById('archiveSearchInput').value;
@@ -2377,7 +2198,7 @@
                     </div>
                     <div class="card-actions">
                         <button type="button" class="btn-card btn-card-report" onclick="openSavedReport('${rec.id}')">
-                            📄 보고서
+                            📄 양식 보기
                         </button>
                         <button type="button" class="btn-card btn-card-edit" onclick="startEditRecord('${rec.id}')">
                             ✏️ 수정
@@ -2392,7 +2213,7 @@
         }
 
         /* =========================================================
-           13. 보고서 양식 뷰 & PNG 이미지 다운로드
+           12. 보고서 양식 뷰 & PNG 이미지 다운로드
         ========================================================= */
         function openFormReportPreview() {
             activeReportRecordId = editingRecordId;
@@ -2492,7 +2313,7 @@
         }
 
         /* =========================================================
-           14. 전체화면 이미지 확대 모달
+           13. 전체화면 이미지 확대 모달
         ========================================================= */
         function openModal(src) {
             if (!src || src === window.location.href) return;
@@ -2506,4 +2327,3 @@
     </script>
 </body>
 </html>
-```
