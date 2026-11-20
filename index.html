@@ -3,22 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>소방 점검 현장기록</title>
-    <!-- 보고서 PNG 이미지 저장을 위한 html2canvas CDN -->
+    <title>소방 점검 앱</title>
+    <!-- 보고서 PNG 이미지 내보내기를 위한 html2canvas CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* ==========================================
-           기본 변수 및 리셋 스타일
+           1. 디자인 토큰 및 기본 리셋
         =========================================== */
         :root {
-            --primary: #e53e3e;
-            --primary-dark: #c53030;
-            --primary-light: #fff5f5;
+            --primary: #dc2626;
+            --primary-dark: #b91c1c;
+            --primary-light: #fef2f2;
+            --amber: #d97706;
+            --amber-dark: #b45309;
+            --amber-light: #fffbeb;
+            --amber-border: #fcd34d;
             --blue: #2563eb;
+            --blue-dark: #1d4ed8;
             --blue-light: #eff6ff;
-            --green: #10b981;
-            --green-dark: #059669;
+            --green: #059669;
+            --green-dark: #047857;
             --green-light: #ecfdf5;
+            --green-border: #a7f3d0;
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
@@ -26,8 +32,10 @@
             --gray-400: #94a3b8;
             --gray-500: #64748b;
             --gray-600: #475569;
+            --gray-700: #334155;
             --gray-800: #1e293b;
-            --text: #1f2937;
+            --text: #0f172a;
+            --radius: 12px;
         }
 
         * {
@@ -35,51 +43,65 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-            background-color: var(--gray-100);
-            color: var(--text);
+        html, body {
             margin: 0;
             padding: 0;
-            line-height: 1.4;
+            width: 100%;
+            overflow-x: hidden;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
+            background-color: var(--gray-100);
+            color: var(--text);
+            line-height: 1.45;
         }
 
         /* ==========================================
-           1. 상단 고정 탭 네비게이션
+           2. 상단 고정 3탭 네비게이션
         =========================================== */
-        .tab-nav {
-            display: flex;
-            background: #ffffff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        .top-header-wrap {
             position: sticky;
             top: 0;
             z-index: 100;
-            max-width: 500px;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.07);
+        }
+
+        .tab-nav {
+            display: flex;
+            max-width: 520px;
             margin: 0 auto;
+            background: #ffffff;
         }
 
         .tab-btn {
             flex: 1;
-            padding: 15px 8px;
-            text-align: center;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--gray-500);
-            background: transparent;
+            min-height: 52px;
+            padding: 12px 4px;
             border: none;
             border-bottom: 3px solid transparent;
+            background: transparent;
+            color: var(--gray-500);
+            font-size: 13.5px;
+            font-weight: 700;
+            font-family: inherit;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+            gap: 4px;
+            transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+            white-space: nowrap;
         }
 
         .tab-btn.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
             background-color: #fffafa;
+        }
+
+        .tab-btn.edit-active {
+            color: var(--amber-dark);
+            border-bottom-color: var(--amber);
+            background-color: var(--amber-light);
         }
 
         .count-badge {
@@ -89,26 +111,27 @@
             min-width: 20px;
             height: 20px;
             padding: 0 6px;
+            border-radius: 999px;
             font-size: 11px;
             font-weight: 800;
-            border-radius: 999px;
-            background-color: var(--gray-200);
-            color: var(--gray-600);
+            background: var(--gray-200);
+            color: var(--gray-700);
         }
 
         .tab-btn.active .count-badge {
-            background-color: var(--primary);
+            background: var(--primary);
             color: #ffffff;
         }
 
         /* ==========================================
-           공통 뷰 섹션 및 카드 스타일
+           3. 공통 섹션 및 카드 레이아웃
         =========================================== */
         .view-section {
             display: none;
-            max-width: 500px;
+            width: 100%;
+            max-width: 520px;
             margin: 0 auto;
-            padding: 14px 12px 60px 12px;
+            padding: 14px 12px 64px 12px;
         }
 
         .view-section.active {
@@ -119,8 +142,9 @@
             background: #ffffff;
             border-radius: 14px;
             padding: 16px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
             margin-bottom: 14px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
         .app-title {
@@ -133,64 +157,104 @@
         }
 
         /* ==========================================
-           2. 탭 1: 점검 작성 폼 스타일
+           4. 탭 1: 점검 작성 / 수정 폼
         =========================================== */
+        .edit-banner {
+            display: none;
+            background: var(--amber-light);
+            border: 1.5px solid var(--amber-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .edit-banner.show {
+            display: flex;
+        }
+
+        .edit-banner-text {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: var(--amber-dark);
+            line-height: 1.35;
+        }
+
+        .btn-cancel-edit {
+            flex-shrink: 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--amber);
+            background: #ffffff;
+            color: var(--amber-dark);
+            font-size: 12.5px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .btn-cancel-edit:active {
+            background: #fef3c7;
+        }
+
         .input-group {
             margin-bottom: 14px;
         }
 
         .input-label {
             display: block;
+            font-size: 13.5px;
             font-weight: 700;
-            font-size: 13px;
-            color: var(--gray-600);
+            color: var(--gray-700);
             margin-bottom: 6px;
         }
 
         .text-input,
         .date-input {
             width: 100%;
-            padding: 12px;
-            border: 1.5px solid var(--gray-200);
+            min-height: 46px;
+            padding: 11px 12px;
+            border: 1.5px solid var(--gray-300);
             border-radius: 10px;
             font-size: 15px;
             font-family: inherit;
             color: var(--text);
             background: #ffffff;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
 
         .text-input:focus,
         .date-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.12);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
         }
 
-        /* 사진 첨부 영역 */
         .photo-section {
+            background: var(--gray-50);
             border: 1.5px solid var(--gray-200);
             border-radius: 12px;
             padding: 13px;
             margin-bottom: 12px;
-            background-color: var(--gray-50);
         }
 
         .photo-title {
-            font-weight: 700;
             font-size: 14px;
+            font-weight: 800;
             color: var(--gray-800);
             margin-bottom: 8px;
         }
 
         .file-input {
             width: 100%;
-            font-size: 13px;
-            padding: 6px 0;
+            font-size: 13.5px;
             color: var(--gray-600);
+            padding: 6px 0;
         }
 
-        .preview-container {
+        .preview-wrap {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -199,25 +263,26 @@
         }
 
         .inline-img {
-            width: 100%;
-            max-height: 180px;
-            object-fit: contain;
             display: none;
+            width: 100%;
+            max-height: 190px;
+            object-fit: contain;
             border-radius: 8px;
             border: 1px solid var(--gray-300);
-            background-color: #111827;
+            background: #111827;
             cursor: pointer;
         }
 
         .btn-remove-photo {
             display: none;
-            background-color: var(--primary-light);
-            color: var(--primary);
-            border: 1px solid #feb2b2;
-            padding: 7px 16px;
+            padding: 8px 16px;
             border-radius: 999px;
-            font-size: 12px;
+            border: 1px solid #fecaca;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 12.5px;
             font-weight: 700;
+            font-family: inherit;
             cursor: pointer;
         }
 
@@ -225,61 +290,82 @@
             transform: scale(0.96);
         }
 
-        /* 하단 액션 버튼 */
-        .form-actions {
+        /* 폼 하단 버튼 그룹 */
+        .form-btn-stack {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             margin-top: 18px;
         }
 
+        .form-btn-row {
+            display: flex;
+            gap: 8px;
+        }
+
         .btn {
+            min-height: 46px;
+            padding: 12px 14px;
             border: none;
             border-radius: 10px;
-            padding: 14px 12px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
+            font-size: 14.5px;
+            font-weight: 800;
             font-family: inherit;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            transition: transform 0.1s, opacity 0.2s;
+            transition: transform 0.1s, opacity 0.15s;
         }
 
         .btn:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 3px 10px rgba(220, 38, 38, 0.25);
+        }
+
+        .btn-amber {
+            width: 100%;
+            background: var(--amber);
+            color: #ffffff;
+            box-shadow: 0 3px 10px rgba(217, 119, 6, 0.28);
         }
 
         .btn-blue {
-            flex: 1;
-            background-color: var(--blue);
+            flex: 1.4;
+            background: var(--blue);
             color: #ffffff;
-            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.22);
         }
 
-        .btn-red {
+        .btn-outline {
             flex: 1;
-            background-color: var(--primary);
-            color: #ffffff;
-            box-shadow: 0 3px 8px rgba(229, 62, 62, 0.25);
+            background: #ffffff;
+            color: var(--gray-700);
+            border: 1.5px solid var(--gray-300);
         }
 
         .btn-green {
             flex: 1;
-            background-color: var(--green);
+            background: var(--green);
             color: #ffffff;
-            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.25);
+            box-shadow: 0 3px 8px rgba(5, 150, 105, 0.22);
         }
 
         .btn-gray {
-            flex: 1;
-            background-color: var(--gray-600);
+            flex: 0.9;
+            background: var(--gray-600);
             color: #ffffff;
         }
 
         /* ==========================================
-           3. 탭 2: 월별·일별 캘린더 체크 스타일
+           5. 탭 2: 월별·일별 캘린더 체크
         =========================================== */
         .cal-header {
             display: flex;
@@ -291,18 +377,18 @@
         .cal-nav-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .cal-nav-btn {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 10px;
             border: 1px solid var(--gray-200);
             background: var(--gray-50);
             color: var(--gray-800);
             font-size: 15px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -322,23 +408,26 @@
         }
 
         .btn-today {
-            padding: 7px 12px;
+            min-height: 36px;
+            padding: 6px 14px;
             border-radius: 8px;
-            border: 1px solid var(--blue);
+            border: 1.5px solid var(--blue);
             background: var(--blue-light);
             color: var(--blue);
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: inherit;
             cursor: pointer;
         }
 
-        /* 월간 요약 바 */
         .month-summary {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
             background: var(--green-light);
-            border: 1px solid #a7f3d0;
+            border: 1px solid var(--green-border);
             border-radius: 10px;
             padding: 10px 14px;
             margin-bottom: 12px;
@@ -347,34 +436,27 @@
             color: #065f46;
         }
 
-        .summary-highlight {
+        .summary-num {
             color: var(--green-dark);
-            font-size: 15px;
+            font-size: 14.5px;
             font-weight: 800;
         }
 
-        /* 요일 헤더 */
         .cal-weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             text-align: center;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
+            color: var(--gray-500);
             padding-bottom: 6px;
             border-bottom: 1px solid var(--gray-200);
             margin-bottom: 6px;
-            color: var(--gray-500);
         }
 
-        .cal-weekdays div:first-child {
-            color: var(--primary);
-        }
+        .cal-weekdays div:first-child { color: var(--primary); }
+        .cal-weekdays div:last-child { color: var(--blue); }
 
-        .cal-weekdays div:last-child {
-            color: var(--blue);
-        }
-
-        /* 날짜 그리드 */
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -389,11 +471,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            cursor: pointer;
             border: 1.5px solid transparent;
-            background-color: #ffffff;
-            transition: background-color 0.15s, border-color 0.15s;
-            position: relative;
+            background: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.12s, border-color 0.12s;
         }
 
         .cal-cell.empty {
@@ -402,54 +483,41 @@
         }
 
         .cal-cell:not(.empty):hover {
-            background-color: var(--gray-50);
+            background: var(--gray-50);
         }
 
         .cal-day-num {
             font-size: 13px;
             font-weight: 700;
             color: var(--gray-800);
-            line-height: 1.2;
         }
 
-        .cal-cell.sun .cal-day-num {
-            color: var(--primary);
-        }
+        .cal-cell.sun .cal-day-num { color: var(--primary); }
+        .cal-cell.sat .cal-day-num { color: var(--blue); }
 
-        .cal-cell.sat .cal-day-num {
-            color: var(--blue);
-        }
-
-        /* 점검 완료된 날짜 스타일 */
         .cal-cell.checked {
-            background-color: var(--green-light);
-            border-color: #a7f3d0;
+            background: var(--green-light);
+            border-color: var(--green-border);
         }
 
-        /* 오늘 날짜 테두리 */
         .cal-cell.today {
             border-color: var(--blue);
-            box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.25);
         }
 
-        /* 선택된 날짜 강조 링 */
         .cal-cell.selected {
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.22);
-            background-color: #fff5f5;
+            background: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.18);
         }
 
         .cal-cell.checked.selected {
-            background-color: #d1fae5;
+            background: #d1fae5;
             border-color: var(--green-dark);
-            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.28);
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.25);
         }
 
         .cal-check-badge {
             margin-top: 3px;
-            display: inline-flex;
-            align-items: center;
-            gap: 2px;
             font-size: 10px;
             font-weight: 800;
             color: #065f46;
@@ -460,7 +528,6 @@
             line-height: 1.2;
         }
 
-        /* 캘린더 하단 필터 컨트롤 */
         .filter-bar {
             display: flex;
             gap: 8px;
@@ -469,15 +536,16 @@
 
         .filter-btn {
             flex: 1;
-            padding: 11px 8px;
+            min-height: 42px;
+            padding: 8px 10px;
             border-radius: 10px;
             border: 1.5px solid var(--gray-200);
             background: #ffffff;
             color: var(--gray-600);
             font-size: 13px;
             font-weight: 700;
-            cursor: pointer;
             font-family: inherit;
+            cursor: pointer;
         }
 
         .filter-btn.active {
@@ -488,7 +556,8 @@
 
         .quick-add-btn {
             width: 100%;
-            padding: 12px;
+            min-height: 46px;
+            padding: 10px 12px;
             margin-bottom: 14px;
             border-radius: 10px;
             border: 1.5px dashed var(--primary);
@@ -496,8 +565,8 @@
             color: var(--primary);
             font-size: 14px;
             font-weight: 800;
-            cursor: pointer;
             font-family: inherit;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -505,10 +574,33 @@
         }
 
         .quick-add-btn:active {
-            background: #fed7d7;
+            background: #fee2e2;
         }
 
-        /* 저장된 기록 리스트 카드 */
+        /* ==========================================
+           6. 기록 카드 리스트 (캘린더 & 보관함 공용)
+        =========================================== */
+        .archive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 2px;
+        }
+
+        .archive-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .archive-subtitle {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--gray-500);
+        }
+
         .record-list {
             display: flex;
             flex-direction: column;
@@ -518,27 +610,32 @@
         .record-card {
             background: #ffffff;
             border: 1px solid var(--gray-200);
-            border-radius: 12px;
+            border-radius: 13px;
             padding: 14px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
         }
 
-        .record-header {
+        .record-meta {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
+            align-items: center;
+            margin-bottom: 6px;
         }
 
         .record-date-tag {
             display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 11.5px;
+            font-weight: 800;
             color: var(--green-dark);
             background: var(--green-light);
             padding: 3px 8px;
             border-radius: 6px;
-            margin-bottom: 4px;
+        }
+
+        .photo-count-tag {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--gray-500);
         }
 
         .record-place {
@@ -546,15 +643,16 @@
             font-weight: 800;
             color: var(--gray-800);
             margin-bottom: 2px;
+            word-break: break-word;
         }
 
         .record-loc {
-            font-size: 13px;
-            color: var(--gray-500);
+            font-size: 13.5px;
             font-weight: 600;
+            color: var(--gray-600);
+            word-break: break-word;
         }
 
-        /* 3장 썸네일 스트립 */
         .thumb-strip {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -567,12 +665,10 @@
             border-radius: 8px;
             overflow: hidden;
             background: var(--gray-50);
-            display: flex;
-            flex-direction: column;
         }
 
         .thumb-label {
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: 700;
             text-align: center;
             padding: 3px 0;
@@ -598,63 +694,82 @@
         }
 
         .thumb-empty {
-            font-size: 10px;
+            font-size: 11px;
             color: var(--gray-400);
         }
 
-        .record-card-actions {
-            display: flex;
-            gap: 8px;
+        .card-actions {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 0.9fr;
+            gap: 6px;
+        }
+
+        .btn-card {
+            min-height: 40px;
+            padding: 8px 6px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            border: none;
         }
 
         .btn-card-report {
-            flex: 2;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
             background: var(--blue);
             color: #ffffff;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
+        }
+
+        .btn-card-edit {
+            background: var(--amber-light);
+            color: var(--amber-dark);
+            border: 1px solid var(--amber-border);
         }
 
         .btn-card-delete {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #fecaca;
-            background: #fef2f2;
+            background: var(--primary-light);
             color: var(--primary);
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
+            border: 1px solid #fecaca;
         }
 
         .empty-state {
             text-align: center;
             background: #ffffff;
             border-radius: 12px;
-            padding: 34px 16px;
+            padding: 36px 16px;
             color: var(--gray-500);
             font-size: 14px;
-            border: 1px dashed var(--gray-300);
+            border: 1.5px dashed var(--gray-300);
         }
 
         .empty-state-icon {
-            font-size: 30px;
+            font-size: 32px;
             margin-bottom: 8px;
         }
 
         /* ==========================================
-           4. 보고서 양식 (캡처 / PNG 저장 모드)
+           7. 보고서 양식 (캡처 / PNG 저장 모드)
         =========================================== */
-        .report-actions {
+        .report-top-bar {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .report-top-bar .btn {
+            font-size: 13px;
+            padding: 10px 8px;
+        }
+
+        .report-edit-btn {
+            flex: 1;
+            background: var(--amber);
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(217, 119, 6, 0.22);
         }
 
         .report-tip {
@@ -666,36 +781,36 @@
 
         .report-box {
             background: #ffffff;
-            padding: 14px;
+            padding: 12px;
             border: 2px solid #000000;
             box-sizing: border-box;
         }
 
         .report-title {
             text-align: center;
-            font-size: 19px;
+            font-size: 18px;
             font-weight: 800;
-            border-bottom: 2px solid #000000;
-            padding-bottom: 8px;
-            margin: 0 0 10px 0;
-            letter-spacing: 1px;
             color: #000000;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 7px;
+            margin: 0 0 8px 0;
+            letter-spacing: 1px;
         }
 
         .report-info {
             font-size: 12.5px;
             font-weight: 700;
-            margin-bottom: 10px;
-            border-bottom: 1px dashed #888888;
-            padding-bottom: 8px;
             color: #111111;
+            border-bottom: 1px dashed #888888;
+            padding-bottom: 7px;
+            margin-bottom: 8px;
         }
 
         .report-info-row {
             display: flex;
             justify-content: space-between;
             gap: 8px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .report-info-row:last-child {
@@ -705,7 +820,7 @@
         .report-grid {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 7px;
         }
 
         .report-item {
@@ -717,27 +832,27 @@
         .report-item-title {
             background: #eeeeee;
             text-align: center;
-            font-weight: 700;
-            font-size: 12.5px;
-            padding: 5px;
-            border-bottom: 1px solid #000000;
+            font-size: 12px;
+            font-weight: 800;
             color: #000000;
+            padding: 4px;
+            border-bottom: 1px solid #000000;
         }
 
-        /* 전/중/후 동일 크기(150px) 사진 박스 */
+        /* 전/중/후 모두 동일한 고정 높이 155px */
         .report-item-content {
             position: relative;
+            height: 155px;
             background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 150px;
             overflow: hidden;
         }
 
         .report-item-content span {
-            color: #aaaaaa;
             font-size: 12px;
+            color: #999999;
         }
 
         .report-item-content img {
@@ -753,14 +868,14 @@
         }
 
         /* ==========================================
-           5. 전체화면 이미지 확대 모달
+           8. 전체화면 이미지 확대 모달
         =========================================== */
         .image-modal {
             display: none;
             position: fixed;
-            z-index: 9999;
             inset: 0;
-            background-color: rgba(0, 0, 0, 0.92);
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.92);
             align-items: center;
             justify-content: center;
             padding: 16px;
@@ -780,19 +895,19 @@
             color: #ffffff;
             font-size: 36px;
             font-weight: 700;
-            cursor: pointer;
             line-height: 1;
+            cursor: pointer;
         }
 
         /* ==========================================
-           6. 커스텀 토스트 & 확인 모달 (alert/confirm 대체)
+           9. 커스텀 알림 토스트 & 확인 모달
         =========================================== */
         .toast {
             position: fixed;
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background-color: rgba(30, 41, 59, 0.95);
+            background: rgba(15, 23, 42, 0.95);
             color: #ffffff;
             padding: 12px 20px;
             border-radius: 999px;
@@ -802,11 +917,9 @@
             z-index: 10000;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.25s, transform 0.25s;
-            white-space: nowrap;
+            transition: opacity 0.22s, transform 0.22s;
             max-width: 92vw;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            text-align: center;
         }
 
         .toast.show {
@@ -818,28 +931,28 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.55);
             z-index: 9998;
+            background: rgba(15, 23, 42, 0.55);
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
 
         .confirm-box {
-            background: #ffffff;
             width: 100%;
             max-width: 320px;
+            background: #ffffff;
             border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
             text-align: center;
         }
 
         .confirm-msg {
+            margin: 0 0 18px 0;
             font-size: 15px;
             font-weight: 700;
             color: var(--gray-800);
-            margin: 0 0 18px 0;
             line-height: 1.5;
         }
 
@@ -850,61 +963,72 @@
 
         .confirm-btn-cancel {
             flex: 1;
-            padding: 11px;
+            min-height: 44px;
             border-radius: 10px;
             border: 1px solid var(--gray-300);
             background: #ffffff;
-            color: var(--gray-600);
+            color: var(--gray-700);
             font-size: 14px;
             font-weight: 700;
-            cursor: pointer;
             font-family: inherit;
+            cursor: pointer;
         }
 
         .confirm-btn-ok {
             flex: 1;
-            padding: 11px;
+            min-height: 44px;
             border-radius: 10px;
             border: none;
             background: var(--primary);
             color: #ffffff;
             font-size: 14px;
             font-weight: 700;
-            cursor: pointer;
             font-family: inherit;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
     <!-- ==========================================
-         상단 고정 탭 네비게이션
+         상단 고정 3탭 네비게이션
     =========================================== -->
-    <nav id="tabNav" class="tab-nav">
-        <button id="tabBtnWrite" class="tab-btn active" onclick="switchTab('write')">
-            📝 점검 작성
-        </button>
-        <button id="tabBtnCalendar" class="tab-btn" onclick="switchTab('calendar')">
-            📅 월별·일별 체크
-            <span id="totalCountBadge" class="count-badge">0</span>
-        </button>
-    </nav>
+    <header id="topHeader" class="top-header-wrap">
+        <nav class="tab-nav">
+            <button type="button" id="tabBtnWrite" class="tab-btn active" onclick="switchTab('write')">
+                📝 점검 작성
+            </button>
+            <button type="button" id="tabBtnCalendar" class="tab-btn" onclick="switchTab('calendar')">
+                📅 월별·일별 체크
+            </button>
+            <button type="button" id="tabBtnArchive" class="tab-btn" onclick="switchTab('archive')">
+                🗂️ 기록 보관함
+                <span id="archiveCountBadge" class="count-badge">0</span>
+            </button>
+        </nav>
+    </header>
 
     <!-- ==========================================
-         [탭 1] 점검 작성 (입력 폼)
+         [탭 1] 점검 작성 및 기존 보고서 수정 폼
     =========================================== -->
     <main id="viewWrite" class="view-section active">
         <div class="card">
             <h1 class="app-title">🚨 소방 점검 현장기록</h1>
 
+            <!-- 기존 보고서 수정 모드 배너 -->
+            <div id="editBanner" class="edit-banner">
+                <div class="edit-banner-text">✏️ 기존 보고서를 수정하고 있습니다</div>
+                <button type="button" class="btn-cancel-edit" onclick="cancelEditMode()">수정 취소</button>
+            </div>
+
             <div class="input-group">
                 <label class="input-label" for="placeInput">🏢 점검 장소</label>
-                <input type="text" id="placeInput" class="text-input" placeholder="예: 한국아파트 101동" oninput="saveDraft()">
+                <input type="text" id="placeInput" class="text-input" placeholder="예: 한국아파트 101동" oninput="handleDraftChange()">
             </div>
 
             <div class="input-group">
                 <label class="input-label" for="locInput">📍 점검 위치</label>
-                <input type="text" id="locInput" class="text-input" placeholder="예: 1층 A동 소화전" oninput="saveDraft()">
+                <input type="text" id="locInput" class="text-input" placeholder="예: 1층 A동 소화전" oninput="handleDraftChange()">
             </div>
 
             <div class="input-group">
@@ -912,68 +1036,67 @@
                 <input type="date" id="dateInput" class="date-input">
             </div>
 
-            <!-- 1. 점검 전 -->
+            <!-- 1. 점검 전 (Before) -->
             <div class="photo-section">
                 <div class="photo-title">📸 1. 점검 전 (Before)</div>
                 <input type="file" id="uploadBefore" class="file-input" accept="image/*"
-                       onchange="handleImageUpload(this, 'imgBefore', 'dataBefore', 'btnRemoveBefore')">
-                <div class="preview-container">
+                       onchange="handlePhotoUpload(this, 'before')">
+                <div class="preview-wrap">
                     <img id="imgBefore" class="inline-img" alt="점검 전 사진" onclick="openModal(this.src)">
-                    <button type="button" id="btnRemoveBefore" class="btn-remove-photo"
-                            onclick="removeImage('uploadBefore', 'imgBefore', 'dataBefore', 'btnRemoveBefore')">
+                    <button type="button" id="btnRemoveBefore" class="btn-remove-photo" onclick="clearPhoto('before')">
                         🗑️ 사진 지우기
                     </button>
                 </div>
-                <input type="hidden" id="dataBefore">
             </div>
 
-            <!-- 2. 점검 중 -->
+            <!-- 2. 점검 중 (During) -->
             <div class="photo-section">
                 <div class="photo-title">📸 2. 점검 중 (During)</div>
                 <input type="file" id="uploadDuring" class="file-input" accept="image/*"
-                       onchange="handleImageUpload(this, 'imgDuring', 'dataDuring', 'btnRemoveDuring')">
-                <div class="preview-container">
+                       onchange="handlePhotoUpload(this, 'during')">
+                <div class="preview-wrap">
                     <img id="imgDuring" class="inline-img" alt="점검 중 사진" onclick="openModal(this.src)">
-                    <button type="button" id="btnRemoveDuring" class="btn-remove-photo"
-                            onclick="removeImage('uploadDuring', 'imgDuring', 'dataDuring', 'btnRemoveDuring')">
+                    <button type="button" id="btnRemoveDuring" class="btn-remove-photo" onclick="clearPhoto('during')">
                         🗑️ 사진 지우기
                     </button>
                 </div>
-                <input type="hidden" id="dataDuring">
             </div>
 
-            <!-- 3. 점검 후 -->
+            <!-- 3. 점검 후 (After) -->
             <div class="photo-section">
                 <div class="photo-title">📸 3. 점검 후 (After)</div>
                 <input type="file" id="uploadAfter" class="file-input" accept="image/*"
-                       onchange="handleImageUpload(this, 'imgAfter', 'dataAfter', 'btnRemoveAfter')">
-                <div class="preview-container">
+                       onchange="handlePhotoUpload(this, 'after')">
+                <div class="preview-wrap">
                     <img id="imgAfter" class="inline-img" alt="점검 후 사진" onclick="openModal(this.src)">
-                    <button type="button" id="btnRemoveAfter" class="btn-remove-photo"
-                            onclick="removeImage('uploadAfter', 'imgAfter', 'dataAfter', 'btnRemoveAfter')">
+                    <button type="button" id="btnRemoveAfter" class="btn-remove-photo" onclick="clearPhoto('after')">
                         🗑️ 사진 지우기
                     </button>
                 </div>
-                <input type="hidden" id="dataAfter">
             </div>
 
-            <div class="form-actions">
-                <button type="button" class="btn btn-blue" onclick="previewCurrentReport()">
-                    📸 보고서 양식 미리보기
-                </button>
-                <button type="button" class="btn btn-red" onclick="saveRecord()">
+            <!-- 저장 / 미리보기 / 초기화 버튼 -->
+            <div class="form-btn-stack">
+                <button type="button" id="btnSavePrimary" class="btn btn-primary" onclick="saveOrUpdateRecord()">
                     💾 앱에 기록 저장하기
                 </button>
+                <div class="form-btn-row">
+                    <button type="button" class="btn btn-blue" onclick="openFormReportPreview()">
+                        📸 보고서 양식 미리보기
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="requestResetForm()">
+                        🔄 입력 초기화
+                    </button>
+                </div>
             </div>
         </div>
     </main>
 
     <!-- ==========================================
-         [탭 2] 월별·일별 체크 (캘린더 + 기록 보관함)
+         [탭 2] 월별·일별 캘린더 체크
     =========================================== -->
     <section id="viewCalendar" class="view-section">
         <div class="card">
-            <!-- 월 이동 헤더 -->
             <div class="cal-header">
                 <div class="cal-nav-group">
                     <button type="button" class="cal-nav-btn" onclick="changeMonth(-1)" aria-label="이전 달">◀</button>
@@ -983,13 +1106,11 @@
                 <button type="button" class="btn-today" onclick="jumpToToday()">오늘</button>
             </div>
 
-            <!-- 월간 점검 요약 바 -->
             <div class="month-summary">
-                <div>이번 달 점검 완료: <span id="summaryDays" class="summary-highlight">0일</span></div>
-                <div>총 점검 건수: <span id="summaryCount" class="summary-highlight">0건</span></div>
+                <div>이번 달 점검 완료 일수: <span id="summaryDays" class="summary-num">0일</span></div>
+                <div>총 점검 건수: <span id="summaryCount" class="summary-num">0건</span></div>
             </div>
 
-            <!-- 요일 헤더 -->
             <div class="cal-weekdays">
                 <div>일</div>
                 <div>월</div>
@@ -1000,42 +1121,47 @@
                 <div>토</div>
             </div>
 
-            <!-- 달력 날짜 셀 컨테이너 -->
             <div id="calGrid" class="cal-grid"></div>
         </div>
 
-        <!-- 일별 / 월별 필터 토글 -->
         <div class="filter-bar">
-            <button type="button" id="filterDayBtn" class="filter-btn active" onclick="setFilterMode('day')">
+            <button type="button" id="filterDayBtn" class="filter-btn active" onclick="setCalendarFilter('day')">
                 📌 선택한 날짜
             </button>
-            <button type="button" id="filterMonthBtn" class="filter-btn" onclick="setFilterMode('month')">
-                📆 이번 달 전체
+            <button type="button" id="filterMonthBtn" class="filter-btn" onclick="setCalendarFilter('month')">
+                📆 이번 달 전체 보기
             </button>
         </div>
 
-        <!-- 선택한 날짜 바로 점검 작성하기 버튼 -->
-        <button type="button" id="quickAddBtn" class="quick-add-btn" onclick="writeForSelectedDate()">
+        <button type="button" id="quickAddBtn" class="quick-add-btn" onclick="startWriteForSelectedDate()">
             + 선택한 날짜 점검 작성하기
         </button>
 
-        <!-- 필터링된 기록 카드 리스트 -->
-        <div id="recordList" class="record-list"></div>
+        <div id="calendarRecordList" class="record-list"></div>
     </section>
 
     <!-- ==========================================
-         [오버레이 뷰] 보고서 양식 (캡처 / PNG 저장)
+         [탭 3] 기록 보관함 (전체 목록)
+    =========================================== -->
+    <section id="viewArchive" class="view-section">
+        <div class="archive-header">
+            <h2 class="archive-title">🗂️ 저장된 점검 기록</h2>
+            <span id="archiveTotalText" class="archive-subtitle">총 0건</span>
+        </div>
+        <div id="archiveRecordList" class="record-list"></div>
+    </section>
+
+    <!-- ==========================================
+         [전용 뷰] 보고서 양식 (캡처 / PNG 저장)
     =========================================== -->
     <section id="viewReport" class="view-section">
-        <div class="report-actions">
+        <div class="report-top-bar">
             <button type="button" class="btn btn-gray" onclick="closeReportView()">↩ 돌아가기</button>
-            <button type="button" id="btnDownloadPng" class="btn btn-green" onclick="downloadReportImage()">
-                💾 이미지로 저장 (PNG)
-            </button>
+            <button type="button" class="btn report-edit-btn" onclick="editCurrentReport()">✏️ 보고서 수정</button>
+            <button type="button" id="btnDownloadPng" class="btn btn-green" onclick="downloadReportPng()">💾 이미지로 저장</button>
         </div>
-        <p class="report-tip">👇 아래 양식을 바로 캡처하거나 [이미지로 저장] 버튼을 누르세요.</p>
+        <p class="report-tip">👇 아래 양식을 캡처하거나 [이미지로 저장]을 눌러 PNG로 보관하세요.</p>
 
-        <!-- 실제 PNG로 저장되는 보고서 박스 -->
         <div id="reportBox" class="report-box">
             <h2 class="report-title">소방 시설 점검 사진 대지</h2>
 
@@ -1081,8 +1207,8 @@
          전체화면 이미지 확대 모달
     =========================================== -->
     <div id="imageModal" class="image-modal" onclick="closeModal()">
-        <span class="modal-close">&times;</span>
-        <img id="modalImg" src="" alt="확대 이미지">
+        <span class="modal-close" aria-label="닫기">&times;</span>
+        <img id="modalImg" src="" alt="확대 사진">
     </div>
 
     <!-- ==========================================
@@ -1090,55 +1216,63 @@
     =========================================== -->
     <div id="confirmOverlay" class="confirm-overlay">
         <div class="confirm-box">
-            <p id="confirmMsg" class="confirm-msg">정말 삭제하시겠습니까?</p>
+            <p id="confirmMsg" class="confirm-msg"></p>
             <div class="confirm-actions">
-                <button type="button" class="confirm-btn-cancel" onclick="closeConfirm(false)">취소</button>
-                <button type="button" class="confirm-btn-ok" onclick="closeConfirm(true)">삭제</button>
+                <button type="button" class="confirm-btn-cancel" onclick="resolveConfirm(false)">취소</button>
+                <button type="button" id="confirmOkBtn" class="confirm-btn-ok" onclick="resolveConfirm(true)">확인</button>
             </div>
         </div>
     </div>
 
     <!-- ==========================================
-         커스텀 토스트 메시지 (alert 대체)
+         커스텀 알림 토스트 (alert 대체)
     =========================================== -->
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script>
         /* ==========================================
-           전역 상태 변수 및 스토리지 키
+           상수 및 전역 상태 관리
         =========================================== */
-        const STORAGE_KEY_RECORDS = 'fireAppRecords';
-        const STORAGE_KEY_DRAFT = 'fireAppDraft';
+        const STORAGE_KEY_RECORDS = 'fire_inspection_records_v2';
+        const STORAGE_KEY_DRAFT = 'fire_inspection_draft_v2';
 
         let records = [];
-        let lastTab = 'write';
+        let formPhotos = { before: null, during: null, after: null };
 
-        // 캘린더 상태 (로컬 타임존 기준 오늘 날짜로 초기화)
-        const now = new Date();
-        let currentYear = now.getFullYear();
-        let currentMonth = now.getMonth(); // 0 ~ 11
-        let selectedDateStr = formatDateYMD(now); // YYYY-MM-DD
-        let filterMode = 'day'; // 'day' 또는 'month'
+        // 수정 모드 상태: null이면 신규 작성, 문자열 ID면 기존 보고서 수정 중
+        let editingRecordId = null;
+        // 보고서 뷰 상태: 현재 보고서 화면이 참조하는 기록 ID (신규 미리보기면 null)
+        let activeReportRecordId = null;
+        // 보고서 화면에서 돌아갈 이전 탭
+        let previousTab = 'write';
 
-        // 커스텀 확인 모달 콜백
+        // 캘린더 상태 (로컬 시간 기준 오늘 날짜)
+        const initialToday = new Date();
+        let calYear = initialToday.getFullYear();
+        let calMonth = initialToday.getMonth(); // 0 ~ 11
+        let selectedDateStr = getLocalDateYMD(initialToday);
+        let calendarFilterMode = 'day'; // 'day' | 'month'
+
+        // 모달/토스트 제어용
         let confirmCallback = null;
         let toastTimer = null;
 
         /* ==========================================
-           초기화 (페이지 로드 시 실행)
+           초기화 (DOM 로드 완료 시)
         =========================================== */
         window.onload = function () {
-            document.getElementById('dateInput').value = formatDateYMD(new Date());
-            loadDraft();
-            loadRecords();
-            updateTotalBadge();
-            renderCalendarAndList();
+            document.getElementById('dateInput').value = getLocalDateYMD(new Date());
+            loadRecordsFromStorage();
+            loadDraftToForm();
+            updateAllCounts();
+            renderCalendarView();
+            renderArchiveView();
         };
 
         /* ==========================================
-           날짜 포맷 유틸리티 함수
+           날짜 및 문자열 유틸리티
         =========================================== */
-        function formatDateYMD(dateObj) {
+        function getLocalDateYMD(dateObj) {
             const y = dateObj.getFullYear();
             const m = String(dateObj.getMonth() + 1).padStart(2, '0');
             const d = String(dateObj.getDate()).padStart(2, '0');
@@ -1159,25 +1293,26 @@
             return `${parseInt(parts[1], 10)}월 ${parseInt(parts[2], 10)}일`;
         }
 
-        // 기존 구버전 데이터("2026년 11월 19일")가 있을 경우 YYYY-MM-DD로 자동 변환
-        function normalizeDateStr(record) {
-            if (record.dateStr && /^\d{4}-\d{2}-\d{2}$/.test(record.dateStr)) {
-                return record.dateStr;
-            }
-            if (record.date) {
-                const match = record.date.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
-                if (match) {
-                    const y = match[1];
-                    const m = String(match[2]).padStart(2, '0');
-                    const d = String(match[3]).padStart(2, '0');
-                    return `${y}-${m}-${d}`;
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function sortRecordsDesc(list) {
+            return [...list].sort((a, b) => {
+                if (a.dateStr !== b.dateStr) {
+                    return a.dateStr < b.dateStr ? 1 : -1;
                 }
-            }
-            return formatDateYMD(new Date());
+                return (b.updatedAt || Number(b.id) || 0) - (a.updatedAt || Number(a.id) || 0);
+            });
         }
 
         /* ==========================================
-           커스텀 토스트 및 확인 모달 (alert/confirm 미사용)
+           커스텀 토스트 및 확인 모달
         =========================================== */
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -1186,16 +1321,17 @@
             if (toastTimer) clearTimeout(toastTimer);
             toastTimer = setTimeout(() => {
                 toast.classList.remove('show');
-            }, 2400);
+            }, 2500);
         }
 
-        function openConfirm(message, onConfirm) {
+        function openConfirm(message, okLabel, onConfirm) {
             document.getElementById('confirmMsg').innerText = message;
+            document.getElementById('confirmOkBtn').innerText = okLabel || '확인';
             confirmCallback = onConfirm;
             document.getElementById('confirmOverlay').style.display = 'flex';
         }
 
-        function closeConfirm(isConfirmed) {
+        function resolveConfirm(isConfirmed) {
             document.getElementById('confirmOverlay').style.display = 'none';
             if (isConfirmed && typeof confirmCallback === 'function') {
                 confirmCallback();
@@ -1204,43 +1340,83 @@
         }
 
         /* ==========================================
-           탭 전환 및 화면 제어
+           탭 전환 및 뷰 표시 제어
         =========================================== */
         function switchTab(tabName) {
-            const tabNav = document.getElementById('tabNav');
-            const views = document.querySelectorAll('.view-section');
-            views.forEach(v => v.classList.remove('active'));
+            const topHeader = document.getElementById('topHeader');
+            const sections = document.querySelectorAll('.view-section');
+            sections.forEach(sec => sec.classList.remove('active'));
 
             if (tabName === 'report') {
-                tabNav.style.display = 'none';
+                topHeader.style.display = 'none';
                 document.getElementById('viewReport').classList.add('active');
                 window.scrollTo(0, 0);
                 return;
             }
 
-            lastTab = tabName;
-            tabNav.style.display = 'flex';
+            previousTab = tabName;
+            topHeader.style.display = 'block';
 
-            document.getElementById('tabBtnWrite').classList.toggle('active', tabName === 'write');
-            document.getElementById('tabBtnCalendar').classList.toggle('active', tabName === 'calendar');
+            const btnWrite = document.getElementById('tabBtnWrite');
+            const btnCal = document.getElementById('tabBtnCalendar');
+            const btnArchive = document.getElementById('tabBtnArchive');
+
+            btnWrite.classList.remove('active', 'edit-active');
+            btnCal.classList.remove('active');
+            btnArchive.classList.remove('active');
 
             if (tabName === 'write') {
                 document.getElementById('viewWrite').classList.add('active');
+                btnWrite.classList.add(editingRecordId ? 'edit-active' : 'active');
             } else if (tabName === 'calendar') {
                 document.getElementById('viewCalendar').classList.add('active');
-                renderCalendarAndList();
+                btnCal.classList.add('active');
+                renderCalendarView();
+            } else if (tabName === 'archive') {
+                document.getElementById('viewArchive').classList.add('active');
+                btnArchive.classList.add('active');
+                renderArchiveView();
             }
             window.scrollTo(0, 0);
         }
 
         function closeReportView() {
-            switchTab(lastTab);
+            switchTab(previousTab || 'write');
         }
 
         /* ==========================================
-           입력 텍스트 자동 임시 저장 (Draft)
+           localStorage 데이터 저장/로드 및 임시 저장
         =========================================== */
-        function saveDraft() {
+        function loadRecordsFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_RECORDS);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        records = parsed;
+                        return;
+                    }
+                }
+                records = [];
+            } catch (e) {
+                console.error('기록 불러오기 실패:', e);
+                records = [];
+            }
+        }
+
+        function saveRecordsToStorage() {
+            localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
+            updateAllCounts();
+        }
+
+        function updateAllCounts() {
+            document.getElementById('archiveCountBadge').innerText = records.length;
+            document.getElementById('archiveTotalText').innerText = `총 ${records.length}건`;
+        }
+
+        // 신규 작성 모드일 때만 장소/위치 텍스트 자동 임시 저장
+        function handleDraftChange() {
+            if (editingRecordId !== null) return;
             try {
                 const draft = {
                     place: document.getElementById('placeInput').value,
@@ -1252,20 +1428,21 @@
             }
         }
 
-        function loadDraft() {
+        function loadDraftToForm() {
+            if (editingRecordId !== null) return;
             try {
-                const saved = localStorage.getItem(STORAGE_KEY_DRAFT);
-                if (saved) {
-                    const draft = JSON.parse(saved);
-                    if (draft.place) document.getElementById('placeInput').value = draft.place;
-                    if (draft.location) document.getElementById('locInput').value = draft.location;
+                const raw = localStorage.getItem(STORAGE_KEY_DRAFT);
+                if (raw) {
+                    const draft = JSON.parse(raw);
+                    document.getElementById('placeInput').value = draft.place || '';
+                    document.getElementById('locInput').value = draft.location || '';
                 }
             } catch (e) {
-                console.error('임시 저장 불러오기 오류:', e);
+                console.error('임시 저장 로드 오류:', e);
             }
         }
 
-        function clearDraft() {
+        function clearDraftStorage() {
             try {
                 localStorage.removeItem(STORAGE_KEY_DRAFT);
             } catch (e) {
@@ -1274,113 +1451,174 @@
         }
 
         /* ==========================================
-           사진 업로드, Canvas 자동 압축 및 초기화
+           사진 업로드 (Canvas 800px / JPEG 0.65 압축) 및 삭제
         =========================================== */
-        function handleImageUpload(input, imgId, dataId, removeBtnId) {
-            if (!input.files || !input.files[0]) return;
+        function getPhotoDomIds(phase) {
+            const cap = phase.charAt(0).toUpperCase() + phase.slice(1);
+            return {
+                input: `upload${cap}`,
+                img: `img${cap}`,
+                removeBtn: `btnRemove${cap}`
+            };
+        }
 
-            const file = input.files[0];
+        function applyPhotoPreview(phase, dataUrl) {
+            const ids = getPhotoDomIds(phase);
+            const imgEl = document.getElementById(ids.img);
+            const btnEl = document.getElementById(ids.removeBtn);
+
+            formPhotos[phase] = dataUrl || null;
+
+            if (dataUrl) {
+                imgEl.src = dataUrl;
+                imgEl.style.display = 'block';
+                btnEl.style.display = 'inline-block';
+            } else {
+                imgEl.src = '';
+                imgEl.style.display = 'none';
+                btnEl.style.display = 'none';
+            }
+        }
+
+        function handlePhotoUpload(inputEl, phase) {
+            if (!inputEl.files || !inputEl.files[0]) return;
+
+            const file = inputEl.files[0];
             const reader = new FileReader();
 
-            reader.onload = function (e) {
+            reader.onload = function (event) {
                 const img = new Image();
                 img.onload = function () {
                     try {
-                        // Canvas를 이용해 최대 800px, JPEG 60% 화질로 압축
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const MAX_SIZE = 800;
+                        const MAX_DIM = 800;
+                        let w = img.width;
+                        let h = img.height;
 
-                        if (width > height && width > MAX_SIZE) {
-                            height = Math.round(height * (MAX_SIZE / width));
-                            width = MAX_SIZE;
-                        } else if (height > MAX_SIZE) {
-                            width = Math.round(width * (MAX_SIZE / height));
-                            height = MAX_SIZE;
+                        if (w > h && w > MAX_DIM) {
+                            h = Math.round(h * (MAX_DIM / w));
+                            w = MAX_DIM;
+                        } else if (h > MAX_DIM) {
+                            w = Math.round(w * (MAX_DIM / h));
+                            h = MAX_DIM;
                         }
 
-                        canvas.width = width;
-                        canvas.height = height;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
                         const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
+                        ctx.drawImage(img, 0, 0, w, h);
 
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
-
-                        const previewImg = document.getElementById(imgId);
-                        previewImg.src = compressedDataUrl;
-                        previewImg.style.display = 'block';
-
-                        document.getElementById(removeBtnId).style.display = 'inline-block';
-                        document.getElementById(dataId).value = compressedDataUrl;
+                        const compressed = canvas.toDataURL('image/jpeg', 0.65);
+                        applyPhotoPreview(phase, compressed);
                     } catch (err) {
-                        console.error('이미지 압축 오류:', err);
+                        console.error('이미지 압축 실패:', err);
                         showToast('사진을 처리하는 중 오류가 발생했습니다.');
                     }
                 };
-                img.src = e.target.result;
+                img.onerror = function () {
+                    showToast('이미지 파일을 읽을 수 없습니다.');
+                };
+                img.src = event.target.result;
             };
 
             reader.readAsDataURL(file);
         }
 
-        // 사진 및 파일 입력값 완전 초기화 (같은 사진 재첨부 가능)
-        function removeImage(inputId, imgId, dataId, removeBtnId) {
-            const inputEl = document.getElementById(inputId);
+        function clearPhoto(phase) {
+            const ids = getPhotoDomIds(phase);
+            const inputEl = document.getElementById(ids.input);
+            // 동일 파일 재첨부가 가능하도록 input.value 초기화
             inputEl.value = '';
-
-            const imgEl = document.getElementById(imgId);
-            imgEl.style.display = 'none';
-            imgEl.src = '';
-
-            document.getElementById(dataId).value = '';
-            document.getElementById(removeBtnId).style.display = 'none';
-        }
-
-        function resetForm() {
-            document.getElementById('placeInput').value = '';
-            document.getElementById('locInput').value = '';
-            clearDraft();
-
-            removeImage('uploadBefore', 'imgBefore', 'dataBefore', 'btnRemoveBefore');
-            removeImage('uploadDuring', 'imgDuring', 'dataDuring', 'btnRemoveDuring');
-            removeImage('uploadAfter', 'imgAfter', 'dataAfter', 'btnRemoveAfter');
+            applyPhotoPreview(phase, null);
         }
 
         /* ==========================================
-           기록 저장 및 불러오기 (localStorage)
+           수정 모드(Edit Mode) 진입 / 취소 / 초기화
         =========================================== */
-        function loadRecords() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY_RECORDS);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) {
-                        records = parsed.map(r => ({
-                            ...r,
-                            dateStr: normalizeDateStr(r)
-                        }));
-                    }
-                }
-            } catch (e) {
-                console.error('기록 불러오기 오류:', e);
-                records = [];
+        function syncEditModeUI() {
+            const banner = document.getElementById('editBanner');
+            const tabBtn = document.getElementById('tabBtnWrite');
+            const saveBtn = document.getElementById('btnSavePrimary');
+
+            if (editingRecordId !== null) {
+                banner.classList.add('show');
+                tabBtn.innerText = '✏️ 기존 보고서 수정 중';
+                saveBtn.innerText = '✅ 수정 내용 저장하기';
+                saveBtn.className = 'btn btn-amber';
+            } else {
+                banner.classList.remove('show');
+                tabBtn.innerText = '📝 점검 작성';
+                saveBtn.innerText = '💾 앱에 기록 저장하기';
+                saveBtn.className = 'btn btn-primary';
             }
         }
 
-        function persistRecords() {
-            localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
-            updateTotalBadge();
+        function startEditRecord(recordId) {
+            const target = records.find(r => r.id === recordId);
+            if (!target) {
+                showToast('수정할 보고서를 찾을 수 없습니다.');
+                return;
+            }
+
+            editingRecordId = target.id;
+            document.getElementById('placeInput').value = target.place || '';
+            document.getElementById('locInput').value = target.location || '';
+            document.getElementById('dateInput').value = target.dateStr || getLocalDateYMD(new Date());
+
+            // 파일 입력창 초기화 후 기존 사진 세팅
+            ['before', 'during', 'after'].forEach(phase => {
+                const ids = getPhotoDomIds(phase);
+                document.getElementById(ids.input).value = '';
+                const photoData = target.photos ? target.photos[phase] : null;
+                applyPhotoPreview(phase, photoData);
+            });
+
+            syncEditModeUI();
+            switchTab('write');
+            showToast('✏️ 보고서 수정 모드로 불러왔습니다.');
         }
 
-        function updateTotalBadge() {
-            document.getElementById('totalCountBadge').innerText = records.length;
+        function cancelEditMode() {
+            editingRecordId = null;
+            clearFormFields(false);
+            loadDraftToForm();
+            syncEditModeUI();
+            switchTab('write');
+            showToast('수정을 취소했습니다.');
         }
 
-        function saveRecord() {
+        function clearFormFields(alsoClearDraft) {
+            document.getElementById('placeInput').value = '';
+            document.getElementById('locInput').value = '';
+            document.getElementById('dateInput').value = getLocalDateYMD(new Date());
+            clearPhoto('before');
+            clearPhoto('during');
+            clearPhoto('after');
+            if (alsoClearDraft) {
+                clearDraftStorage();
+            }
+        }
+
+        function requestResetForm() {
+            const msg = editingRecordId
+                ? '수정 중인 내용을 초기화하고 새 작성 모드로 전환할까요?'
+                : '현재 입력한 내용과 사진을 모두 초기화할까요?';
+            openConfirm(msg, '초기화', function () {
+                editingRecordId = null;
+                clearFormFields(true);
+                syncEditModeUI();
+                switchTab('write');
+                showToast('입력 내용을 초기화했습니다.');
+            });
+        }
+
+        /* ==========================================
+           기록 저장 및 수정 반영 (localStorage)
+        =========================================== */
+        function saveOrUpdateRecord() {
             const place = document.getElementById('placeInput').value.trim();
             const location = document.getElementById('locInput').value.trim();
-            const dateStr = document.getElementById('dateInput').value || formatDateYMD(new Date());
+            const dateStr = document.getElementById('dateInput').value || getLocalDateYMD(new Date());
 
             if (!place) {
                 showToast('점검 장소를 입력해주세요.');
@@ -1393,264 +1631,311 @@
                 return;
             }
 
-            const newRecord = {
-                id: String(Date.now()),
-                dateStr: dateStr,
-                date: formatKoreanDate(dateStr),
-                place: place,
-                location: location,
-                photos: {
-                    before: document.getElementById('dataBefore').value || null,
-                    during: document.getElementById('dataDuring').value || null,
-                    after: document.getElementById('dataAfter').value || null
-                }
+            const photosSnapshot = {
+                before: formPhotos.before || null,
+                during: formPhotos.during || null,
+                after: formPhotos.after || null
             };
 
-            records.unshift(newRecord);
+            const isEditing = editingRecordId !== null;
+            const backupRecords = [...records];
+
+            if (isEditing) {
+                const idx = records.findIndex(r => r.id === editingRecordId);
+                if (idx === -1) {
+                    showToast('원본 보고서를 찾을 수 없어 새로 저장합니다.');
+                    editingRecordId = null;
+                } else {
+                    records[idx] = {
+                        ...records[idx],
+                        place: place,
+                        location: location,
+                        dateStr: dateStr,
+                        photos: photosSnapshot,
+                        updatedAt: Date.now()
+                    };
+                }
+            }
+
+            if (!isEditing || editingRecordId === null) {
+                const newRecord = {
+                    id: String(Date.now()),
+                    place: place,
+                    location: location,
+                    dateStr: dateStr,
+                    photos: photosSnapshot,
+                    updatedAt: Date.now()
+                };
+                records.unshift(newRecord);
+            }
 
             try {
-                persistRecords();
-                resetForm();
+                saveRecordsToStorage();
 
-                // 저장한 날짜가 보이도록 캘린더 상태 이동 후 탭 전환
+                // 캘린더를 저장/수정한 날짜로 동기화
                 const parts = dateStr.split('-');
-                currentYear = parseInt(parts[0], 10);
-                currentMonth = parseInt(parts[1], 10) - 1;
-                selectedDateStr = dateStr;
-                filterMode = 'day';
+                if (parts.length === 3) {
+                    calYear = parseInt(parts[0], 10);
+                    calMonth = parseInt(parts[1], 10) - 1;
+                    selectedDateStr = dateStr;
+                    calendarFilterMode = 'day';
+                }
 
-                showToast('✅ 기록이 저장되어 캘린더에 체크되었습니다!');
-                switchTab('calendar');
-            } catch (e) {
-                records.shift();
-                console.error('저장 공간 부족 오류:', e);
-                showToast('저장 공간이 부족합니다. 오래된 기록을 삭제해주세요.');
+                editingRecordId = null;
+                clearFormFields(!isEditing);
+                if (isEditing) {
+                    loadDraftToForm();
+                }
+                syncEditModeUI();
+                renderCalendarView();
+                renderArchiveView();
+
+                showToast(isEditing ? '✅ 보고서 수정 내용이 저장되었습니다!' : '💾 점검 기록이 저장되었습니다!');
+                switchTab(isEditing ? 'archive' : 'calendar');
+            } catch (err) {
+                // 용량 초과 시 안전하게 복구 및 한국어 안내
+                records = backupRecords;
+                console.error('localStorage 저장 오류:', err);
+                showToast('저장 공간이 부족합니다! 기록 보관함에서 오래된 기록을 삭제한 후 다시 시도해주세요.');
             }
         }
 
-        function requestDeleteRecord(id) {
-            openConfirm('이 점검 기록을 삭제하시겠습니까?', function () {
-                records = records.filter(r => r.id !== id);
+        function requestDeleteRecord(recordId) {
+            openConfirm('이 점검 기록을 영구 삭제하시겠습니까?', '삭제', function () {
+                records = records.filter(r => r.id !== recordId);
+                if (editingRecordId === recordId) {
+                    editingRecordId = null;
+                    clearFormFields(false);
+                    syncEditModeUI();
+                }
                 try {
-                    persistRecords();
-                    renderCalendarAndList();
-                    showToast('기록이 삭제되었습니다.');
+                    saveRecordsToStorage();
+                    renderCalendarView();
+                    renderArchiveView();
+                    showToast('🗑️ 기록이 삭제되었습니다.');
                 } catch (e) {
-                    showToast('삭제 중 오류가 발생했습니다.');
+                    showToast('삭제 처리 중 오류가 발생했습니다.');
                 }
             });
         }
 
         /* ==========================================
-           월별·일별 캘린더 렌더링 및 필터 로직
+           탭 2: 월별·일별 캘린더 렌더링
         =========================================== */
         function changeMonth(delta) {
-            currentMonth += delta;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear -= 1;
-            } else if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear += 1;
+            calMonth += delta;
+            if (calMonth < 0) {
+                calMonth = 11;
+                calYear -= 1;
+            } else if (calMonth > 11) {
+                calMonth = 0;
+                calYear += 1;
             }
-            // 달을 이동하면 월 전체 보기 또는 해당 달 1일로 자연스럽게 선택 유지
-            const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-            if (!selectedDateStr.startsWith(monthPrefix)) {
-                selectedDateStr = `${monthPrefix}-01`;
+            const prefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+            if (!selectedDateStr.startsWith(prefix)) {
+                selectedDateStr = `${prefix}-01`;
             }
-            renderCalendarAndList();
+            renderCalendarView();
         }
 
         function jumpToToday() {
             const today = new Date();
-            currentYear = today.getFullYear();
-            currentMonth = today.getMonth();
-            selectedDateStr = formatDateYMD(today);
-            filterMode = 'day';
-            renderCalendarAndList();
+            calYear = today.getFullYear();
+            calMonth = today.getMonth();
+            selectedDateStr = getLocalDateYMD(today);
+            calendarFilterMode = 'day';
+            renderCalendarView();
         }
 
-        function selectDate(ymd) {
+        function selectCalendarDate(ymd) {
             selectedDateStr = ymd;
-            filterMode = 'day';
-            renderCalendarAndList();
+            calendarFilterMode = 'day';
+            renderCalendarView();
         }
 
-        function setFilterMode(mode) {
-            filterMode = mode;
-            renderFilterUI();
-            renderRecordList();
+        function setCalendarFilter(mode) {
+            calendarFilterMode = mode;
+            renderCalendarControls();
+            renderCalendarRecordList();
         }
 
-        function writeForSelectedDate() {
+        function startWriteForSelectedDate() {
+            if (editingRecordId !== null) {
+                editingRecordId = null;
+                clearFormFields(false);
+                loadDraftToForm();
+                syncEditModeUI();
+            }
             document.getElementById('dateInput').value = selectedDateStr;
             switchTab('write');
             showToast(`${formatMonthDay(selectedDateStr)} 점검을 작성합니다.`);
         }
 
-        function renderCalendarAndList() {
-            const monthNum = currentMonth + 1;
-            const monthPrefix = `${currentYear}-${String(monthNum).padStart(2, '0')}`;
-            const todayStr = formatDateYMD(new Date());
+        function renderCalendarView() {
+            const monthNum = calMonth + 1;
+            const monthPrefix = `${calYear}-${String(monthNum).padStart(2, '0')}`;
+            const todayStr = getLocalDateYMD(new Date());
 
-            // 1. 헤더 월 표시
-            document.getElementById('calMonthTitle').innerText = `${currentYear}년 ${monthNum}월`;
+            document.getElementById('calMonthTitle').innerText = `${calYear}년 ${monthNum}월`;
 
-            // 2. 현재 달의 날짜별 기록 건수 집계
+            // 해당 월의 날짜별 기록 수 집계
             const countByDate = {};
-            let monthTotalRecords = 0;
-
+            let monthTotal = 0;
             records.forEach(r => {
                 if (r.dateStr && r.dateStr.startsWith(monthPrefix)) {
                     countByDate[r.dateStr] = (countByDate[r.dateStr] || 0) + 1;
-                    monthTotalRecords += 1;
+                    monthTotal += 1;
                 }
             });
 
-            const checkedDaysCount = Object.keys(countByDate).length;
-            document.getElementById('summaryDays').innerText = `${checkedDaysCount}일`;
-            document.getElementById('summaryCount').innerText = `${monthTotalRecords}건`;
+            document.getElementById('summaryDays').innerText = `${Object.keys(countByDate).length}일`;
+            document.getElementById('summaryCount').innerText = `${monthTotal}건`;
 
-            // 3. 달력 그리드 생성
             const grid = document.getElementById('calGrid');
             grid.innerHTML = '';
 
-            const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay(); // 0(일)~6(토)
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const firstWeekday = new Date(calYear, calMonth, 1).getDay();
+            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
 
-            // 앞쪽 빈 칸
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                const emptyCell = document.createElement('div');
-                emptyCell.className = 'cal-cell empty';
-                grid.appendChild(emptyCell);
+            for (let i = 0; i < firstWeekday; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'cal-cell empty';
+                grid.appendChild(empty);
             }
 
-            // 날짜 셀 채우기
             for (let day = 1; day <= daysInMonth; day++) {
                 const ymd = `${monthPrefix}-${String(day).padStart(2, '0')}`;
-                const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+                const weekday = (firstWeekday + day - 1) % 7;
                 const count = countByDate[ymd] || 0;
 
                 const cell = document.createElement('div');
                 cell.className = 'cal-cell';
-
-                if (dayOfWeek === 0) cell.classList.add('sun');
-                if (dayOfWeek === 6) cell.classList.add('sat');
+                if (weekday === 0) cell.classList.add('sun');
+                if (weekday === 6) cell.classList.add('sat');
                 if (count > 0) cell.classList.add('checked');
                 if (ymd === todayStr) cell.classList.add('today');
                 if (ymd === selectedDateStr) cell.classList.add('selected');
 
                 cell.onclick = function () {
-                    selectDate(ymd);
+                    selectCalendarDate(ymd);
                 };
 
-                let html = `<div class="cal-day-num">${day}</div>`;
+                let cellHtml = `<div class="cal-day-num">${day}</div>`;
                 if (count > 0) {
-                    html += `<div class="cal-check-badge">✅${count}</div>`;
+                    cellHtml += `<div class="cal-check-badge">✅${count}</div>`;
                 }
-                cell.innerHTML = html;
+                cell.innerHTML = cellHtml;
                 grid.appendChild(cell);
             }
 
-            renderFilterUI();
-            renderRecordList();
+            renderCalendarControls();
+            renderCalendarRecordList();
         }
 
-        function renderFilterUI() {
-            const monthNum = currentMonth + 1;
+        function renderCalendarControls() {
+            const monthNum = calMonth + 1;
             const dayBtn = document.getElementById('filterDayBtn');
             const monthBtn = document.getElementById('filterMonthBtn');
-            const quickAddBtn = document.getElementById('quickAddBtn');
+            const quickBtn = document.getElementById('quickAddBtn');
 
-            dayBtn.innerText = `📌 선택한 날짜 (${formatMonthDay(selectedDateStr)})`;
-            monthBtn.innerText = `📆 이번 달 전체 (${monthNum}월)`;
+            dayBtn.innerText = `📌 ${formatMonthDay(selectedDateStr)} 보기`;
+            monthBtn.innerText = `📆 ${monthNum}월 전체 보기`;
 
-            dayBtn.classList.toggle('active', filterMode === 'day');
-            monthBtn.classList.toggle('active', filterMode === 'month');
+            dayBtn.classList.toggle('active', calendarFilterMode === 'day');
+            monthBtn.classList.toggle('active', calendarFilterMode === 'month');
 
-            if (filterMode === 'day') {
-                quickAddBtn.style.display = 'flex';
-                quickAddBtn.innerText = `+ ${formatMonthDay(selectedDateStr)} 점검 작성하기`;
+            if (calendarFilterMode === 'day') {
+                quickBtn.style.display = 'flex';
+                quickBtn.innerText = `+ ${formatMonthDay(selectedDateStr)} 점검 작성하기`;
             } else {
-                quickAddBtn.style.display = 'none';
+                quickBtn.style.display = 'none';
             }
         }
 
-        function renderRecordList() {
-            const container = document.getElementById('recordList');
-            container.innerHTML = '';
+        function renderCalendarRecordList() {
+            const container = document.getElementById('calendarRecordList');
+            const monthPrefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
 
-            const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-            const filtered = records.filter(r => {
-                if (filterMode === 'day') {
+            const filtered = sortRecordsDesc(records.filter(r => {
+                if (calendarFilterMode === 'day') {
                     return r.dateStr === selectedDateStr;
                 }
                 return r.dateStr && r.dateStr.startsWith(monthPrefix);
-            });
+            }));
 
-            // 날짜 최신순 정렬
-            filtered.sort((a, b) => {
-                if (a.dateStr !== b.dateStr) {
-                    return a.dateStr < b.dateStr ? 1 : -1;
-                }
-                return Number(b.id) - Number(a.id);
-            });
+            const emptyMessage = calendarFilterMode === 'day'
+                ? `${formatMonthDay(selectedDateStr)}에 저장된 점검 기록이 없습니다.<br>위 버튼을 눌러 바로 작성해 보세요.`
+                : `${calYear}년 ${calMonth + 1}월에 저장된 점검 기록이 없습니다.`;
 
-            if (filtered.length === 0) {
-                const emptyText = filterMode === 'day'
-                    ? `${formatMonthDay(selectedDateStr)}에 등록된 점검 기록이 없습니다.<br>위 버튼을 눌러 바로 점검을 작성해보세요.`
-                    : `${currentYear}년 ${currentMonth + 1}월에 등록된 점검 기록이 없습니다.`;
+            renderRecordCardsInto(container, filtered, emptyMessage);
+        }
 
+        /* ==========================================
+           탭 3: 기록 보관함 렌더링
+        =========================================== */
+        function renderArchiveView() {
+            const container = document.getElementById('archiveRecordList');
+            const sorted = sortRecordsDesc(records);
+            renderRecordCardsInto(
+                container,
+                sorted,
+                '아직 저장된 소방 점검 기록이 없습니다.<br>[📝 점검 작성] 탭에서 첫 기록을 남겨보세요.'
+            );
+        }
+
+        function renderRecordCardsInto(container, list, emptyHtml) {
+            container.innerHTML = '';
+
+            if (!list.length) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📋</div>
-                        <div>${emptyText}</div>
+                        <div>${emptyHtml}</div>
                     </div>
                 `;
                 return;
             }
 
-            filtered.forEach(record => {
+            list.forEach(record => {
+                const photos = record.photos || {};
+                const photoCount = [photos.before, photos.during, photos.after].filter(Boolean).length;
+
                 const card = document.createElement('div');
                 card.className = 'record-card';
 
-                const beforeHtml = record.photos && record.photos.before
-                    ? `<img src="${record.photos.before}" alt="전" onclick="openModal(this.src)">`
-                    : `<span class="thumb-empty">없음</span>`;
-                const duringHtml = record.photos && record.photos.during
-                    ? `<img src="${record.photos.during}" alt="중" onclick="openModal(this.src)">`
-                    : `<span class="thumb-empty">없음</span>`;
-                const afterHtml = record.photos && record.photos.after
-                    ? `<img src="${record.photos.after}" alt="후" onclick="openModal(this.src)">`
+                const makeThumb = (src, alt) => src
+                    ? `<img src="${src}" alt="${alt}" onclick="openModal(this.src)">`
                     : `<span class="thumb-empty">없음</span>`;
 
                 card.innerHTML = `
-                    <div class="record-header">
-                        <div>
-                            <div class="record-date-tag">✅ ${formatKoreanDate(record.dateStr)}</div>
-                            <div class="record-place">${escapeHtml(record.place)}</div>
-                            <div class="record-loc">📍 ${escapeHtml(record.location)}</div>
-                        </div>
+                    <div class="record-meta">
+                        <span class="record-date-tag">✅ ${formatKoreanDate(record.dateStr)}</span>
+                        <span class="photo-count-tag">사진 ${photoCount}/3</span>
                     </div>
+                    <div class="record-place">${escapeHtml(record.place)}</div>
+                    <div class="record-loc">📍 ${escapeHtml(record.location)}</div>
                     <div class="thumb-strip">
                         <div class="thumb-box">
                             <div class="thumb-label">점검 전</div>
-                            <div class="thumb-img-wrap">${beforeHtml}</div>
+                            <div class="thumb-img-wrap">${makeThumb(photos.before, '점검 전')}</div>
                         </div>
                         <div class="thumb-box">
                             <div class="thumb-label">점검 중</div>
-                            <div class="thumb-img-wrap">${duringHtml}</div>
+                            <div class="thumb-img-wrap">${makeThumb(photos.during, '점검 중')}</div>
                         </div>
                         <div class="thumb-box">
                             <div class="thumb-label">점검 후</div>
-                            <div class="thumb-img-wrap">${afterHtml}</div>
+                            <div class="thumb-img-wrap">${makeThumb(photos.after, '점검 후')}</div>
                         </div>
                     </div>
-                    <div class="record-card-actions">
-                        <button type="button" class="btn-card-report" onclick="openArchivedReport('${record.id}')">
-                            📄 보고서 보기
+                    <div class="card-actions">
+                        <button type="button" class="btn-card btn-card-report" onclick="openSavedReport('${record.id}')">
+                            📄 보고서
                         </button>
-                        <button type="button" class="btn-card-delete" onclick="requestDeleteRecord('${record.id}')">
+                        <button type="button" class="btn-card btn-card-edit" onclick="startEditRecord('${record.id}')">
+                            ✏️ 수정
+                        </button>
+                        <button type="button" class="btn-card btn-card-delete" onclick="requestDeleteRecord('${record.id}')">
                             🗑️ 삭제
                         </button>
                     </div>
@@ -1659,59 +1944,62 @@
             });
         }
 
-        function escapeHtml(str) {
-            return String(str || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
         /* ==========================================
-           보고서 양식 미리보기 및 PNG 이미지 저장
+           보고서 양식 뷰 / 보고서에서 바로 수정 / PNG 다운로드
         =========================================== */
-        function previewCurrentReport() {
-            const dateStr = document.getElementById('dateInput').value || formatDateYMD(new Date());
-            const place = document.getElementById('placeInput').value.trim() || '미입력';
-            const location = document.getElementById('locInput').value.trim() || '미입력';
-
-            populateReport({
-                dateStr: dateStr,
-                place: place,
-                location: location,
-                photos: {
-                    before: document.getElementById('dataBefore').value || null,
-                    during: document.getElementById('dataDuring').value || null,
-                    after: document.getElementById('dataAfter').value || null
-                }
+        function openFormReportPreview() {
+            // 현재 작성(또는 수정) 중인 폼 내용으로 보고서 열기
+            activeReportRecordId = editingRecordId;
+            populateReportBox({
+                place: document.getElementById('placeInput').value.trim() || '미입력',
+                location: document.getElementById('locInput').value.trim() || '미입력',
+                dateStr: document.getElementById('dateInput').value || getLocalDateYMD(new Date()),
+                photos: formPhotos
             });
-
             switchTab('report');
         }
 
-        function openArchivedReport(id) {
-            const record = records.find(r => r.id === id);
-            if (!record) return;
-            populateReport(record);
+        function openSavedReport(recordId) {
+            const target = records.find(r => r.id === recordId);
+            if (!target) {
+                showToast('보고서를 찾을 수 없습니다.');
+                return;
+            }
+            activeReportRecordId = target.id;
+            populateReportBox(target);
             switchTab('report');
         }
 
-        function populateReport(data) {
+        function editCurrentReport() {
+            // 저장된 보고서를 보고 있었다면 바로 수정 모드로 로드
+            if (activeReportRecordId) {
+                if (editingRecordId === activeReportRecordId && previousTab === 'write') {
+                    switchTab('write');
+                    return;
+                }
+                startEditRecord(activeReportRecordId);
+                return;
+            }
+            // 아직 저장 전인 폼 미리보기였다면 작성 탭으로 바로 복귀
+            switchTab('write');
+        }
+
+        function populateReportBox(data) {
             document.getElementById('repPlace').innerText = data.place || '미입력';
             document.getElementById('repLoc').innerText = data.location || '미입력';
             document.getElementById('repDate').innerText = formatKoreanDate(data.dateStr);
 
-            setReportPhoto('Before', data.photos ? data.photos.before : null);
-            setReportPhoto('During', data.photos ? data.photos.during : null);
-            setReportPhoto('After', data.photos ? data.photos.after : null);
+            const photos = data.photos || {};
+            setReportPhotoSlot('Before', photos.before);
+            setReportPhotoSlot('During', photos.during);
+            setReportPhotoSlot('After', photos.after);
         }
 
-        function setReportPhoto(phase, dataUrl) {
-            const img = document.getElementById(`repImg${phase}`);
-            const text = document.getElementById(`repText${phase}`);
-            if (dataUrl) {
-                img.src = dataUrl;
+        function setReportPhotoSlot(capPhase, src) {
+            const img = document.getElementById(`repImg${capPhase}`);
+            const text = document.getElementById(`repText${capPhase}`);
+            if (src) {
+                img.src = src;
                 img.style.display = 'block';
                 text.style.display = 'none';
             } else {
@@ -1721,34 +2009,34 @@
             }
         }
 
-        function downloadReportImage() {
+        function downloadReportPng() {
             if (typeof html2canvas === 'undefined') {
-                showToast('이미지 저장 라이브러리를 불러오는 중입니다.');
+                showToast('이미지 저장 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
                 return;
             }
 
-            const reportElement = document.getElementById('reportBox');
+            const box = document.getElementById('reportBox');
             const btn = document.getElementById('btnDownloadPng');
             const originalText = btn.innerText;
 
-            const placeStr = (document.getElementById('repPlace').innerText || '현장').replace(/[\\/:*?"<>|\s]+/g, '_');
-            const dateStr = (document.getElementById('repDate').innerText || '').replace(/\s+/g, '');
+            const safePlace = (document.getElementById('repPlace').innerText || '현장').replace(/[\\/:*?"<>|\s]+/g, '_');
+            const safeDate = (document.getElementById('repDate').innerText || '').replace(/\s+/g, '');
 
             btn.innerText = '⏳ 저장 중...';
             btn.disabled = true;
 
-            html2canvas(reportElement, {
+            html2canvas(box, {
                 scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff'
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.href = canvas.toDataURL('image/png');
-                link.download = `소방점검_${placeStr}_${dateStr}.png`;
+                link.download = `소방점검_${safePlace}_${safeDate}.png`;
                 link.click();
                 showToast('💾 보고서 이미지(PNG)가 저장되었습니다!');
             }).catch(err => {
-                console.error('PNG 저장 오류:', err);
+                console.error('PNG 내보내기 오류:', err);
                 showToast('이미지 저장 중 오류가 발생했습니다.');
             }).finally(() => {
                 btn.innerText = originalText;
@@ -1761,9 +2049,8 @@
         =========================================== */
         function openModal(src) {
             if (!src || src === window.location.href) return;
-            const modal = document.getElementById('imageModal');
             document.getElementById('modalImg').src = src;
-            modal.style.display = 'flex';
+            document.getElementById('imageModal').style.display = 'flex';
         }
 
         function closeModal() {
