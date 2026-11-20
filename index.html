@@ -237,11 +237,29 @@
             margin-bottom: 12px;
         }
 
+        .photo-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
         .photo-title {
             font-size: 14px;
             font-weight: 800;
             color: var(--gray-800);
-            margin-bottom: 8px;
+        }
+
+        .original-tag {
+            display: none;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: var(--green-light);
+            color: var(--green-dark);
+            border: 1px solid var(--green-border);
         }
 
         .file-input {
@@ -255,7 +273,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 9px;
             margin-top: 8px;
         }
 
@@ -270,20 +288,53 @@
             cursor: pointer;
         }
 
-        .btn-remove-photo {
+        .photo-btn-row {
             display: none;
-            min-height: 36px;
-            padding: 6px 16px;
-            border-radius: 999px;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .photo-btn-row.show {
+            display: flex;
+        }
+
+        .btn-download-photo {
+            flex: 1;
+            min-height: 38px;
+            padding: 7px 10px;
+            border-radius: 9px;
+            border: 1px solid var(--blue-border);
+            background: var(--blue-light);
+            color: var(--blue-dark);
+            font-size: 12.5px;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn-remove-photo {
+            flex: 1;
+            min-height: 38px;
+            padding: 7px 10px;
+            border-radius: 9px;
             border: 1px solid var(--primary-border);
             background: var(--primary-light);
             color: var(--primary);
             font-size: 12.5px;
-            font-weight: 700;
+            font-weight: 800;
             font-family: inherit;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
+        .btn-download-photo:active,
         .btn-remove-photo:active {
             transform: scale(0.97);
         }
@@ -313,6 +364,12 @@
 
         .btn:active {
             transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.48;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-primary {
@@ -556,7 +613,7 @@
         }
 
         /* =========================================================
-           6. 탭 3: 기록 보관함 + 데이터 안전 관리 (백업/복원 2버튼)
+           6. 탭 3: 기록 보관함 + 데이터 안전 관리 (백업/불러오기 2버튼)
         ========================================================= */
         .safety-box {
             background: #ffffff;
@@ -765,7 +822,7 @@
 
         .card-actions {
             display: grid;
-            grid-template-columns: 1.25fr 1fr 0.9fr;
+            grid-template-columns: 1.2fr 1fr 0.9fr;
             gap: 6px;
         }
 
@@ -817,7 +874,7 @@
         }
 
         /* =========================================================
-           8. 보고서 양식 (사진 대지 / PNG 내보내기 뷰)
+           8. 보고서 양식 (사진 대지 / 원본 다운로드 바 / PNG 내보내기)
         ========================================================= */
         .report-toolbar {
             display: flex;
@@ -828,13 +885,94 @@
         .report-toolbar .btn {
             flex: 1;
             min-height: 44px;
-            font-size: 13px;
+            font-size: 12.5px;
             padding: 10px 6px;
         }
 
         .report-edit-btn {
             background: var(--amber);
             color: #ffffff;
+        }
+
+        /* 보고서 영역(#reportBox) 바깥에 배치되는 원본 사진 다운로드 바 */
+        .report-download-panel {
+            background: #ffffff;
+            border: 1.5px solid var(--blue-border);
+            border-radius: 12px;
+            padding: 11px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+        }
+
+        .report-download-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12.5px;
+            font-weight: 800;
+            color: var(--blue-dark);
+        }
+
+        .report-download-sub {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-500);
+        }
+
+        .report-dl-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .btn-slot-dl {
+            min-height: 38px;
+            padding: 7px 4px;
+            border-radius: 8px;
+            border: 1px solid var(--blue-border);
+            background: var(--blue-light);
+            color: var(--blue-dark);
+            font-size: 12px;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .btn-slot-dl:disabled {
+            background: var(--gray-100);
+            border-color: var(--gray-200);
+            color: var(--gray-400);
+            cursor: not-allowed;
+        }
+
+        .btn-all-dl {
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            border: none;
+            background: var(--blue);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-all-dl:disabled {
+            background: var(--gray-300);
+            color: var(--gray-500);
+            cursor: not-allowed;
         }
 
         .report-tip {
@@ -933,35 +1071,84 @@
         }
 
         /* =========================================================
-           9. 전체화면 이미지 확대 모달
+           9. 전체화면 이미지 확대 모달 (원본 다운로드 버튼 포함)
         ========================================================= */
         .image-modal {
             display: none;
             position: fixed;
             inset: 0;
             z-index: 9999;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.92);
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 58px 16px 76px 16px;
+        }
+
+        .modal-top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+        }
+
+        .modal-caption {
+            color: #f8fafc;
+            font-size: 13.5px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            color: #ffffff;
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            padding: 2px 6px;
         }
 
         .image-modal img {
             max-width: 100%;
-            max-height: 88vh;
+            max-height: 100%;
             border-radius: 8px;
             object-fit: contain;
         }
 
-        .modal-close {
+        .modal-bottom-bar {
             position: absolute;
-            top: 14px;
-            right: 20px;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-modal-download {
+            min-height: 44px;
+            padding: 10px 20px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            background: var(--blue);
             color: #ffffff;
-            font-size: 36px;
-            font-weight: 700;
-            line-height: 1;
+            font-size: 14px;
+            font-weight: 800;
+            font-family: inherit;
             cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-modal-download:active {
+            transform: scale(0.97);
         }
 
         /* =========================================================
@@ -1113,51 +1300,75 @@
                 <input type="date" id="dateInput" class="date-input">
             </div>
 
-            <!-- 1. 점검 전 (capture 속성 제거로 카메라/갤러리 선택 가능) -->
+            <!-- 1. 점검 전 -->
             <div class="photo-section">
-                <div class="photo-title">📸 1. 점검 전 (Before)</div>
+                <div class="photo-header-row">
+                    <div class="photo-title">📸 1. 점검 전 (Before)</div>
+                    <span id="origTagBefore" class="original-tag">원본 보관됨</span>
+                </div>
                 <input type="file" id="uploadBefore" class="file-input" accept="image/*"
                        onchange="handlePhotoUpload(this, 'before')">
                 <div class="preview-wrap">
-                    <img id="imgBefore" class="inline-img" alt="점검 전 사진" onclick="openModal(this.src)">
-                    <button type="button" id="btnRemoveBefore" class="btn-remove-photo" onclick="clearPhoto('before')">
-                        🗑️ 사진 지우기
-                    </button>
+                    <img id="imgBefore" class="inline-img" alt="점검 전 사진" onclick="openFormPhotoModal('before')">
+                    <div id="photoBtnRowBefore" class="photo-btn-row">
+                        <button type="button" class="btn-download-photo" onclick="downloadFromForm('before')">
+                            ⬇️ 원본 다운로드
+                        </button>
+                        <button type="button" class="btn-remove-photo" onclick="clearPhoto('before')">
+                            🗑️ 사진 지우기
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- 2. 점검 중 -->
             <div class="photo-section">
-                <div class="photo-title">📸 2. 점검 중 (During)</div>
+                <div class="photo-header-row">
+                    <div class="photo-title">📸 2. 점검 중 (During)</div>
+                    <span id="origTagDuring" class="original-tag">원본 보관됨</span>
+                </div>
                 <input type="file" id="uploadDuring" class="file-input" accept="image/*"
                        onchange="handlePhotoUpload(this, 'during')">
                 <div class="preview-wrap">
-                    <img id="imgDuring" class="inline-img" alt="점검 중 사진" onclick="openModal(this.src)">
-                    <button type="button" id="btnRemoveDuring" class="btn-remove-photo" onclick="clearPhoto('during')">
-                        🗑️ 사진 지우기
-                    </button>
+                    <img id="imgDuring" class="inline-img" alt="점검 중 사진" onclick="openFormPhotoModal('during')">
+                    <div id="photoBtnRowDuring" class="photo-btn-row">
+                        <button type="button" class="btn-download-photo" onclick="downloadFromForm('during')">
+                            ⬇️ 원본 다운로드
+                        </button>
+                        <button type="button" class="btn-remove-photo" onclick="clearPhoto('during')">
+                            🗑️ 사진 지우기
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- 3. 점검 후 -->
             <div class="photo-section">
-                <div class="photo-title">📸 3. 점검 후 (After)</div>
+                <div class="photo-header-row">
+                    <div class="photo-title">📸 3. 점검 후 (After)</div>
+                    <span id="origTagAfter" class="original-tag">원본 보관됨</span>
+                </div>
                 <input type="file" id="uploadAfter" class="file-input" accept="image/*"
                        onchange="handlePhotoUpload(this, 'after')">
                 <div class="preview-wrap">
-                    <img id="imgAfter" class="inline-img" alt="점검 후 사진" onclick="openModal(this.src)">
-                    <button type="button" id="btnRemoveAfter" class="btn-remove-photo" onclick="clearPhoto('after')">
-                        🗑️ 사진 지우기
-                    </button>
+                    <img id="imgAfter" class="inline-img" alt="점검 후 사진" onclick="openFormPhotoModal('after')">
+                    <div id="photoBtnRowAfter" class="photo-btn-row">
+                        <button type="button" class="btn-download-photo" onclick="downloadFromForm('after')">
+                            ⬇️ 원본 다운로드
+                        </button>
+                        <button type="button" class="btn-remove-photo" onclick="clearPhoto('after')">
+                            🗑️ 사진 지우기
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div class="form-actions">
-                <button type="button" class="btn btn-blue" onclick="openFormReportPreview()">
-                    📸 보고서 양식 미리보기
-                </button>
                 <button type="button" id="btnSaveRecord" class="btn btn-primary" onclick="saveOrUpdateRecord()">
                     💾 앱에 기록 저장하기
+                </button>
+                <button type="button" class="btn btn-blue" onclick="openFormReportPreview()">
+                    📸 보고서 양식 미리보기
                 </button>
             </div>
         </div>
@@ -1213,7 +1424,7 @@
          [탭 3] 기록 보관함 (백업/불러오기 + 검색 + 전체 리스트)
     ========================================================= -->
     <section id="viewArchive" class="view-section">
-        <!-- 데이터 안전 관리 영역 (파일로 백업 / 백업 불러오기 2개 버튼) -->
+        <!-- 데이터 안전 관리 영역 (파일로 백업 / 백업 불러오기 2개 버튼만 유지) -->
         <div class="safety-box">
             <div class="safety-title">
                 <span>🛡️ 데이터 안전 관리</span>
@@ -1227,7 +1438,6 @@
                     📥 백업 불러오기
                 </button>
             </div>
-            <!-- 숨겨진 JSON 백업 파일 선택 입력 -->
             <input type="file" id="restoreJsonInput" accept=".json,application/json" style="display:none;"
                    onchange="handleRestoreJsonFile(this)">
         </div>
@@ -1243,15 +1453,38 @@
     </section>
 
     <!-- =========================================================
-         [전용 뷰] 보고서 양식 (사진 대지 / 캡처 및 PNG 저장)
+         [전용 뷰] 보고서 양식 (사진 대지 / 원본 다운로드 / PNG 저장)
     ========================================================= -->
     <section id="viewReport" class="view-section">
         <div class="report-toolbar">
             <button type="button" class="btn btn-gray" onclick="closeReportView()">↩ 돌아가기</button>
             <button type="button" id="btnReportEdit" class="btn report-edit-btn" onclick="editActiveReport()">✏️ 보고서 수정</button>
-            <button type="button" id="btnDownloadPng" class="btn btn-green" onclick="downloadReportPng()">💾 이미지로 저장</button>
+            <button type="button" id="btnDownloadPng" class="btn btn-green" onclick="downloadReportPng()">💾 보고서 PNG 저장</button>
         </div>
-        <p class="report-tip">👇 화면을 캡처하거나 [이미지로 저장]을 눌러 PNG로 저장하세요.</p>
+
+        <!-- #reportBox 외부에 위치한 원본 사진 다운로드 바 (PNG 캡처에 포함되지 않음) -->
+        <div class="report-download-panel">
+            <div class="report-download-header">
+                <span>🖼️ 원본 사진 다운로드</span>
+                <span class="report-download-sub">압축 없는 원본 화질 저장</span>
+            </div>
+            <div class="report-dl-grid">
+                <button type="button" id="btnReportDlBefore" class="btn-slot-dl" onclick="downloadFromReport('before')">
+                    ⬇️ 전 원본
+                </button>
+                <button type="button" id="btnReportDlDuring" class="btn-slot-dl" onclick="downloadFromReport('during')">
+                    ⬇️ 중 원본
+                </button>
+                <button type="button" id="btnReportDlAfter" class="btn-slot-dl" onclick="downloadFromReport('after')">
+                    ⬇️ 후 원본
+                </button>
+            </div>
+            <button type="button" id="btnReportDlAll" class="btn-all-dl" onclick="downloadAllReportOriginals()">
+                📥 원본 사진 전체 다운로드
+            </button>
+        </div>
+
+        <p class="report-tip">👇 사진을 누르면 크게 보며 원본을 다운로드할 수 있습니다.</p>
 
         <div id="reportBox" class="report-box">
             <h2 class="report-title">소방 시설 점검 사진 대지</h2>
@@ -1271,7 +1504,7 @@
                     <div class="report-item-title">점검 전</div>
                     <div class="report-item-content">
                         <span id="repTextBefore">사진 없음</span>
-                        <img id="repImgBefore" alt="점검 전" onclick="openModal(this.src)">
+                        <img id="repImgBefore" alt="점검 전" onclick="openReportPhotoModal('before')">
                     </div>
                 </div>
 
@@ -1279,7 +1512,7 @@
                     <div class="report-item-title">점검 중</div>
                     <div class="report-item-content">
                         <span id="repTextDuring">사진 없음</span>
-                        <img id="repImgDuring" alt="점검 중" onclick="openModal(this.src)">
+                        <img id="repImgDuring" alt="점검 중" onclick="openReportPhotoModal('during')">
                     </div>
                 </div>
 
@@ -1287,7 +1520,7 @@
                     <div class="report-item-title">점검 후</div>
                     <div class="report-item-content">
                         <span id="repTextAfter">사진 없음</span>
-                        <img id="repImgAfter" alt="점검 후" onclick="openModal(this.src)">
+                        <img id="repImgAfter" alt="점검 후" onclick="openReportPhotoModal('after')">
                     </div>
                 </div>
             </div>
@@ -1295,11 +1528,19 @@
     </section>
 
     <!-- =========================================================
-         전체화면 이미지 확대 모달
+         전체화면 이미지 확대 모달 (원본 다운로드 지원)
     ========================================================= -->
     <div id="imageModal" class="image-modal" onclick="closeModal()">
-        <span class="modal-close" aria-label="닫기">&times;</span>
-        <img id="modalImg" src="" alt="확대 사진">
+        <div class="modal-top-bar" onclick="event.stopPropagation()">
+            <div id="modalCaption" class="modal-caption">사진 크게 보기</div>
+            <span class="modal-close" aria-label="닫기" onclick="closeModal()">&times;</span>
+        </div>
+        <img id="modalImg" src="" alt="확대 사진" onclick="closeModal()">
+        <div class="modal-bottom-bar" onclick="event.stopPropagation()">
+            <button type="button" id="btnModalDownload" class="btn-modal-download" onclick="downloadFromModal(event)">
+                ⬇️ 원본 다운로드
+            </button>
+        </div>
     </div>
 
     <!-- =========================================================
@@ -1323,20 +1564,41 @@
 
     <script>
         /* =========================================================
-           1. 영구 저장소 키 및 전역 상태
+           1. 영구 저장소 키 (localStorage + IndexedDB) 및 전역 상태
         ========================================================= */
         const CANONICAL_RECORDS_KEY = 'FIRE_INSPECTION_RECORDS_V1';
         const DRAFT_KEY = 'FIRE_INSPECTION_DRAFT_V1';
 
+        // 원본 사진 저장용 IndexedDB 설정
+        const IDB_NAME = 'FireInspectionOriginalsDB';
+        const IDB_VERSION = 1;
+        const IDB_STORE = 'photos';
+
+        const SLOT_LIST = ['before', 'during', 'after'];
+        const SLOT_LABELS = {
+            before: '점검전',
+            during: '점검중',
+            after: '점검후'
+        };
+
         let records = [];
+        // 폼 내 압축 썸네일(base64)
         let formPhotos = { before: null, during: null, after: null };
+        // 폼 내 새로 선택한 100% 원본 File 객체 (저장 전에도 즉시 다운로드 가능)
+        let formOriginalFiles = { before: null, during: null, after: null };
+        // 수정 모드에서 기존 사진을 삭제했는지 여부 추적
+        let formRemovedOriginals = { before: false, during: false, after: false };
 
         // 수정 모드 상태 (null이면 신규 작성, 문자열이면 기존 기록 수정 중)
         let editingRecordId = null;
-        // 보고서 화면에서 현재 보고 있는 저장된 기록 ID (폼 미리보기면 null)
-        let activeReportRecordId = null;
+        // 보고서 화면에 표시 중인 데이터 컨텍스트
+        let activeReportContext = null;
         // 보고서 화면에서 복귀할 이전 탭
         let previousTab = 'write';
+
+        // 확대 모달 컨텍스트 및 임시 ObjectURL 관리
+        let modalContext = null;
+        let modalObjectUrl = null;
 
         // 캘린더 상태
         const nowDate = new Date();
@@ -1350,10 +1612,144 @@
         let toastTimer = null;
 
         /* =========================================================
-           2. 앱 초기화
+           2. IndexedDB 헬퍼 (100% 원본 사진 Blob 저장/조회/삭제)
+        ========================================================= */
+        let idbPromise = null;
+
+        function openOriginalsDB() {
+            if (idbPromise) return idbPromise;
+            idbPromise = new Promise((resolve) => {
+                try {
+                    if (!('indexedDB' in window)) {
+                        resolve(null);
+                        return;
+                    }
+                    const request = indexedDB.open(IDB_NAME, IDB_VERSION);
+                    request.onupgradeneeded = function (event) {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(IDB_STORE)) {
+                            db.createObjectStore(IDB_STORE, { keyPath: 'key' });
+                        }
+                    };
+                    request.onsuccess = function (event) {
+                        resolve(event.target.result);
+                    };
+                    request.onerror = function (event) {
+                        console.warn('IndexedDB 열기 실패:', event.target.error);
+                        resolve(null);
+                    };
+                } catch (err) {
+                    console.warn('IndexedDB 초기화 예외:', err);
+                    resolve(null);
+                }
+            });
+            return idbPromise;
+        }
+
+        function getOriginalPhotoKey(recordId, slot) {
+            return `${recordId}_${slot}`;
+        }
+
+        function extractExtension(fileName, mimeType) {
+            if (fileName && fileName.includes('.')) {
+                const ext = fileName.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (ext && ext.length <= 5) return ext;
+            }
+            const mimeMap = {
+                'image/jpeg': 'jpg',
+                'image/jpg': 'jpg',
+                'image/png': 'png',
+                'image/webp': 'webp',
+                'image/heic': 'heic',
+                'image/heif': 'heif',
+                'image/gif': 'gif',
+                'image/bmp': 'bmp'
+            };
+            if (mimeType && mimeMap[mimeType.toLowerCase()]) {
+                return mimeMap[mimeType.toLowerCase()];
+            }
+            return 'jpg';
+        }
+
+        async function saveOriginalToIDB(recordId, slot, fileOrBlob) {
+            if (!recordId || !slot || !fileOrBlob) return false;
+            const db = await openOriginalsDB();
+            if (!db) return false;
+
+            const mimeType = fileOrBlob.type || 'image/jpeg';
+            const fileName = fileOrBlob.name || '';
+            const ext = extractExtension(fileName, mimeType);
+
+            return new Promise((resolve) => {
+                try {
+                    const tx = db.transaction(IDB_STORE, 'readwrite');
+                    const store = tx.objectStore(IDB_STORE);
+                    store.put({
+                        key: getOriginalPhotoKey(recordId, slot),
+                        blob: fileOrBlob,
+                        mimeType: mimeType,
+                        fileName: fileName,
+                        ext: ext,
+                        savedAt: Date.now()
+                    });
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                } catch (err) {
+                    console.warn('IndexedDB 저장 오류:', err);
+                    resolve(false);
+                }
+            });
+        }
+
+        async function getOriginalFromIDB(recordId, slot) {
+            if (!recordId || !slot) return null;
+            const db = await openOriginalsDB();
+            if (!db) return null;
+
+            return new Promise((resolve) => {
+                try {
+                    const tx = db.transaction(IDB_STORE, 'readonly');
+                    const store = tx.objectStore(IDB_STORE);
+                    const req = store.get(getOriginalPhotoKey(recordId, slot));
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                } catch (err) {
+                    console.warn('IndexedDB 조회 오류:', err);
+                    resolve(null);
+                }
+            });
+        }
+
+        async function deleteOriginalFromIDB(recordId, slot) {
+            if (!recordId || !slot) return false;
+            const db = await openOriginalsDB();
+            if (!db) return false;
+
+            return new Promise((resolve) => {
+                try {
+                    const tx = db.transaction(IDB_STORE, 'readwrite');
+                    const store = tx.objectStore(IDB_STORE);
+                    store.delete(getOriginalPhotoKey(recordId, slot));
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                } catch (err) {
+                    console.warn('IndexedDB 삭제 오류:', err);
+                    resolve(false);
+                }
+            });
+        }
+
+        async function deleteAllRecordOriginalsFromIDB(recordId) {
+            if (!recordId) return;
+            await Promise.all(SLOT_LIST.map(slot => deleteOriginalFromIDB(recordId, slot)));
+        }
+
+        /* =========================================================
+           3. 앱 초기화
         ========================================================= */
         window.onload = function () {
             document.getElementById('dateInput').value = getLocalDateYMD(new Date());
+            openOriginalsDB();
             loadRecordsFromStorage();
             loadDraft();
             updateArchiveBadge();
@@ -1362,7 +1758,7 @@
         };
 
         /* =========================================================
-           3. 날짜 / 문자열 유틸리티
+           4. 날짜 / 문자열 유틸리티
         ========================================================= */
         function getLocalDateYMD(dateObj) {
             const y = dateObj.getFullYear();
@@ -1420,6 +1816,23 @@
                 .replace(/'/g, '&#39;');
         }
 
+        function sanitizeFilePart(str, fallback) {
+            const cleaned = String(str || '')
+                .trim()
+                .replace(/[\\/:*?"<>|]/g, '')
+                .replace(/\s+/g, '_');
+            return cleaned || fallback;
+        }
+
+        function buildOriginalFilename(meta, slot, ext) {
+            const datePart = sanitizeFilePart(meta.date || getLocalDateYMD(new Date()), '날짜미상');
+            const placePart = sanitizeFilePart(meta.place, '장소미입력');
+            const locPart = sanitizeFilePart(meta.location, '위치미입력');
+            const phasePart = SLOT_LABELS[slot] || slot;
+            const safeExt = ext || 'jpg';
+            return `${datePart}_${placePart}_${locPart}_${phasePart}_원본.${safeExt}`;
+        }
+
         function sortRecordsNewestFirst(list) {
             return [...list].sort((a, b) => {
                 if (a.date !== b.date) {
@@ -1432,7 +1845,7 @@
         }
 
         /* =========================================================
-           4. 커스텀 토스트 & 다이얼로그 (alert, confirm 대체)
+           5. 커스텀 토스트 & 다이얼로그 (alert, confirm 대체)
         ========================================================= */
         function showToast(msg) {
             const toast = document.getElementById('toast');
@@ -1475,7 +1888,7 @@
         }
 
         /* =========================================================
-           5. 데이터 정규화 및 localStorage 읽기/쓰기
+           6. 데이터 정규화 및 localStorage 읽기/쓰기
         ========================================================= */
         function normalizeRecord(raw, fallbackIndex) {
             if (!raw || typeof raw !== 'object') return null;
@@ -1549,7 +1962,6 @@
             document.getElementById('archiveCountBadge').innerText = records.length;
         }
 
-        // 임시 저장 (신규 작성 모드에서만 작동)
         function saveDraft() {
             if (editingRecordId !== null) return;
             try {
@@ -1559,7 +1971,7 @@
                 };
                 localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
             } catch (e) {
-                // 임시 저장 실패는 무시
+                // 무시
             }
         }
 
@@ -1585,7 +1997,187 @@
         }
 
         /* =========================================================
-           6. JSON 파일 백업 및 불러오기 (ID 기준 중복 방지)
+           7. 원본 사진 다운로드 핵심 로직 (메모리 -> IndexedDB -> Base64 폴백)
+        ========================================================= */
+        function triggerBlobDownload(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+        }
+
+        function dataUrlToBlob(dataUrl) {
+            try {
+                const parts = dataUrl.split(',');
+                const mimeMatch = parts[0].match(/:(.*?);/);
+                const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+                const binary = atob(parts[1]);
+                const len = binary.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return { blob: new Blob([bytes], { type: mime }), mime };
+            } catch (err) {
+                console.error('DataURL 변환 오류:', err);
+                return null;
+            }
+        }
+
+        /**
+         * 원본 사진 다운로드 공통 함수
+         * @param {Object} opts { slot, recordId, memoryFile, fallbackDataUrl, meta, silentToast }
+         * @returns {Promise<'original'|'fallback'|'none'>}
+         */
+        async function downloadPhotoOriginal(opts) {
+            const { slot, recordId, memoryFile, fallbackDataUrl, meta, silentToast } = opts;
+            const label = SLOT_LABELS[slot] || slot;
+
+            // 1순위: 메모리에 있는 방금 선택한 원본 File
+            if (memoryFile) {
+                const ext = extractExtension(memoryFile.name, memoryFile.type);
+                const filename = buildOriginalFilename(meta, slot, ext);
+                triggerBlobDownload(memoryFile, filename);
+                if (!silentToast) {
+                    showToast(`⬇️ ${label} 원본 사진을 다운로드했습니다.`);
+                }
+                return 'original';
+            }
+
+            // 2순위: IndexedDB에 보관된 100% 원본 Blob
+            if (recordId) {
+                const idbItem = await getOriginalFromIDB(recordId, slot);
+                if (idbItem && idbItem.blob) {
+                    const ext = idbItem.ext || extractExtension(idbItem.fileName, idbItem.mimeType);
+                    const filename = buildOriginalFilename(meta, slot, ext);
+                    triggerBlobDownload(idbItem.blob, filename);
+                    if (!silentToast) {
+                        showToast(`⬇️ ${label} 원본 사진을 다운로드했습니다.`);
+                    }
+                    return 'original';
+                }
+            }
+
+            // 3순위: 이전 버전 기록 등 localStorage base64 폴백
+            if (fallbackDataUrl) {
+                const converted = dataUrlToBlob(fallbackDataUrl);
+                if (converted && converted.blob) {
+                    const ext = extractExtension('', converted.mime);
+                    const filename = buildOriginalFilename(meta, slot, ext);
+                    triggerBlobDownload(converted.blob, filename);
+                    if (!silentToast) {
+                        showToast(`⬇️ ${label} 사진을 다운로드했습니다. (이전 기록 이미지)`);
+                    }
+                    return 'fallback';
+                }
+            }
+
+            if (!silentToast) {
+                showToast(`${label} 사진이 없습니다.`);
+            }
+            return 'none';
+        }
+
+        function getCurrentFormMeta() {
+            return {
+                place: document.getElementById('placeInput').value.trim() || '미입력',
+                location: document.getElementById('locInput').value.trim() || '미입력',
+                date: document.getElementById('dateInput').value || getLocalDateYMD(new Date())
+            };
+        }
+
+        async function downloadFromForm(slot) {
+            const useRecordId = (!formRemovedOriginals[slot] && editingRecordId) ? editingRecordId : null;
+            await downloadPhotoOriginal({
+                slot: slot,
+                recordId: useRecordId,
+                memoryFile: formOriginalFiles[slot],
+                fallbackDataUrl: formPhotos[slot],
+                meta: getCurrentFormMeta()
+            });
+        }
+
+        async function downloadFromReport(slot) {
+            if (!activeReportContext) return;
+            const ctx = activeReportContext;
+            const memoryFile = ctx.fromForm ? formOriginalFiles[slot] : null;
+            const useRecordId = (ctx.fromForm && formRemovedOriginals[slot]) ? null : ctx.recordId;
+
+            await downloadPhotoOriginal({
+                slot: slot,
+                recordId: useRecordId,
+                memoryFile: memoryFile,
+                fallbackDataUrl: ctx.photos[slot],
+                meta: ctx.meta
+            });
+        }
+
+        async function downloadAllReportOriginals() {
+            if (!activeReportContext) return;
+            const ctx = activeReportContext;
+            const availableSlots = SLOT_LIST.filter(slot => {
+                const hasMem = ctx.fromForm && !!formOriginalFiles[slot];
+                const hasThumb = !!ctx.photos[slot];
+                return hasMem || hasThumb;
+            });
+
+            if (availableSlots.length === 0) {
+                showToast('다운로드할 사진이 없습니다.');
+                return;
+            }
+
+            const btn = document.getElementById('btnReportDlAll');
+            const origLabel = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = `⏳ 원본 사진 ${availableSlots.length}장 다운로드 중...`;
+
+            let originalCount = 0;
+            let fallbackCount = 0;
+
+            try {
+                for (let i = 0; i < availableSlots.length; i++) {
+                    const slot = availableSlots[i];
+                    const memoryFile = ctx.fromForm ? formOriginalFiles[slot] : null;
+                    const useRecordId = (ctx.fromForm && formRemovedOriginals[slot]) ? null : ctx.recordId;
+
+                    const result = await downloadPhotoOriginal({
+                        slot: slot,
+                        recordId: useRecordId,
+                        memoryFile: memoryFile,
+                        fallbackDataUrl: ctx.photos[slot],
+                        meta: ctx.meta,
+                        silentToast: true
+                    });
+
+                    if (result === 'original') originalCount++;
+                    else if (result === 'fallback') fallbackCount++;
+
+                    // 모바일 브라우저 다중 다운로드 차단을 방지하기 위한 300ms 순차 지연
+                    if (i < availableSlots.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                }
+
+                const total = originalCount + fallbackCount;
+                if (fallbackCount > 0 && originalCount === 0) {
+                    showToast(`📥 사진 ${total}장을 다운로드했습니다. (이전 기록 이미지)`);
+                } else if (fallbackCount > 0) {
+                    showToast(`📥 총 ${total}장 다운로드 완료 (원본 ${originalCount}장, 이전 이미지 ${fallbackCount}장)`);
+                } else {
+                    showToast(`📥 원본 사진 ${originalCount}장을 모두 다운로드했습니다!`);
+                }
+            } finally {
+                btn.innerText = origLabel;
+                btn.disabled = false;
+            }
+        }
+
+        /* =========================================================
+           8. JSON 파일 백업 및 불러오기 (ID 기준 중복 방지)
         ========================================================= */
         function exportBackupJson() {
             if (records.length === 0) {
@@ -1600,17 +2192,8 @@
                     records: records
                 };
                 const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
                 const todayYMD = getLocalDateYMD(new Date());
-
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `소방점검_백업_${todayYMD}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-
+                triggerBlobDownload(blob, `소방점검_백업_${todayYMD}.json`);
                 showToast(`📤 총 ${records.length}건의 기록을 JSON 파일로 백업했습니다.`);
             } catch (err) {
                 console.error('백업 내보내기 오류:', err);
@@ -1682,7 +2265,7 @@
         }
 
         /* =========================================================
-           7. 탭 전환 및 뷰 제어
+           9. 탭 전환 및 뷰 제어
         ========================================================= */
         function switchTab(tabName) {
             const topHeader = document.getElementById('topHeader');
@@ -1726,41 +2309,48 @@
         }
 
         /* =========================================================
-           8. 사진 업로드 (Canvas 800px / JPEG 0.65 압축) 및 삭제
+           10. 사진 업로드 (원본 File 메모리 보관 + Canvas 800px / JPEG 65% 압축)
         ========================================================= */
-        function getPhotoIds(phase) {
-            const cap = phase.charAt(0).toUpperCase() + phase.slice(1);
+        function getPhotoIds(slot) {
+            const cap = slot.charAt(0).toUpperCase() + slot.slice(1);
             return {
                 input: `upload${cap}`,
                 img: `img${cap}`,
-                removeBtn: `btnRemove${cap}`
+                btnRow: `photoBtnRow${cap}`,
+                origTag: `origTag${cap}`
             };
         }
 
-        function setFormPhotoPreview(phase, dataUrl) {
-            const ids = getPhotoIds(phase);
+        function setFormPhotoPreview(slot, dataUrl, hasOriginal) {
+            const ids = getPhotoIds(slot);
             const imgEl = document.getElementById(ids.img);
-            const btnEl = document.getElementById(ids.removeBtn);
+            const btnRowEl = document.getElementById(ids.btnRow);
+            const origTagEl = document.getElementById(ids.origTag);
 
-            formPhotos[phase] = dataUrl || null;
+            formPhotos[slot] = dataUrl || null;
 
             if (dataUrl) {
                 imgEl.src = dataUrl;
                 imgEl.style.display = 'block';
-                btnEl.style.display = 'inline-block';
+                btnRowEl.classList.add('show');
+                origTagEl.style.display = hasOriginal ? 'inline-block' : 'none';
             } else {
                 imgEl.src = '';
                 imgEl.style.display = 'none';
-                btnEl.style.display = 'none';
+                btnRowEl.classList.remove('show');
+                origTagEl.style.display = 'none';
             }
         }
 
-        function handlePhotoUpload(inputEl, phase) {
+        function handlePhotoUpload(inputEl, slot) {
             if (!inputEl.files || !inputEl.files[0]) return;
 
             const file = inputEl.files[0];
-            const reader = new FileReader();
+            // 100% 원본 File 객체 보관
+            formOriginalFiles[slot] = file;
+            formRemovedOriginals[slot] = false;
 
+            const reader = new FileReader();
             reader.onload = function (event) {
                 const img = new Image();
                 img.onload = function () {
@@ -1784,13 +2374,14 @@
                         ctx.drawImage(img, 0, 0, width, height);
 
                         const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
-                        setFormPhotoPreview(phase, compressedDataUrl);
+                        setFormPhotoPreview(slot, compressedDataUrl, true);
                     } catch (err) {
                         console.error('사진 압축 오류:', err);
                         showToast('사진을 처리하는 중 오류가 발생했습니다.');
                     }
                 };
                 img.onerror = function () {
+                    formOriginalFiles[slot] = null;
                     showToast('이미지 파일을 읽을 수 없습니다.');
                 };
                 img.src = event.target.result;
@@ -1799,15 +2390,19 @@
             reader.readAsDataURL(file);
         }
 
-        function clearPhoto(phase) {
-            const ids = getPhotoIds(phase);
+        function clearPhoto(slot) {
+            const ids = getPhotoIds(slot);
             // 같은 파일을 바로 다시 첨부할 수 있도록 input.value 초기화
             document.getElementById(ids.input).value = '';
-            setFormPhotoPreview(phase, null);
+            formOriginalFiles[slot] = null;
+            if (editingRecordId !== null) {
+                formRemovedOriginals[slot] = true;
+            }
+            setFormPhotoPreview(slot, null, false);
         }
 
         /* =========================================================
-           9. 점검 작성 / 수정 모드 / 저장 및 삭제
+           11. 점검 작성 / 수정 모드 / 저장 및 삭제 (IndexedDB 연동)
         ========================================================= */
         function syncEditModeUI() {
             const banner = document.getElementById('editBanner');
@@ -1831,15 +2426,19 @@
             document.getElementById('placeInput').value = '';
             document.getElementById('locInput').value = '';
             document.getElementById('dateInput').value = getLocalDateYMD(new Date());
-            clearPhoto('before');
-            clearPhoto('during');
-            clearPhoto('after');
+            formOriginalFiles = { before: null, during: null, after: null };
+            formRemovedOriginals = { before: false, during: false, after: false };
+            SLOT_LIST.forEach(slot => {
+                const ids = getPhotoIds(slot);
+                document.getElementById(ids.input).value = '';
+                setFormPhotoPreview(slot, null, false);
+            });
             if (shouldClearDraft) {
                 clearDraft();
             }
         }
 
-        function startEditRecord(recordId) {
+        async function startEditRecord(recordId) {
             const target = records.find(r => r.id === recordId);
             if (!target) {
                 showToast('수정할 보고서를 찾을 수 없습니다.');
@@ -1847,15 +2446,19 @@
             }
 
             editingRecordId = target.id;
+            formOriginalFiles = { before: null, during: null, after: null };
+            formRemovedOriginals = { before: false, during: false, after: false };
+
             document.getElementById('placeInput').value = target.place === '미입력' ? '' : target.place;
             document.getElementById('locInput').value = target.location === '미입력' ? '' : target.location;
             document.getElementById('dateInput').value = target.date || getLocalDateYMD(new Date());
 
-            ['before', 'during', 'after'].forEach(phase => {
-                const ids = getPhotoIds(phase);
+            for (const slot of SLOT_LIST) {
+                const ids = getPhotoIds(slot);
                 document.getElementById(ids.input).value = '';
-                setFormPhotoPreview(phase, target[phase] || null);
-            });
+                const idbItem = target[slot] ? await getOriginalFromIDB(target.id, slot) : null;
+                setFormPhotoPreview(slot, target[slot] || null, !!(idbItem && idbItem.blob));
+            }
 
             syncEditModeUI();
             switchTab('write');
@@ -1871,7 +2474,7 @@
             showToast('수정을 취소했습니다.');
         }
 
-        function saveOrUpdateRecord() {
+        async function saveOrUpdateRecord() {
             const place = document.getElementById('placeInput').value.trim();
             const location = document.getElementById('locInput').value.trim();
             const date = document.getElementById('dateInput').value || getLocalDateYMD(new Date());
@@ -1890,6 +2493,7 @@
             const isEditing = editingRecordId !== null;
             const backupSnapshot = [...records];
             const now = Date.now();
+            const targetRecordId = isEditing ? editingRecordId : String(now);
 
             if (isEditing) {
                 const idx = records.findIndex(r => r.id === editingRecordId);
@@ -1906,7 +2510,7 @@
                     };
                 } else {
                     records.unshift({
-                        id: String(now),
+                        id: targetRecordId,
                         place: place,
                         location: location,
                         date: date,
@@ -1919,7 +2523,7 @@
                 }
             } else {
                 records.unshift({
-                    id: String(now),
+                    id: targetRecordId,
                     place: place,
                     location: location,
                     date: date,
@@ -1936,6 +2540,15 @@
             if (!persistRecordsToStorage()) {
                 records = backupSnapshot;
                 return;
+            }
+
+            // IndexedDB에 100% 원본 사진 저장 및 삭제된 사진 정리
+            for (const slot of SLOT_LIST) {
+                if (formOriginalFiles[slot]) {
+                    await saveOriginalToIDB(targetRecordId, slot, formOriginalFiles[slot]);
+                } else if (isEditing && (formRemovedOriginals[slot] || !formPhotos[slot])) {
+                    await deleteOriginalFromIDB(targetRecordId, slot);
+                }
             }
 
             // 캘린더를 저장/수정한 날짜로 동기화
@@ -1955,16 +2568,16 @@
             renderCalendarView();
             renderArchiveView();
 
-            showToast(isEditing ? '✅ 수정된 보고서가 저장되었습니다!' : '💾 점검 기록이 안전하게 저장되었습니다!');
+            showToast(isEditing ? '✅ 수정된 보고서와 원본 사진이 저장되었습니다!' : '💾 점검 기록과 원본 사진이 저장되었습니다!');
             switchTab(isEditing ? 'archive' : 'calendar');
         }
 
         function requestDeleteRecord(recordId) {
             showConfirmDialog(
                 '기록 삭제',
-                '이 점검 기록을 영구적으로 삭제하시겠습니까?',
+                '이 점검 기록과 보관된 원본 사진을 영구적으로 삭제하시겠습니까?',
                 '삭제',
-                function () {
+                async function () {
                     records = records.filter(r => r.id !== recordId);
                     if (editingRecordId === recordId) {
                         editingRecordId = null;
@@ -1972,6 +2585,7 @@
                         syncEditModeUI();
                     }
                     persistRecordsToStorage();
+                    await deleteAllRecordOriginalsFromIDB(recordId);
                     updateArchiveBadge();
                     renderCalendarView();
                     renderArchiveView();
@@ -1981,7 +2595,7 @@
         }
 
         /* =========================================================
-           10. 탭 2: 월별·일별 캘린더 체크 렌더링
+           12. 탭 2: 월별·일별 캘린더 체크 렌더링
         ========================================================= */
         function changeMonth(delta) {
             calMonth += delta;
@@ -2123,7 +2737,7 @@
         }
 
         /* =========================================================
-           11. 탭 3: 기록 보관함 검색 및 렌더링
+           13. 탭 3: 기록 보관함 검색 및 렌더링
         ========================================================= */
         function handleSearchInput() {
             const val = document.getElementById('archiveSearchInput').value;
@@ -2169,8 +2783,9 @@
 
             list.forEach(rec => {
                 const photoCount = [rec.before, rec.during, rec.after].filter(Boolean).length;
-                const makeThumb = (src, alt) => src
-                    ? `<img src="${src}" alt="${alt}" onclick="openModal(this.src)">`
+                const safeId = escapeHtml(rec.id);
+                const makeThumb = (slot, src, alt) => src
+                    ? `<img src="${src}" alt="${alt}" onclick="openSavedPhotoModal('${safeId}', '${slot}')">`
                     : `<span class="thumb-empty">없음</span>`;
 
                 const card = document.createElement('div');
@@ -2185,25 +2800,25 @@
                     <div class="thumb-strip">
                         <div class="thumb-box">
                             <div class="thumb-label">점검 전</div>
-                            <div class="thumb-img-wrap">${makeThumb(rec.before, '점검 전')}</div>
+                            <div class="thumb-img-wrap">${makeThumb('before', rec.before, '점검 전')}</div>
                         </div>
                         <div class="thumb-box">
                             <div class="thumb-label">점검 중</div>
-                            <div class="thumb-img-wrap">${makeThumb(rec.during, '점검 중')}</div>
+                            <div class="thumb-img-wrap">${makeThumb('during', rec.during, '점검 중')}</div>
                         </div>
                         <div class="thumb-box">
                             <div class="thumb-label">점검 후</div>
-                            <div class="thumb-img-wrap">${makeThumb(rec.after, '점검 후')}</div>
+                            <div class="thumb-img-wrap">${makeThumb('after', rec.after, '점검 후')}</div>
                         </div>
                     </div>
                     <div class="card-actions">
-                        <button type="button" class="btn-card btn-card-report" onclick="openSavedReport('${rec.id}')">
-                            📄 양식 보기
+                        <button type="button" class="btn-card btn-card-report" onclick="openSavedReport('${safeId}')">
+                            📄 보고서
                         </button>
-                        <button type="button" class="btn-card btn-card-edit" onclick="startEditRecord('${rec.id}')">
+                        <button type="button" class="btn-card btn-card-edit" onclick="startEditRecord('${safeId}')">
                             ✏️ 수정
                         </button>
-                        <button type="button" class="btn-card btn-card-delete" onclick="requestDeleteRecord('${rec.id}')">
+                        <button type="button" class="btn-card btn-card-delete" onclick="requestDeleteRecord('${safeId}')">
                             🗑️ 삭제
                         </button>
                     </div>
@@ -2213,20 +2828,22 @@
         }
 
         /* =========================================================
-           12. 보고서 양식 뷰 & PNG 이미지 다운로드
+           14. 보고서 양식 뷰 & PNG 이미지 다운로드
         ========================================================= */
         function openFormReportPreview() {
-            activeReportRecordId = editingRecordId;
-            document.getElementById('btnReportEdit').style.display = activeReportRecordId ? 'inline-flex' : 'none';
-
-            fillReportView({
-                place: document.getElementById('placeInput').value.trim() || '미입력',
-                location: document.getElementById('locInput').value.trim() || '미입력',
-                date: document.getElementById('dateInput').value || getLocalDateYMD(new Date()),
-                before: formPhotos.before,
-                during: formPhotos.during,
-                after: formPhotos.after
-            });
+            const meta = getCurrentFormMeta();
+            activeReportContext = {
+                fromForm: true,
+                recordId: editingRecordId,
+                meta: meta,
+                photos: {
+                    before: formPhotos.before,
+                    during: formPhotos.during,
+                    after: formPhotos.after
+                }
+            };
+            document.getElementById('btnReportEdit').style.display = editingRecordId ? 'inline-flex' : 'none';
+            fillReportView(activeReportContext);
             switchTab('report');
         }
 
@@ -2236,29 +2853,52 @@
                 showToast('보고서를 찾을 수 없습니다.');
                 return;
             }
-            activeReportRecordId = target.id;
+            activeReportContext = {
+                fromForm: false,
+                recordId: target.id,
+                meta: {
+                    place: target.place || '미입력',
+                    location: target.location || '미입력',
+                    date: target.date || getLocalDateYMD(new Date())
+                },
+                photos: {
+                    before: target.before,
+                    during: target.during,
+                    after: target.after
+                }
+            };
             document.getElementById('btnReportEdit').style.display = 'inline-flex';
-            fillReportView(target);
+            fillReportView(activeReportContext);
             switchTab('report');
         }
 
         function editActiveReport() {
-            if (activeReportRecordId) {
-                startEditRecord(activeReportRecordId);
+            if (activeReportContext && activeReportContext.recordId) {
+                startEditRecord(activeReportContext.recordId);
             } else {
                 switchTab('write');
             }
         }
 
-        function fillReportView(data) {
-            document.getElementById('repPlace').innerText = data.place || '미입력';
-            document.getElementById('repLoc').innerText = data.location || '미입력';
-            document.getElementById('repDate').innerText = formatKoreanDate(data.date);
-            document.getElementById('repDate').dataset.ymd = data.date || getLocalDateYMD(new Date());
+        function fillReportView(ctx) {
+            document.getElementById('repPlace').innerText = ctx.meta.place || '미입력';
+            document.getElementById('repLoc').innerText = ctx.meta.location || '미입력';
+            document.getElementById('repDate').innerText = formatKoreanDate(ctx.meta.date);
+            document.getElementById('repDate').dataset.ymd = ctx.meta.date || getLocalDateYMD(new Date());
 
-            setReportSlot('Before', data.before);
-            setReportSlot('During', data.during);
-            setReportSlot('After', data.after);
+            setReportSlot('Before', ctx.photos.before);
+            setReportSlot('During', ctx.photos.during);
+            setReportSlot('After', ctx.photos.after);
+
+            // 원본 다운로드 버튼 활성화 상태 업데이트
+            const hasBefore = !!ctx.photos.before;
+            const hasDuring = !!ctx.photos.during;
+            const hasAfter = !!ctx.photos.after;
+
+            document.getElementById('btnReportDlBefore').disabled = !hasBefore;
+            document.getElementById('btnReportDlDuring').disabled = !hasDuring;
+            document.getElementById('btnReportDlAfter').disabled = !hasAfter;
+            document.getElementById('btnReportDlAll').disabled = !(hasBefore || hasDuring || hasAfter);
         }
 
         function setReportSlot(capPhase, src) {
@@ -2285,7 +2925,7 @@
             const btn = document.getElementById('btnDownloadPng');
             const originalLabel = btn.innerText;
 
-            const safePlace = (document.getElementById('repPlace').innerText || '현장').replace(/[\\/:*?"<>|\s]+/g, '_');
+            const safePlace = sanitizeFilePart(document.getElementById('repPlace').innerText, '현장');
             const ymd = document.getElementById('repDate').dataset.ymd || getLocalDateYMD(new Date());
 
             btn.innerText = '⏳ 저장 중...';
@@ -2313,16 +2953,100 @@
         }
 
         /* =========================================================
-           13. 전체화면 이미지 확대 모달
+           15. 전체화면 이미지 확대 모달 (원본 우선 표시 + 원본 다운로드)
         ========================================================= */
-        function openModal(src) {
-            if (!src || src === window.location.href) return;
-            document.getElementById('modalImg').src = src;
-            document.getElementById('imageModal').style.display = 'flex';
+        function openFormPhotoModal(slot) {
+            if (!formPhotos[slot]) return;
+            const useRecordId = (!formRemovedOriginals[slot] && editingRecordId) ? editingRecordId : null;
+            openPhotoModal({
+                slot: slot,
+                recordId: useRecordId,
+                memoryFile: formOriginalFiles[slot],
+                fallbackDataUrl: formPhotos[slot],
+                meta: getCurrentFormMeta()
+            });
+        }
+
+        function openReportPhotoModal(slot) {
+            if (!activeReportContext || !activeReportContext.photos[slot]) return;
+            const ctx = activeReportContext;
+            const memoryFile = ctx.fromForm ? formOriginalFiles[slot] : null;
+            const useRecordId = (ctx.fromForm && formRemovedOriginals[slot]) ? null : ctx.recordId;
+            openPhotoModal({
+                slot: slot,
+                recordId: useRecordId,
+                memoryFile: memoryFile,
+                fallbackDataUrl: ctx.photos[slot],
+                meta: ctx.meta
+            });
+        }
+
+        function openSavedPhotoModal(recordId, slot) {
+            const target = records.find(r => r.id === recordId);
+            if (!target || !target[slot]) return;
+            openPhotoModal({
+                slot: slot,
+                recordId: target.id,
+                memoryFile: null,
+                fallbackDataUrl: target[slot],
+                meta: {
+                    place: target.place || '미입력',
+                    location: target.location || '미입력',
+                    date: target.date || getLocalDateYMD(new Date())
+                }
+            });
+        }
+
+        async function openPhotoModal(ctx) {
+            if (!ctx || (!ctx.fallbackDataUrl && !ctx.memoryFile)) return;
+            modalContext = ctx;
+
+            // 기존 ObjectURL 정리
+            if (modalObjectUrl) {
+                URL.revokeObjectURL(modalObjectUrl);
+                modalObjectUrl = null;
+            }
+
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImg');
+            const caption = document.getElementById('modalCaption');
+            const phaseLabel = SLOT_LABELS[ctx.slot] || '사진';
+
+            // 먼저 썸네일 즉시 표시하여 지연 없이 열기
+            modalImg.src = ctx.fallbackDataUrl || '';
+            caption.innerText = `${phaseLabel} 크게 보기`;
+            modal.style.display = 'flex';
+
+            // 원본(메모리 또는 IndexedDB)이 있으면 고화질 원본으로 즉시 교체
+            let originalBlob = ctx.memoryFile || null;
+            if (!originalBlob && ctx.recordId) {
+                const idbItem = await getOriginalFromIDB(ctx.recordId, ctx.slot);
+                if (idbItem && idbItem.blob) {
+                    originalBlob = idbItem.blob;
+                }
+            }
+
+            // 모달이 여전히 같은 사진으로 열려 있는 경우에만 원본 적용
+            if (originalBlob && modalContext === ctx && modal.style.display === 'flex') {
+                modalObjectUrl = URL.createObjectURL(originalBlob);
+                modalImg.src = modalObjectUrl;
+                caption.innerText = `${phaseLabel} (원본 화질)`;
+            }
+        }
+
+        async function downloadFromModal(event) {
+            if (event) event.stopPropagation();
+            if (!modalContext) return;
+            await downloadPhotoOriginal(modalContext);
         }
 
         function closeModal() {
             document.getElementById('imageModal').style.display = 'none';
+            modalContext = null;
+            if (modalObjectUrl) {
+                URL.revokeObjectURL(modalObjectUrl);
+                modalObjectUrl = null;
+            }
         }
     </script>
 </body>
